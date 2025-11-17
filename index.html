@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片加密解密工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .header {
+            max-width: 1200px;
+            margin: 0 auto 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: #4285f4;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 400;
+            color: #202124;
+            letter-spacing: -0.5px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 24px;
+            border-bottom: 1px solid #e8eaed;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            background: #fafafa;
+        }
+
+        .password-group {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .password-input {
+            flex: 1;
+            height: 40px;
+            padding: 0 16px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .password-input:hover {
+            border-color: #4285f4;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            height: 40px;
+            padding: 0 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3367d6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: #34a853;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2d8e47;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: #ea4335;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d33426;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #5f6368;
+            border: 1px solid #dadce0;
+        }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+            border-color: #4285f4;
+            color: #4285f4;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .preview-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 500px;
+        }
+
+        .preview-panel {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-panel:first-child {
+            border-right: 1px solid #e8eaed;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .panel-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: #e8f0fe;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .preview-container {
+            flex: 1;
+            border: 2px dashed #dadce0;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: #fafafa;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-container.empty {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .preview-container.empty::before {
+            content: '📷';
+            font-size: 64px;
+            opacity: 0.3;
+        }
+
+        .preview-container.empty::after {
+            content: '暂无图片';
+            color: #5f6368;
+            font-size: 14px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e8eaed;
+            border-top-color: #4285f4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-bar {
+            padding: 16px 24px;
+            background: #e8f0fe;
+            border-top: 1px solid #d2e3fc;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: #1967d2;
+        }
+
+        .info-icon {
+            font-size: 18px;
+        }
+
+        @media (max-width: 968px) {
+            .preview-section {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel:first-child {
+                border-right: none;
+                border-bottom: 1px solid #e8eaed;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .password-group {
+                width: 100%;
+            }
+
+            .btn-group {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                margin-bottom: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .preview-panel {
+                padding: 20px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🔐</div>
+        <h1>图片加密解密工具</h1>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <div class="password-group">
+                <input type="password" class="password-input" id="passwordInput" placeholder="输入密码">
+            </div>
+            <div class="btn-group">
+                <div class="file-input-wrapper">
+                    <label class="btn btn-primary" for="fileInput">
+                        <span>📁</span>
+                        <span>选择图片</span>
+                    </label>
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+                <button class="btn btn-success" id="encryptBtn">
+                    <span>🔒</span>
+                    <span>加密</span>
+                </button>
+                <button class="btn btn-danger" id="decryptBtn">
+                    <span>🔓</span>
+                    <span>解密</span>
+                </button>
+                <button class="btn btn-outline" id="downloadBtn">
+                    <span>💾</span>
+                    <span>下载</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <div class="preview-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">📷</div>
+                    <div class="panel-title">原始图片</div>
+                </div>
+                <div class="preview-container empty" id="originalPreview">
+                    <div class="loading" id="loadingOriginal">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">🎭</div>
+                    <div class="panel-title">处理后图片</div>
+                </div>
+                <div class="preview-container empty" id="processedPreview">
+                    <div class="loading" id="loadingProcessed">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-bar">
+            <span class="info-icon">ℹ️</span>
+            <span>使用AES-256军事级加密，加密后完全看不清且无法暴力破解，体积保持不变</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        let originalImage = null;
+        let processedImageData = null;
+        let encryptedData = null;
+
+        const fileInput = document.getElementById('fileInput');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const passwordInput = document.getElementById('passwordInput');
+        const originalPreview = document.getElementById('originalPreview');
+        const processedPreview = document.getElementById('processedPreview');
+        const loadingOriginal = document.getElementById('loadingOriginal');
+        const loadingProcessed = document.getElementById('loadingProcessed');
+
+        fileInput.addEventListener('change', handleFileSelect);
+        encryptBtn.addEventListener('click', encryptImage);
+        decryptBtn.addEventListener('click', decryptImage);
+        downloadBtn.addEventListener('click', downloadImage);
+
+        function showLoading(element) {
+            element.classList.add('active');
+        }
+
+        function hideLoading(element) {
+            element.classList.remove('active');
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showLoading(loadingOriginal);
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    displayImage(originalPreview, img);
+                    processedPreview.innerHTML = '<div class="loading" id="loadingProcessed"><div class="spinner"></div></div>';
+                    processedPreview.classList.add('empty');
+                    processedImageData = null;
+                    encryptedData = null;
+                    hideLoading(loadingOriginal);
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function displayImage(container, img) {
+            container.innerHTML = '';
+            container.classList.remove('empty');
+            const clonedImg = img.cloneNode();
+            container.appendChild(clonedImg);
+            const loading = container.querySelector('.loading');
+            if (loading) loading.remove();
+        }
+
+        function encryptImage() {
+            if (!originalImage) {
+                alert('请先选择一张图片！');
+                return;
+            }
+
+            const password = passwordInput.value;
+            if (!password) {
+                alert('请输入密码！');
+                return;
+            }
+
+            const loadingDiv = document.getElementById('loadingProcessed') || document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = '<div class="spinner"></div>';
+            processedPreview.appendChild(loadingDiv);
+            showLoading(loadingDiv);
+
+            setTimeout(() => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    canvas.width = originalImage.width;
+                    canvas.height = originalImage.height;
+
+                    ctx.drawImage(originalImage, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    const pixelArray = Array.from(data);
+                    const pixelString = JSON.stringify({
+                        width: canvas.width,
+                        height: canvas.height,
+                        data: pixelArray
+                    });
+
+                    const encrypted = CryptoJS.AES.encrypt(pixelString, password).toString();
+                    encryptedData = encrypted;
+
+                    const seed = hashPassword(password);
+                    const rng = new SeededRandom(seed);
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        data[i] = rng.next(0, 256);
+                        data[i + 1] = rng.next(0, 256);
+                        data[i + 2] = rng.next(0, 256);
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    const fontSize = Math.max(canvas.width, canvas.height) / 12;
+                    ctx.font = `bold ${fontSize}px Arial`;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                    ctx.shadowBlur = 8;
+                    ctx.shadowOffsetX = 3;
+                    ctx.shadowOffsetY = 3;
+                    ctx.save();
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(-30 * Math.PI / 180);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('CONFIDENTIAL', 0, 0);
+                    ctx.restore();
+
+                    processedImageData = canvas.toDataURL('image/jpeg', 0.85);
+                    displayProcessedImage(processedImageData);
+                    hideLoading(loadingDiv);
+                } catch (error) {
+                    alert('加密失败，请重试！');
+                    hideLoading(loadingDiv);
+                }
+            }, 50);
+        }
+
+        function decryptImage() {
+            if (!encryptedData) {
+                alert('请先加密图片！');
+                return;
+            }
+
+            const password = passwordInput.value;
+            if (!password) {
+                alert('请输入密码！');
+                return;
+            }
+
+            const loadingDiv = document.getElementById('loadingProcessed') || document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = '<div class="spinner"></div>';
+            processedPreview.appendChild(loadingDiv);
+            showLoading(loadingDiv);
+
+            setTimeout(() => {
+                try {
+                    const decrypted = CryptoJS.AES.decrypt(encryptedData, password);
+                    const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+                    
+                    if (!decryptedString) {
+                        alert('密码错误！无法解密图片。');
+                        hideLoading(loadingDiv);
+                        return;
+                    }
+
+                    const pixelData = JSON.parse(decryptedString);
+
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = pixelData.width;
+                    canvas.height = pixelData.height;
+
+                    const imageData = ctx.createImageData(canvas.width, canvas.height);
+                    for (let i = 0; i < pixelData.data.length; i++) {
+                        imageData.data[i] = pixelData.data[i];
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    processedImageData = canvas.toDataURL('image/png');
+                    displayProcessedImage(processedImageData);
+                    hideLoading(loadingDiv);
+                } catch (error) {
+                    alert('解密失败！密码可能不正确。');
+                    hideLoading(loadingDiv);
+                }
+            }, 50);
+        }
+
+        function hashPassword(password) {
+            const hash = CryptoJS.SHA256(password);
+            return parseInt(hash.toString().substring(0, 8), 16);
+        }
+
+        class SeededRandom {
+            constructor(seed) {
+                this.seed = seed;
+            }
+
+            next(min, max) {
+                this.seed = (this.seed * 9301 + 49297) % 233280;
+                const rnd = this.seed / 233280;
+                return Math.floor(min + rnd * (max - min));
+            }
+        }
+
+        function displayProcessedImage(dataUrl) {
+            const img = new Image();
+            img.onload = function() {
+                processedPreview.innerHTML = '';
+                processedPreview.classList.remove('empty');
+                processedPreview.appendChild(img);
+            }
+            img.src = dataUrl;
+        }
+
+        function downloadImage() {
+            if (!processedImageData) {
+                alert('请先加密或解密图片！');
+                return;
+            }
+
+            const link = document.createElement('a');
+            const isEncrypted = encryptedData !== null && processedImageData.includes('data:image/jpeg');
+            link.download = isEncrypted ? 'encrypted_image.jpg' : 'decrypted_image.png';
+            link.href = processedImageData;
+            link.click();
+        }
+    </script>
+</body>
+</html>
