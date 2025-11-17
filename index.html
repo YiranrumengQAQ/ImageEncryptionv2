@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片加米解密工具</title>
+    <title>图片加密解密工具</title>
     <style>
         /* [样式表... 和你之前的一样，为了简洁这里省略] */
         * {
@@ -458,8 +458,8 @@
                 <div class="info-icon">💡</div>
                 <div class="info-text">
                     <strong>使用流程：</strong><br>
-                    1. <strong>加密：</strong>点击“选择文件”上传一张**图片**。加密后，点击“下载结果”保存 `encrypted_data.png` 文件。<br>
-                    2. <strong>解密：</strong>点击“选择文件”上传 `encrypted_data.png` **数据文件**（在相册中可能显示为损坏）。输入密码，点击“解密数据”即可恢复原图。
+                    1. <strong>加密：</strong>上传**图片**。加密后，点击“下载结果”保存 `encrypted_data.png` 文件。<br>
+                    2. <strong>解密：</strong>上传 `encrypted_data.png` **数据文件**。左侧会显示加密预览图，输入密码解密即可恢复原图。
                 </div>
             </div>
         </div>
@@ -474,7 +474,7 @@
     <script>
         let originalImage = null; // 用于加密
         let processedImageData = null; // 用于解密后的图片预览
-        let encryptedData = null; // 加密/解密用的AES字符串
+        let encryptedData = null; // 加密/解密用的AES字符串 (现在是 payload)
 
         const fileInput = document.getElementById('fileInput');
         const encryptBtn = document.getElementById('encryptBtn');
@@ -487,6 +487,9 @@
         const loadingProcessed = document.getElementById('loadingProcessed');
         const successMessage = document.getElementById('successMessage');
         const messageText = document.getElementById('messageText');
+        
+        // *** 优化点 2：新增一个变量，用于存储完整的加密包 (JSON字符串) ***
+        let fullEncryptedPackage = null; 
 
         fileInput.addEventListener('change', handleFileSelect);
         encryptBtn.addEventListener('click', encryptImage);
@@ -509,21 +512,19 @@
             element.classList.remove('active');
         }
 
-        // *** 优化点 3：重构 handleFileSelect，使其更智能 ***
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            // 重置所有状态
             resetOriginalPreview();
             resetProcessedPreview();
             originalImage = null;
             encryptedData = null;
             processedImageData = null;
+            fullEncryptedPackage = null; // 重置
             
             showLoading(loadingOriginal);
 
-            // 优先尝试作为图片读取，如果失败（onerror），则尝试作为文本读取
             const reader = new FileReader();
             reader.onload = function(event) {
                 const dataUrl = event.target.result;
@@ -537,39 +538,63 @@
                 };
                 img.onerror = function() {
                     // 2. 失败：这不是一个合法的图片（可能是我们加密的.png）
-                    // 自动切换，尝试作为文本文件读取
                     readDataAsText(file);
                 };
                 img.src = dataUrl;
             }
-            // 兜底：如果连 readAsDataURL 都失败，尝试 readAsText
             reader.onerror = function() {
                  readDataAsText(file);
             }
 
-            // 3. 优先处理 .txt 文件 (为了兼容旧版 .txt)
             if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
                  readDataAsText(file);
             } else {
-                // 否则，按标准流程（先图片后文本）处理
                  reader.readAsDataURL(file);
             }
         }
 
-        // 辅助函数：专门用于读取并验证加密文本
+        // *** 优化点 3：更新 readDataAsText 来解析 JSON 包 ***
         function readDataAsText(file) {
             const textReader = new FileReader();
             textReader.onload = function(event) {
                 const data = event.target.result.trim();
-                if (data.startsWith('U2FsdGVkX')) { // 检查是否为CryptoJS AES格式
+                
+                try {
+                    // 尝试解析为 v6 的 JSON 包
+                    const parsedData = JSON.parse(data);
+                    if (parsedData.preview && parsedData.payload) {
+                        // 成功！这是 v6 的文件
+                        encryptedData = parsedData.payload; // 存储 payload 用于解密
+                        fullEncryptedPackage = data; // 存储完整包 (以防万一)
+                        
+                        // 在左侧显示预览图
+                        const previewImg = new Image();
+                        previewImg.onload = function() {
+                            displayImage(originalPreview, previewImg);
+                            hideLoading(loadingOriginal);
+                            showMessage('加密数据已加载，请输入密码解密。');
+                        }
+                        previewImg.src = parsedData.preview;
+                        return;
+                    }
+                } catch (e) {
+                    // JSON 解析失败，继续检查
+                }
+
+                // 检查是否为 v5 的纯文本加密数据 (为了向后兼容)
+                if (data.startsWith('U2FsdGVkX')) {
                     encryptedData = data;
-                    displayDataLoaded(originalPreview); // 在左侧显示 "数据已加载"
+                    displayDataLoaded(originalPreview); // 显示 "数据已加载"
+                    fullEncryptedPackage = data; // 存储
                     hideLoading(loadingOriginal);
                     showMessage('加密数据已加载，请输入密码解密。');
-                } else {
-                    alert('❌ 文件无法识别。请上传合法的图片或加密数据文件。');
-                    hideLoading(loadingOriginal);
+                    return;
                 }
+
+                // 彻底失败
+                alert('❌ 文件无法识别。请上传合法的图片或加密数据文件。');
+                hideLoading(loadingOriginal);
+                
             }
             textReader.onerror = function() {
                 alert('❌ 文件读取失败。');
@@ -604,7 +629,6 @@
             processedPreview.classList.add('empty');
         }
         
-        // 在左侧显示"数据已加载"的占位符
         function displayDataLoaded(container) {
             container.innerHTML = `
                 <div class="placeholder">
@@ -631,7 +655,7 @@
             container.appendChild(clonedImg);
         }
 
-        // encryptImage 函数不变 (v4 已经优化过)
+        // *** 优化点 4：更新 encryptImage 来创建 JSON 包 ***
         function encryptImage() {
             if (!originalImage) {
                 alert('❌ 请先选择一张图片！');
@@ -644,21 +668,22 @@
             }
 
             processedImageData = null; 
+            encryptedData = null; // 清空
+            fullEncryptedPackage = null; // 清空
             const loading = document.getElementById('loadingProcessed');
             showLoading(loading);
 
             setTimeout(() => {
                 try {
+                    // 1. 创建加密 payload
                     const originalDataUrl = originalImage.src;
-                    const encryptData = { originalImage: originalDataUrl };
-                    const pixelString = JSON.stringify(encryptData);
-                    
-                    encryptedData = CryptoJS.AES.encrypt(pixelString, password).toString();
+                    const encryptPayloadJson = { originalImage: originalDataUrl };
+                    const payloadString = JSON.stringify(encryptPayloadJson);
+                    const encryptedPayload = CryptoJS.AES.encrypt(payloadString, password).toString();
 
-                    // --- 创建视觉预览图 (仅供观赏) ---
+                    // 2. 创建视觉 preview
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                    
                     const maxSize = 1920;
                     let width = originalImage.width;
                     let height = originalImage.height;
@@ -679,7 +704,6 @@
 
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
-
                     const key = CryptoJS.SHA256(password).toString();
                     let keyIndex = 0;
                     for (let i = 0; i < data.length; i += 4) {
@@ -703,10 +727,24 @@
                     ctx.rotate(-30 * Math.PI / 180);
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('PREVIEW ONLY', 0, 0); // 水印
+                    ctx.fillText('CONFIDENTIAL', 0, 0); // 水印
                     ctx.restore();
 
                     const previewDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
+                    // 3. 打包成 JSON
+                    const packageJson = {
+                        preview: previewDataUrl,
+                        payload: encryptedPayload
+                    };
+                    
+                    // 存储完整包 (JSON字符串) 用于下载
+                    fullEncryptedPackage = JSON.stringify(packageJson);
+                    
+                    // 存储 payload 用于解密 (以防用户不下载，直接解密)
+                    encryptedData = encryptedPayload; 
+                    
+                    // 在右侧显示预览图
                     displayProcessedImage(previewDataUrl);
                     hideLoading(loading);
                     showMessage('🔒 图片加密成功！请点击"下载结果"保存.png文件。');
@@ -719,7 +757,7 @@
             }, 100);
         }
 
-        // decryptImage 函数不变 (v4 已经优化过)
+        // decryptImage 函数现在只依赖 encryptedData (payload)，无需修改
         function decryptImage() {
             if (!encryptedData) {
                 alert('❌ 请先上传一个加密数据文件（.png 或 .txt）！');
@@ -753,7 +791,10 @@
                         displayProcessedImage(processedImageData);
                         hideLoading(loading);
                         showMessage('🔓 数据解密成功！已恢复原图。');
-                        encryptedData = null; // 清除已用过的加密数据
+                        
+                        // 清除已用过的加密数据
+                        encryptedData = null; 
+                        fullEncryptedPackage = null;
                     } else {
                         throw new Error('加密数据中未找到原始图片');
                     }
@@ -775,17 +816,17 @@
             img.src = dataUrl;
         }
 
-        // *** 优化点 4：更新 downloadImage，保存为 .png ***
+        // *** 优化点 5：更新 downloadImage，保存 fullEncryptedPackage ***
         function downloadImage() {
             const link = document.createElement('a');
 
-            if (encryptedData) {
-                // 情况1：我们刚刚加密了，`encryptedData` 变量里有值
-                // 下载 .png 文件 (内容是文本，但后缀是.png)
-                link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(encryptedData);
-                link.download = 'encrypted_data.png'; // <--- 关键修改
+            if (fullEncryptedPackage) {
+                // 情况1：我们刚刚加密了，或者刚上传了加密文件
+                // 下载 .png 文件 (内容是JSON文本)
+                link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(fullEncryptedPackage);
+                link.download = 'encrypted_data.png';
                 link.click();
-                showMessage('💾 加密数据(.png)下载成功！'); // <--- 关键修改
+                showMessage('💾 加密数据(.png)下载成功！');
 
             } else if (processedImageData) {
                 // 情况2：我们刚刚解密了，`processedImageData` 有值
