@@ -587,23 +587,41 @@
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d', { willReadFrequently: true });
                     
-                    canvas.width = originalImage.width;
-                    canvas.height = originalImage.height;
+                    const maxSize = 1920;
+                    let width = originalImage.width;
+                    let height = originalImage.height;
+                    
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = (height / width) * maxSize;
+                            width = maxSize;
+                        } else {
+                            width = (width / height) * maxSize;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
 
-                    ctx.drawImage(originalImage, 0, 0);
+                    ctx.drawImage(originalImage, 0, 0, width, height);
 
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
 
+                    const pixelArray = Array.from(data);
                     const originalDataUrl = originalImage.src;
-                    
-                    const metaData = {
-                        originalImage: originalDataUrl,
-                        timestamp: Date.now()
+                    const encryptData = {
+                        width: canvas.width,
+                        height: canvas.height,
+                        data: pixelArray,
+                        originalWidth: originalImage.width,
+                        originalHeight: originalImage.height,
+                        originalImage: originalDataUrl
                     };
-                    const metaString = JSON.stringify(metaData);
+                    const pixelString = JSON.stringify(encryptData);
 
-                    const encrypted = CryptoJS.AES.encrypt(metaString, password).toString();
+                    const encrypted = CryptoJS.AES.encrypt(pixelString, password).toString();
                     encryptedData = encrypted;
 
                     const key = CryptoJS.SHA256(password).toString();
@@ -635,23 +653,7 @@
                     ctx.fillText('CONFIDENTIAL', 0, 0);
                     ctx.restore();
 
-                    const originalFormat = originalImage.src.match(/data:image\/(\w+);/);
-                    const format = originalFormat ? originalFormat[1] : 'jpeg';
-                    let quality = 0.92;
-                    
-                    if (format === 'png') {
-                        quality = 1.0;
-                    }
-
-                    let encryptedImageDataUrl = canvas.toDataURL(`image/${format}`, quality);
-                    
-                    const compressedData = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(encrypted));
-                    encryptedImageDataUrl = encryptedImageDataUrl.replace(
-                        `data:image/${format};base64,`,
-                        `data:image/${format};ENCRYPTED_DATA:${compressedData};base64,`
-                    );
-                    
-                    processedImageData = encryptedImageDataUrl;
+                    processedImageData = canvas.toDataURL('image/jpeg', 0.75);
                     displayProcessedImage(processedImageData);
                     hideLoading(loading);
                     showMessage('🔒 图片加密成功！');
@@ -743,16 +745,9 @@
             }
 
             const link = document.createElement('a');
-            const isEncrypted = encryptedData !== null && processedImageData.includes('ENCRYPTED_DATA:');
-            
-            if (isEncrypted) {
-                link.download = 'encrypted_image.jpg';
-                link.href = processedImageData;
-            } else {
-                link.download = 'decrypted_image.png';
-                link.href = processedImageData;
-            }
-            
+            const isEncrypted = encryptedData !== null && processedImageData.includes('data:image/jpeg');
+            link.download = isEncrypted ? 'encrypted_image.jpg' : 'decrypted_image.png';
+            link.href = processedImageData;
             link.click();
             showMessage('💾 图片下载成功！');
         }
