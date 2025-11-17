@@ -471,7 +471,7 @@
     <script>
         let originalImage = null;
         let processedImageData = null;
-        let encryptedData = null;
+        let encryptedData = null; // 这个变量将保存从加密或上传中获取的AES加密字符串
 
         const fileInput = document.getElementById('fileInput');
         const encryptBtn = document.getElementById('encryptBtn');
@@ -517,22 +517,26 @@
                 const img = new Image();
                 img.onload = function() {
                     originalImage = img;
-                    displayImage(originalPreview, img);
+                    displayImage(originalPreview, img); // originalPreview现在会被正确清理
                     
                     const dataUrl = event.target.result;
+                    // 检查Data URL中是否包含我们嵌入的加密数据
                     const encryptedDataMatch = dataUrl.match(/ENCRYPTED_DATA:([^;]+);/);
                     
                     if (encryptedDataMatch) {
                         try {
+                            // 找到了！解码并存储加密字符串以备解密
                             encryptedData = decodeURIComponent(encryptedDataMatch[1]);
-                            processedImageData = dataUrl;
-                            displayProcessedImage(dataUrl);
-                            showMessage('检测到加密图片，可直接解密！');
+                            processedImageData = dataUrl; // 这是带水印的预览图
+                            displayProcessedImage(dataUrl); // 显示预览图
+                            showMessage('检测到加密图片，输入密码可解密！');
                         } catch (error) {
+                            console.error('解析嵌入数据失败:', error);
                             resetProcessedPreview();
                             showMessage('图片上传成功！');
                         }
                     } else {
+                        // 普通图片，重置处理结果
                         resetProcessedPreview();
                         showMessage('图片上传成功！');
                     }
@@ -556,12 +560,20 @@
             `;
             processedPreview.classList.add('empty');
             processedImageData = null;
-            encryptedData = null;
+            encryptedData = null; // 重置加密数据
         }
 
         function displayImage(container, img) {
+            // *** 修复点 1：修复重叠问题 ***
+            // 在添加新图片前，移除旧的<img>（如果存在）
+            const oldImg = container.querySelector('img');
+            if (oldImg) {
+                oldImg.remove();
+            }
+
             const placeholder = container.querySelector('.placeholder');
             if (placeholder) placeholder.remove();
+            
             container.classList.remove('empty');
             const clonedImg = img.cloneNode();
             container.appendChild(clonedImg);
@@ -584,6 +596,21 @@
 
             setTimeout(() => {
                 try {
+                    // --- 1. 创建加密数据 ---
+                    
+                    // *** 修复点 2a：优化体积 ***
+                    // 只加密需要恢复的原始Data URL
+                    const originalDataUrl = originalImage.src;
+                    const encryptData = {
+                        originalImage: originalDataUrl
+                    };
+                    const pixelString = JSON.stringify(encryptData); // 转换为JSON字符串
+
+                    // 使用AES加密
+                    const encrypted = CryptoJS.AES.encrypt(pixelString, password).toString();
+                    encryptedData = encrypted; // 保存这个AES加密字符串
+
+                    // --- 2. 创建视觉预览图 (带混淆和水印) ---
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d', { willReadFrequently: true });
                     
@@ -603,41 +630,24 @@
                     
                     canvas.width = width;
                     canvas.height = height;
-
                     ctx.drawImage(originalImage, 0, 0, width, height);
 
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
 
-                    const pixelArray = Array.from(data);
-                    const originalDataUrl = originalImage.src;
-                    const encryptData = {
-                        width: canvas.width,
-                        height: canvas.height,
-                        data: pixelArray,
-                        originalWidth: originalImage.width,
-                        originalHeight: originalImage.height,
-                        originalImage: originalDataUrl
-                    };
-                    const pixelString = JSON.stringify(encryptData);
-
-                    const encrypted = CryptoJS.AES.encrypt(pixelString, password).toString();
-                    encryptedData = encrypted;
-
+                    // 基于密码的XOR混淆 (仅为视觉效果)
                     const key = CryptoJS.SHA256(password).toString();
                     let keyIndex = 0;
-                    
                     for (let i = 0; i < data.length; i += 4) {
                         const keyByte = parseInt(key.substr((keyIndex % key.length) * 2, 2), 16);
                         keyIndex++;
-                        
                         data[i] = keyByte ^ (i % 256);
                         data[i + 1] = keyByte ^ ((i + 1) % 256);
                         data[i + 2] = keyByte ^ ((i + 2) % 256);
                     }
-
                     ctx.putImageData(imageData, 0, 0);
 
+                    // 添加水印
                     const fontSize = Math.max(canvas.width, canvas.height) / 12;
                     ctx.font = `bold ${fontSize}px Arial`;
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
@@ -653,11 +663,22 @@
                     ctx.fillText('CONFIDENTIAL', 0, 0);
                     ctx.restore();
 
-                    processedImageData = canvas.toDataURL('image/jpeg', 0.75);
+                    // --- 3. 合并数据和预览图 ---
+                    
+                    // *** 修复点 2b：嵌入数据 ***
+                    // 将预览图转为Data URL
+                    const previewDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                    // 将AES加密字符串(encryptedData)嵌入到预览图的Data URL中
+                    processedImageData = previewDataUrl.replace(
+                        ';base64,',
+                        `;ENCRYPTED_DATA:${encodeURIComponent(encryptedData)};base64,`
+                    );
+                    
                     displayProcessedImage(processedImageData);
                     hideLoading(loading);
                     showMessage('🔒 图片加密成功！');
                 } catch (error) {
+                    console.error('加密失败:', error);
                     alert('❌ 加密失败，请重试！');
                     hideLoading(loading);
                 }
@@ -665,8 +686,10 @@
         }
 
         function decryptImage() {
+            // *** 修复点 2c：实现解密 ***
+            // encryptedData 现在在上传或加密时被正确设置
             if (!encryptedData) {
-                alert('❌ 请先加密图片！');
+                alert('❌ 请先上传一张加密图片！'); // 更新提示信息
                 return;
             }
 
@@ -681,6 +704,7 @@
 
             setTimeout(() => {
                 try {
+                    // 解密AES字符串
                     const decrypted = CryptoJS.AES.decrypt(encryptedData, password);
                     const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
                     
@@ -690,46 +714,30 @@
                         return;
                     }
 
+                    // 解析JSON
                     const encryptData = JSON.parse(decryptedString);
 
+                    // *** 修复点 3：恢复原图 ***
+                    // 检查JSON中是否有我们存的 originalImage
                     if (encryptData.originalImage) {
-                        processedImageData = encryptData.originalImage;
+                        processedImageData = encryptData.originalImage; // 100% 恢复原图
                         displayProcessedImage(processedImageData);
                         hideLoading(loading);
                         showMessage('🔓 图片解密成功！已完整恢复原图');
                     } else {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = encryptData.width;
-                        canvas.height = encryptData.height;
-
-                        const imageData = ctx.createImageData(canvas.width, canvas.height);
-                        for (let i = 0; i < encryptData.data.length; i++) {
-                            imageData.data[i] = encryptData.data[i];
-                        }
-
-                        ctx.putImageData(imageData, 0, 0);
-                        processedImageData = canvas.toDataURL('image/png');
-                        displayProcessedImage(processedImageData);
-                        hideLoading(loading);
-                        showMessage('🔓 图片解密成功！');
+                        // 这是一个备用逻辑，理论上不应该执行
+                        throw new Error('加密数据中未找到原始图片');
                     }
                 } catch (error) {
-                    alert('❌ 解密失败！密码可能不正确。');
+                    console.error('解密失败:', error);
+                    alert('❌ 解密失败！密码不正确或文件已损坏。');
                     hideLoading(loading);
                 }
             }, 100);
         }
 
-        function hashPassword(password) {
-            const hash = CryptoJS.SHA256(password);
-            return parseInt(hash.toString().substring(0, 8), 16);
-        }
-
-
-
         function displayProcessedImage(dataUrl) {
-            processedPreview.innerHTML = '';
+            processedPreview.innerHTML = ''; // 清理旧内容
             processedPreview.classList.remove('empty');
             const img = new Image();
             img.onload = function() {
@@ -745,8 +753,20 @@
             }
 
             const link = document.createElement('a');
-            const isEncrypted = encryptedData !== null && processedImageData.includes('data:image/jpeg');
-            link.download = isEncrypted ? 'encrypted_image.jpg' : 'decrypted_image.png';
+            
+            // 检查下载的是加密预览图还是解密后的原图
+            const isEncrypted = processedImageData.includes('ENCRYPTED_DATA:');
+            
+            // 动态设置文件名
+            if (isEncrypted) {
+                link.download = 'encrypted_image.jpg';
+            } else {
+                // 尝试从Data URL中获取原始格式
+                const mimeMatch = processedImageData.match(/data:image\/(\w+);/);
+                const extension = mimeMatch ? mimeMatch[1] : 'png';
+                link.download = `decrypted_image.${extension}`;
+            }
+            
             link.href = processedImageData;
             link.click();
             showMessage('💾 图片下载成功！');
