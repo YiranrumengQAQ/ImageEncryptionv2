@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片加密解密工具</title>
+    <title>图片加密解密工具v4</title>
     <style>
         /* [样式表... 和你之前的一样，为了简洁这里省略] */
         * {
@@ -401,9 +401,9 @@
                     <div class="file-input-wrapper">
                         <label class="btn btn-upload" for="fileInput">
                             <span>📁</span>
-                            <span>选择图片</span>
+                            <span>选择文件</span>
                         </label>
-                        <input type="file" id="fileInput" accept="image/*">
+                        <input type="file" id="fileInput" accept="image/*,text/plain,.txt">
                     </div>
                     <button class="btn btn-encrypt" id="encryptBtn">
                         <span>🔒</span>
@@ -411,7 +411,7 @@
                     </button>
                     <button class="btn btn-decrypt" id="decryptBtn">
                         <span>🔓</span>
-                        <span>解密图片</span>
+                        <span>解密数据</span>
                     </button>
                     <button class="btn btn-download" id="downloadBtn">
                         <span>💾</span>
@@ -424,7 +424,7 @@
                 <div class="preview-card">
                     <div class="preview-header">
                         <div class="preview-icon">📷</div>
-                        <div class="preview-title">原始图片</div>
+                        <div class="preview-title">原始图片 / 上传数据</div>
                     </div>
                     <div class="preview-box empty" id="originalPreview">
                         <div class="placeholder">
@@ -457,7 +457,9 @@
             <div class="info-banner">
                 <div class="info-icon">💡</div>
                 <div class="info-text">
-                    <strong>安全提示：</strong>本工具使用AES-256算法加密您的原始图片。加密后的数据会作为EXIF元数据（用户备注）存储在下方的“加密预览图”中。解密后将完美恢复原始图片。加密预览图本身是带水印的JPEG，体积小便于分享。
+                    <strong>使用流程：</strong><br>
+                    1. <strong>加密：</strong>点击“选择文件”上传一张**图片**。加密后，点击“下载结果”保存 `encrypted_data.txt` 文件。<br>
+                    2. <strong>解密：</strong>点击“选择文件”上传 `encrypted_data.txt` **数据文件**。输入密码，点击“解密数据”即可恢复原图。
                 </div>
             </div>
         </div>
@@ -468,12 +470,11 @@
         <span id="messageText">操作成功！</span>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/piexifjs/1.0.6/piexif.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        let originalImage = null;
-        let processedImageData = null;
-        let encryptedData = null; // 这个变量将保存从加密或上传中获取的AES加密字符串
+        let originalImage = null; // 用于加密
+        let processedImageData = null; // 用于解密后的图片预览
+        let encryptedData = null; // 加密/解密用的AES字符串
 
         const fileInput = document.getElementById('fileInput');
         const encryptBtn = document.getElementById('encryptBtn');
@@ -505,52 +506,71 @@
         }
 
         function hideLoading(element) {
+            element.classList.remove('show');
+            // 修复 v3 中可能存在的残留
             element.classList.remove('active');
         }
 
-        // *** 修复点 3：更新 handleFileSelect 以读取 EXIF ***
+        // *** 修复点 3：更新 handleFileSelect 以处理图片和 .txt ***
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            showLoading(loadingOriginal);
+            // 重置所有状态
+            resetOriginalPreview();
+            resetProcessedPreview();
+            originalImage = null;
+            encryptedData = null;
+            processedImageData = null;
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    originalImage = img;
-                    displayImage(originalPreview, img);
-                    
-                    const dataUrl = event.target.result;
-                    
-                    try {
-                        // 尝试加载 EXIF 数据
-                        const exifObj = piexif.load(dataUrl);
-                        const comment = exifObj.Exif[piexif.ExifIFD.UserComment]; // 37510 是 UserComment 的 ID
-
-                        if (comment) {
-                            // 找到了！解码并存储加密字符串以备解密
-                            encryptedData = comment; // 它已经是字符串了
-                            processedImageData = dataUrl; // 这是带水印的预览图
-                            displayProcessedImage(dataUrl); // 显示预览图
-                            showMessage('检测到加密图片，输入密码可解密！');
-                        } else {
-                            // 是JEPG但没有我们的备注，是普通图片
-                            resetProcessedPreview();
-                            showMessage('图片上传成功！');
-                        }
-                    } catch (error) {
-                        // 加载EXIF失败（可能是PNG或非图片），是普通图片
-                        resetProcessedPreview();
-                        showMessage('图片上传成功！');
+            if (file.type.startsWith('image/')) {
+                // 情况1: 用户上传图片 (用于加密)
+                showLoading(loadingOriginal);
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImage = img;
+                        displayImage(originalPreview, img);
+                        hideLoading(loadingOriginal);
+                        showMessage('图片上传成功！请输入密码加密。');
                     }
-                    
-                    hideLoading(loadingOriginal);
+                    img.src = event.target.result;
                 }
-                img.src = event.target.result;
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
+                // 情况2: 用户上传 .txt (用于解密)
+                showLoading(loadingOriginal); // 在左侧显示加载
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const data = event.target.result.trim();
+                    if (data.startsWith('U2FsdGVkX')) { // 检查是否为CryptoJS AES格式
+                        encryptedData = data;
+                        displayDataLoaded(originalPreview); // 在左侧显示 "数据已加载"
+                        hideLoading(loadingOriginal);
+                        showMessage('加密数据已加载，请输入密码解密。');
+                    } else {
+                        alert('❌ 这不是一个有效的加密数据文件。');
+                        hideLoading(loadingOriginal);
+                    }
+                }
+                reader.readAsText(file);
+            } else {
+                alert('❌ 请上传图片 (jpg, png) 或加密数据 (.txt) 文件。');
             }
-            reader.readAsDataURL(file);
+        }
+        
+        function resetOriginalPreview() {
+            originalPreview.innerHTML = `
+                <div class="placeholder">
+                    <div class="placeholder-icon">🖼️</div>
+                    <div class="placeholder-text">等待上传图片</div>
+                </div>
+                <div class="loading-spinner" id="loadingOriginal">
+                    <div class="spinner"></div>
+                </div>
+            `;
+            originalPreview.classList.add('empty');
         }
 
         function resetProcessedPreview() {
@@ -564,8 +584,20 @@
                 </div>
             `;
             processedPreview.classList.add('empty');
-            processedImageData = null;
-            encryptedData = null; // 重置加密数据
+        }
+        
+        // 在左侧显示"数据已加载"的占位符
+        function displayDataLoaded(container) {
+            container.innerHTML = `
+                <div class="placeholder">
+                    <div class="placeholder-icon" style="font-size: 80px;"> TXT </div>
+                    <div class="placeholder-text" style="color: #1e293b;">加密数据已加载</div>
+                </div>
+                <div class="loading-spinner" id="loadingOriginal">
+                    <div class="spinner"></div>
+                </div>
+            `;
+            container.classList.remove('empty');
         }
 
         function displayImage(container, img) {
@@ -582,7 +614,7 @@
             container.appendChild(clonedImg);
         }
 
-        // *** 修复点 2：更新 encryptImage 以注入 EXIF ***
+        // *** 修复点 4：简化 encryptImage，不再使用 EXIF ***
         function encryptImage() {
             if (!originalImage) {
                 alert('❌ 请先选择一张图片！');
@@ -595,21 +627,23 @@
                 return;
             }
 
-            const loading = document.getElementById('loadingProcessed') || processedPreview.querySelector('.loading-spinner');
+            // 加密后，清除 processedImageData (如果有旧的)
+            processedImageData = null; 
+            const loading = document.getElementById('loadingProcessed');
             showLoading(loading);
 
             setTimeout(() => {
                 try {
                     // --- 1. 创建加密数据 ---
+                    // *** 体积优化：只保存原始 data URL ***
                     const originalDataUrl = originalImage.src;
-                    const encryptData = {
-                        originalImage: originalDataUrl
-                    };
+                    const encryptData = { originalImage: originalDataUrl };
                     const pixelString = JSON.stringify(encryptData);
-                    const encrypted = CryptoJS.AES.encrypt(pixelString, password).toString();
-                    encryptedData = encrypted; // 保存这个AES加密字符串
+                    
+                    // 加密数据，并存到全局变量
+                    encryptedData = CryptoJS.AES.encrypt(pixelString, password).toString();
 
-                    // --- 2. 创建视觉预览图 (带混淆和水印) ---
+                    // --- 2. 创建视觉预览图 (仅供观赏) ---
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d', { willReadFrequently: true });
                     
@@ -657,35 +691,27 @@
                     ctx.rotate(-30 * Math.PI / 180);
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('CONFIDENTIAL', 0, 0);
+                    ctx.fillText('PREVIEW ONLY', 0, 0); // 水印
                     ctx.restore();
 
-                    // --- 3. 合并数据和预览图 ---
+                    // 显示预览图
                     const previewDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-
-                    // 创建EXIF数据，将加密字符串存入"用户备注"
-                    const exifObj = {"Exif": {}};
-                    exifObj.Exif[piexif.ExifIFD.UserComment] = encryptedData;
-                    const exifBytes = piexif.dump(exifObj);
-
-                    // 将EXIF数据插入到JPEG预览图中
-                    processedImageData = piexif.insert(exifBytes, previewDataUrl);
-                    
-                    displayProcessedImage(processedImageData);
+                    displayProcessedImage(previewDataUrl);
                     hideLoading(loading);
-                    showMessage('🔒 图片加密成功！');
+                    showMessage('🔒 图片加密成功！请点击"下载结果"保存.txt文件。');
+
                 } catch (error) {
                     console.error('加密失败:', error);
-                    alert('❌ 加密失败，请重试！');
+                    alert('❌ 加密失败，请重试！'); // 这次这个错误不应该再发生了
                     hideLoading(loading);
                 }
             }, 100);
         }
 
-        // 解密函数不需要修改，它依赖于 encryptedData 变量
+        // *** 修复点 5：更新 decryptImage 逻辑 ***
         function decryptImage() {
             if (!encryptedData) {
-                alert('❌ 请先上传一张已加密的图片！'); // 现在这个提示是准确的
+                alert('❌ 请先上传一个 `encrypted_data.txt` 文件！');
                 return;
             }
 
@@ -695,7 +721,9 @@
                 return;
             }
 
-            const loading = document.getElementById('loadingProcessed') || processedPreview.querySelector('.loading-spinner');
+            // 解密后，清除原始图片（如果有）
+            originalImage = null; 
+            const loading = document.getElementById('loadingProcessed');
             showLoading(loading);
 
             setTimeout(() => {
@@ -704,7 +732,7 @@
                     const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
                     
                     if (!decryptedString) {
-                        alert('❌ 密码错误！无法解密图片。');
+                        alert('❌ 密码错误！无法解密。');
                         hideLoading(loading);
                         return;
                     }
@@ -712,10 +740,15 @@
                     const encryptData = JSON.parse(decryptedString);
 
                     if (encryptData.originalImage) {
+                        // 解密成功！
                         processedImageData = encryptData.originalImage; 
                         displayProcessedImage(processedImageData);
                         hideLoading(loading);
-                        showMessage('🔓 图片解密成功！已完整恢复原图');
+                        showMessage('🔓 数据解密成功！已恢复原图。');
+                        
+                        // *** 关键：清除已用过的加密数据 ***
+                        // 这能确保"下载结果"按钮下载的是图片
+                        encryptedData = null; 
                     } else {
                         throw new Error('加密数据中未找到原始图片');
                     }
@@ -737,37 +770,32 @@
             img.src = dataUrl;
         }
 
+        // *** 修复点 6：更新 downloadImage 逻辑 ***
         function downloadImage() {
-            if (!processedImageData) {
-                alert('❌ 请先加密或解密图片！');
-                return;
-            }
-
             const link = document.createElement('a');
-            
-            // 检查下载的是加密预览图还是解密后的原图
-            // 只有加密图才有 EXIF 数据，piexif.load 不会报错
-            let isEncrypted = false;
-            try {
-                const exif = piexif.load(processedImageData);
-                if (exif.Exif && exif.Exif[piexif.ExifIFD.UserComment]) {
-                    isEncrypted = true;
-                }
-            } catch (e) {
-                // 不是JPEG或没有EXIF，是解密后的原图
-            }
-            
-            if (isEncrypted) {
-                link.download = 'encrypted_image.jpg';
-            } else {
+
+            if (encryptedData) {
+                // 情况1：我们刚刚加密了，`encryptedData` 变量里有值
+                // 下载 .txt 文件
+                link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(encryptedData);
+                link.download = 'encrypted_data.txt';
+                link.click();
+                showMessage('💾 加密数据下载成功！');
+
+            } else if (processedImageData) {
+                // 情况2：我们刚刚解密了，`processedImageData` 有值
+                // （并且 `encryptedData` 已被设为 null）
+                // 下载解密后的图片
+                link.href = processedImageData;
                 const mimeMatch = processedImageData.match(/data:image\/(\w+);/);
                 const extension = mimeMatch ? mimeMatch[1] : 'png';
                 link.download = `decrypted_image.${extension}`;
+                link.click();
+                showMessage('💾 图片下载成功！');
+            } else {
+                alert('❌ 没有可下载的结果。');
+                return;
             }
-            
-            link.href = processedImageData;
-            link.click();
-            showMessage('💾 图片下载成功！');
         }
     </script>
 </body>
