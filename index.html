@@ -457,9 +457,8 @@
             <div class="info-banner">
                 <div class="info-icon">💡</div>
                 <div class="info-text">
-                    <strong>使用流程：</strong><br>
-                    1. <strong>加密：</strong>上传**图片**。加密后，点击“下载结果”保存 `encrypted_data.png` 文件。<br>
-                    2. <strong>解密：</strong>上传 `encrypted_data.png` **数据文件**。左侧会显示加密预览图，输入密码解密即可恢复原图。
+                    <strong>安全提示：</strong>本工具使用 <strong>AES-256 + PBKDF2 (10,000次迭代)</strong> 强加密，可有效防止暴力破解。加密数据包已优化体积。<br>
+                    <strong>流程：</strong>1. 上传**图片** -> 加密 -> 下载 `.png` 数据包。 2. 上传 `.png` **数据包** -> 解密 -> 恢复原图。
                 </div>
             </div>
         </div>
@@ -472,9 +471,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        let originalImage = null; // 用于加密
+        let originalImage = null; // 用于 *显示* 原始预览
+        let originalFile = null;  // *** 优化点 2：存储原始文件，用于读取字节 ***
         let processedImageData = null; // 用于解密后的图片预览
-        let encryptedData = null; // 加密/解密用的AES字符串 (现在是 payload)
+        let encryptedDataPayload = null; // 加密/解密用的AES payload *对象*
+        
+        let fullEncryptedPackage = null; // 存储完整的JSON字符串 ({"preview":..., "payload":...})
 
         const fileInput = document.getElementById('fileInput');
         const encryptBtn = document.getElementById('encryptBtn');
@@ -488,8 +490,9 @@
         const successMessage = document.getElementById('successMessage');
         const messageText = document.getElementById('messageText');
         
-        // *** 优化点 2：新增一个变量，用于存储完整的加密包 (JSON字符串) ***
-        let fullEncryptedPackage = null; 
+        // *** 优化点 3：PBKDF2 的配置 ***
+        const PBKDF2_ITERATIONS = 10000;
+        const KEY_SIZE_BITS = 256;
 
         fileInput.addEventListener('change', handleFileSelect);
         encryptBtn.addEventListener('click', encryptImage);
@@ -519,9 +522,10 @@
             resetOriginalPreview();
             resetProcessedPreview();
             originalImage = null;
-            encryptedData = null;
+            originalFile = null; // 重置
+            encryptedDataPayload = null;
             processedImageData = null;
-            fullEncryptedPackage = null; // 重置
+            fullEncryptedPackage = null;
             
             showLoading(loadingOriginal);
 
@@ -532,12 +536,13 @@
                 img.onload = function() {
                     // 1. 成功：这是一个合法的图片
                     originalImage = img;
+                    originalFile = file; // *** 优化点 4：存储原始文件 ***
                     displayImage(originalPreview, img);
                     hideLoading(loadingOriginal);
                     showMessage('图片上传成功！请输入密码加密。');
                 };
                 img.onerror = function() {
-                    // 2. 失败：这不是一个合法的图片（可能是我们加密的.png）
+                    // 2. 失败：这不是一个合法的图片
                     readDataAsText(file);
                 };
                 img.src = dataUrl;
@@ -553,21 +558,19 @@
             }
         }
 
-        // *** 优化点 3：更新 readDataAsText 来解析 JSON 包 ***
+        // *** 优化点 5：更新 readDataAsText 来解析新的 payload 格式 ***
         function readDataAsText(file) {
             const textReader = new FileReader();
             textReader.onload = function(event) {
                 const data = event.target.result.trim();
                 
                 try {
-                    // 尝试解析为 v6 的 JSON 包
                     const parsedData = JSON.parse(data);
-                    if (parsedData.preview && parsedData.payload) {
-                        // 成功！这是 v6 的文件
-                        encryptedData = parsedData.payload; // 存储 payload 用于解密
-                        fullEncryptedPackage = data; // 存储完整包 (以防万一)
+                    // 检查 v7 的格式: { preview: "...", payload: { type: "...", ... } }
+                    if (parsedData.preview && parsedData.payload && parsedData.payload.type) {
+                        encryptedDataPayload = parsedData.payload; // 存储 payload 对象
+                        fullEncryptedPackage = data;
                         
-                        // 在左侧显示预览图
                         const previewImg = new Image();
                         previewImg.onload = function() {
                             displayImage(originalPreview, previewImg);
@@ -578,20 +581,16 @@
                         return;
                     }
                 } catch (e) {
-                    // JSON 解析失败，继续检查
+                    // JSON 解析失败或格式不对，非致命
                 }
 
-                // 检查是否为 v5 的纯文本加密数据 (为了向后兼容)
+                // (兼容 v5/v6)
                 if (data.startsWith('U2FsdGVkX')) {
-                    encryptedData = data;
-                    displayDataLoaded(originalPreview); // 显示 "数据已加载"
-                    fullEncryptedPackage = data; // 存储
+                    alert('❌ 检测到旧版加密数据，请使用旧版工具解密。');
                     hideLoading(loadingOriginal);
-                    showMessage('加密数据已加载，请输入密码解密。');
                     return;
                 }
 
-                // 彻底失败
                 alert('❌ 文件无法识别。请上传合法的图片或加密数据文件。');
                 hideLoading(loadingOriginal);
                 
@@ -628,19 +627,6 @@
             `;
             processedPreview.classList.add('empty');
         }
-        
-        function displayDataLoaded(container) {
-            container.innerHTML = `
-                <div class="placeholder">
-                    <div class="placeholder-icon" style="font-size: 80px;"> 📦 </div>
-                    <div class="placeholder-text" style="color: #1e293b;">加密数据已加载</div>
-                </div>
-                <div class="loading-spinner" id="loadingOriginal">
-                    <div class="spinner"></div>
-                </div>
-            `;
-            container.classList.remove('empty');
-        }
 
         function displayImage(container, img) {
             const oldImg = container.querySelector('img');
@@ -655,9 +641,9 @@
             container.appendChild(clonedImg);
         }
 
-        // *** 优化点 4：更新 encryptImage 来创建 JSON 包 ***
+        // *** 优化点 6：重写 encryptImage，使用 PBKDF2 和 ArrayBuffer ***
         function encryptImage() {
-            if (!originalImage) {
+            if (!originalImage || !originalFile) {
                 alert('❌ 请先选择一张图片！');
                 return;
             }
@@ -668,99 +654,128 @@
             }
 
             processedImageData = null; 
-            encryptedData = null; // 清空
-            fullEncryptedPackage = null; // 清空
+            encryptedDataPayload = null;
+            fullEncryptedPackage = null;
             const loading = document.getElementById('loadingProcessed');
             showLoading(loading);
 
-            setTimeout(() => {
+            // 1. 生成预览图 (这一步很快)
+            const previewDataUrl = createPreviewCanvas(originalImage, password);
+            
+            // 2. 异步读取文件字节，然后执行加密
+            const reader = new FileReader();
+            reader.onload = function(e) {
                 try {
-                    // 1. 创建加密 payload
-                    const originalDataUrl = originalImage.src;
-                    const encryptPayloadJson = { originalImage: originalDataUrl };
-                    const payloadString = JSON.stringify(encryptPayloadJson);
-                    const encryptedPayload = CryptoJS.AES.encrypt(payloadString, password).toString();
+                    const fileBuffer = e.target.result;
+                    const payloadData = CryptoJS.lib.WordArray.create(fileBuffer); // 原始字节
+                    const mimeType = originalFile.type;
 
-                    // 2. 创建视觉 preview
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                    const maxSize = 1920;
-                    let width = originalImage.width;
-                    let height = originalImage.height;
+                    // 3. PBKDF2 安全加密
+                    const salt = CryptoJS.lib.WordArray.random(128 / 8); // 16 字节
+                    const iv = CryptoJS.lib.WordArray.random(128 / 8); // 16 字节
+
+                    // 衍生密钥 (这是慢速部分)
+                    const key = CryptoJS.PBKDF2(password, salt, {
+                        keySize: KEY_SIZE_BITS / 32,
+                        iterations: PBKDF2_ITERATIONS
+                    });
+
+                    // 加密
+                    const encrypted = CryptoJS.AES.encrypt(payloadData, key, { iv: iv });
                     
-                    if (width > maxSize || height > maxSize) {
-                        if (width > height) {
-                            height = (height / width) * maxSize;
-                            width = maxSize;
-                        } else {
-                            width = (width / height) * maxSize;
-                            height = maxSize;
-                        }
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(originalImage, 0, 0, width, height);
+                    // 4. 打包 Payload
+                    const payload = {
+                        type: mimeType,
+                        salt: salt.toString(CryptoJS.enc.Hex), // 存储为 Hex
+                        iv: iv.toString(CryptoJS.enc.Hex),
+                        iterations: PBKDF2_ITERATIONS,
+                        ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64) // 密文用Base64
+                    };
 
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const data = imageData.data;
-                    const key = CryptoJS.SHA256(password).toString();
-                    let keyIndex = 0;
-                    for (let i = 0; i < data.length; i += 4) {
-                        const keyByte = parseInt(key.substr((keyIndex % key.length) * 2, 2), 16);
-                        keyIndex++;
-                        data[i] = keyByte ^ (i % 256);
-                        data[i + 1] = keyByte ^ ((i + 1) % 256);
-                        data[i + 2] = keyByte ^ ((i + 2) % 256);
-                    }
-                    ctx.putImageData(imageData, 0, 0);
-
-                    const fontSize = Math.max(canvas.width, canvas.height) / 12;
-                    ctx.font = `bold ${fontSize}px Arial`;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-                    ctx.shadowBlur = 8;
-                    ctx.shadowOffsetX = 3;
-                    ctx.shadowOffsetY = 3;
-                    ctx.save();
-                    ctx.translate(canvas.width / 2, canvas.height / 2);
-                    ctx.rotate(-30 * Math.PI / 180);
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('CONFIDENTIAL', 0, 0); // 水印
-                    ctx.restore();
-
-                    const previewDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-
-                    // 3. 打包成 JSON
+                    // 5. 打包完整文件
                     const packageJson = {
                         preview: previewDataUrl,
-                        payload: encryptedPayload
+                        payload: payload
                     };
                     
-                    // 存储完整包 (JSON字符串) 用于下载
                     fullEncryptedPackage = JSON.stringify(packageJson);
+                    encryptedDataPayload = payload; 
                     
-                    // 存储 payload 用于解密 (以防用户不下载，直接解密)
-                    encryptedData = encryptedPayload; 
-                    
-                    // 在右侧显示预览图
                     displayProcessedImage(previewDataUrl);
                     hideLoading(loading);
                     showMessage('🔒 图片加密成功！请点击"下载结果"保存.png文件。');
-
+                
                 } catch (error) {
                     console.error('加密失败:', error);
                     alert('❌ 加密失败，请重试！');
                     hideLoading(loading);
                 }
-            }, 100);
+            }
+            reader.onerror = function() {
+                 alert('❌ 文件读取失败，无法加密。');
+                 hideLoading(loading);
+            }
+            
+            reader.readAsArrayBuffer(originalFile);
         }
 
-        // decryptImage 函数现在只依赖 encryptedData (payload)，无需修改
+        // 辅助函数：创建预览图 (从 encryptImage 中提取)
+        function createPreviewCanvas(img, password) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const maxSize = 1920;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > maxSize || height > maxSize) {
+                if (width > height) {
+                    height = (height / width) * maxSize;
+                    width = maxSize;
+                } else {
+                    width = (width / height) * maxSize;
+                    height = maxSize;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const key = CryptoJS.SHA256(password).toString();
+            let keyIndex = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const keyByte = parseInt(key.substr((keyIndex % key.length) * 2, 2), 16);
+                keyIndex++;
+                data[i] = keyByte ^ (i % 256);
+                data[i + 1] = keyByte ^ ((i + 1) % 256);
+                data[i + 2] = keyByte ^ ((i + 2) % 256);
+            }
+            ctx.putImageData(imageData, 0, 0);
+
+            const fontSize = Math.max(canvas.width, canvas.height) / 12;
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(-30 * Math.PI / 180);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('CONFIDENTIAL', 0, 0);
+            ctx.restore();
+
+            return canvas.toDataURL('image/jpeg', 0.75);
+        }
+
+        // *** 优化点 7：重写 decryptImage，使用 PBKDF2 ***
         function decryptImage() {
-            if (!encryptedData) {
-                alert('❌ 请先上传一个加密数据文件（.png 或 .txt）！');
+            if (!encryptedDataPayload) {
+                alert('❌ 请先上传一个加密数据文件（.png）！');
                 return;
             }
             const password = passwordInput.value.trim();
@@ -770,40 +785,59 @@
             }
 
             originalImage = null; 
+            originalFile = null;
             const loading = document.getElementById('loadingProcessed');
             showLoading(loading);
 
+            // 解密现在也需要时间，放到 setTimeout 中以显示加载动画
             setTimeout(() => {
                 try {
-                    const decrypted = CryptoJS.AES.decrypt(encryptedData, password);
-                    const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+                    const payload = encryptedDataPayload;
                     
-                    if (!decryptedString) {
-                        alert('❌ 密码错误！无法解密。');
-                        hideLoading(loading);
-                        return;
-                    }
+                    // 1. 从 payload 恢复参数
+                    const salt = CryptoJS.enc.Hex.parse(payload.salt);
+                    const iv = CryptoJS.enc.Hex.parse(payload.iv);
+                    const iterations = payload.iterations || 10000; // 兼容
+                    const ciphertext_b64 = payload.ciphertext;
 
-                    const encryptData = JSON.parse(decryptedString);
-
-                    if (encryptData.originalImage) {
-                        processedImageData = encryptData.originalImage; 
-                        displayProcessedImage(processedImageData);
-                        hideLoading(loading);
-                        showMessage('🔓 数据解密成功！已恢复原图。');
-                        
-                        // 清除已用过的加密数据
-                        encryptedData = null; 
-                        fullEncryptedPackage = null;
-                    } else {
-                        throw new Error('加密数据中未找到原始图片');
+                    // 2. 衍生密钥 (这是慢速部分)
+                    const key = CryptoJS.PBKDF2(password, salt, {
+                        keySize: KEY_SIZE_BITS / 32,
+                        iterations: iterations
+                    });
+                    
+                    // 3. 解密
+                    const cipherParams = CryptoJS.lib.CipherParams.create({
+                        ciphertext: CryptoJS.enc.Base64.parse(ciphertext_b64)
+                    });
+                    const decrypted = CryptoJS.AES.decrypt(cipherParams, key, { iv: iv });
+                    
+                    // 4. 转换回 Data URL
+                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Base64);
+                    
+                    if (!decryptedBase64) {
+                        // 如果密码错误，decrypted.sigBytes 会是 0
+                        throw new Error('密码错误');
                     }
+                    
+                    const mimeType = payload.type;
+                    processedImageData = 'data:' + mimeType + ';base64,' + decryptedBase64;
+                    
+                    displayProcessedImage(processedImageData);
+                    hideLoading(loading);
+                    showMessage('🔓 数据解密成功！已恢复原图。');
+                    
+                    // 清除已用过的加密数据
+                    encryptedDataPayload = null; 
+                    fullEncryptedPackage = null;
+
                 } catch (error) {
                     console.error('解密失败:', error);
+                    // 99% 的情况是密码错误
                     alert('❌ 解密失败！密码不正确或文件已损坏。');
                     hideLoading(loading);
                 }
-            }, 100);
+            }, 100); // 延迟100ms执行，让 "loading" 动画先生效
         }
 
         function displayProcessedImage(dataUrl) {
@@ -816,20 +850,17 @@
             img.src = dataUrl;
         }
 
-        // *** 优化点 5：更新 downloadImage，保存 fullEncryptedPackage ***
+        // downloadImage 函数不变 (v6 已经优化过)
         function downloadImage() {
             const link = document.createElement('a');
 
             if (fullEncryptedPackage) {
-                // 情况1：我们刚刚加密了，或者刚上传了加密文件
-                // 下载 .png 文件 (内容是JSON文本)
                 link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(fullEncryptedPackage);
                 link.download = 'encrypted_data.png';
                 link.click();
                 showMessage('💾 加密数据(.png)下载成功！');
 
             } else if (processedImageData) {
-                // 情况2：我们刚刚解密了，`processedImageData` 有值
                 link.href = processedImageData;
                 const mimeMatch = processedImageData.match(/data:image\/(\w+);/);
                 const extension = mimeMatch ? mimeMatch[1] : 'png';
