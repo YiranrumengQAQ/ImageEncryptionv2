@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片加密解密工具</title>
     <style>
+        /* [样式表... 和你之前的一样，为了简洁这里省略] */
         * {
             margin: 0;
             padding: 0;
@@ -456,7 +457,7 @@
             <div class="info-banner">
                 <div class="info-icon">💡</div>
                 <div class="info-text">
-                    <strong>安全提示：</strong>本工具使用AES-256军事级加密算法，原始图片完整保存在加密数据中。加密显示图采用基于密码的XOR混淆，完全无法识别原始内容，带有水印标识。解密后将完美恢复原始图片，尺寸、质量、体积完全一致。加密展示图采用JPEG压缩（质量75%），体积更小便于分享。
+                    <strong>安全提示：</strong>本工具使用AES-256算法加密您的原始图片。加密后的数据会作为EXIF元数据（用户备注）存储在下方的“加密预览图”中。解密后将完美恢复原始图片。加密预览图本身是带水印的JPEG，体积小便于分享。
                 </div>
             </div>
         </div>
@@ -467,6 +468,7 @@
         <span id="messageText">操作成功！</span>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/piexifjs/1.0.6/piexif.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         let originalImage = null;
@@ -506,6 +508,7 @@
             element.classList.remove('active');
         }
 
+        // *** 修复点 3：更新 handleFileSelect 以读取 EXIF ***
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -517,26 +520,28 @@
                 const img = new Image();
                 img.onload = function() {
                     originalImage = img;
-                    displayImage(originalPreview, img); // originalPreview现在会被正确清理
+                    displayImage(originalPreview, img);
                     
                     const dataUrl = event.target.result;
-                    // 检查Data URL中是否包含我们嵌入的加密数据
-                    const encryptedDataMatch = dataUrl.match(/ENCRYPTED_DATA:([^;]+);/);
                     
-                    if (encryptedDataMatch) {
-                        try {
+                    try {
+                        // 尝试加载 EXIF 数据
+                        const exifObj = piexif.load(dataUrl);
+                        const comment = exifObj.Exif[piexif.ExifIFD.UserComment]; // 37510 是 UserComment 的 ID
+
+                        if (comment) {
                             // 找到了！解码并存储加密字符串以备解密
-                            encryptedData = decodeURIComponent(encryptedDataMatch[1]);
+                            encryptedData = comment; // 它已经是字符串了
                             processedImageData = dataUrl; // 这是带水印的预览图
                             displayProcessedImage(dataUrl); // 显示预览图
                             showMessage('检测到加密图片，输入密码可解密！');
-                        } catch (error) {
-                            console.error('解析嵌入数据失败:', error);
+                        } else {
+                            // 是JEPG但没有我们的备注，是普通图片
                             resetProcessedPreview();
                             showMessage('图片上传成功！');
                         }
-                    } else {
-                        // 普通图片，重置处理结果
+                    } catch (error) {
+                        // 加载EXIF失败（可能是PNG或非图片），是普通图片
                         resetProcessedPreview();
                         showMessage('图片上传成功！');
                     }
@@ -564,8 +569,6 @@
         }
 
         function displayImage(container, img) {
-            // *** 修复点 1：修复重叠问题 ***
-            // 在添加新图片前，移除旧的<img>（如果存在）
             const oldImg = container.querySelector('img');
             if (oldImg) {
                 oldImg.remove();
@@ -579,6 +582,7 @@
             container.appendChild(clonedImg);
         }
 
+        // *** 修复点 2：更新 encryptImage 以注入 EXIF ***
         function encryptImage() {
             if (!originalImage) {
                 alert('❌ 请先选择一张图片！');
@@ -597,16 +601,11 @@
             setTimeout(() => {
                 try {
                     // --- 1. 创建加密数据 ---
-                    
-                    // *** 修复点 2a：优化体积 ***
-                    // 只加密需要恢复的原始Data URL
                     const originalDataUrl = originalImage.src;
                     const encryptData = {
                         originalImage: originalDataUrl
                     };
-                    const pixelString = JSON.stringify(encryptData); // 转换为JSON字符串
-
-                    // 使用AES加密
+                    const pixelString = JSON.stringify(encryptData);
                     const encrypted = CryptoJS.AES.encrypt(pixelString, password).toString();
                     encryptedData = encrypted; // 保存这个AES加密字符串
 
@@ -635,7 +634,6 @@
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
 
-                    // 基于密码的XOR混淆 (仅为视觉效果)
                     const key = CryptoJS.SHA256(password).toString();
                     let keyIndex = 0;
                     for (let i = 0; i < data.length; i += 4) {
@@ -647,7 +645,6 @@
                     }
                     ctx.putImageData(imageData, 0, 0);
 
-                    // 添加水印
                     const fontSize = Math.max(canvas.width, canvas.height) / 12;
                     ctx.font = `bold ${fontSize}px Arial`;
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
@@ -664,15 +661,15 @@
                     ctx.restore();
 
                     // --- 3. 合并数据和预览图 ---
-                    
-                    // *** 修复点 2b：嵌入数据 ***
-                    // 将预览图转为Data URL
                     const previewDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-                    // 将AES加密字符串(encryptedData)嵌入到预览图的Data URL中
-                    processedImageData = previewDataUrl.replace(
-                        ';base64,',
-                        `;ENCRYPTED_DATA:${encodeURIComponent(encryptedData)};base64,`
-                    );
+
+                    // 创建EXIF数据，将加密字符串存入"用户备注"
+                    const exifObj = {"Exif": {}};
+                    exifObj.Exif[piexif.ExifIFD.UserComment] = encryptedData;
+                    const exifBytes = piexif.dump(exifObj);
+
+                    // 将EXIF数据插入到JPEG预览图中
+                    processedImageData = piexif.insert(exifBytes, previewDataUrl);
                     
                     displayProcessedImage(processedImageData);
                     hideLoading(loading);
@@ -685,11 +682,10 @@
             }, 100);
         }
 
+        // 解密函数不需要修改，它依赖于 encryptedData 变量
         function decryptImage() {
-            // *** 修复点 2c：实现解密 ***
-            // encryptedData 现在在上传或加密时被正确设置
             if (!encryptedData) {
-                alert('❌ 请先上传一张加密图片！'); // 更新提示信息
+                alert('❌ 请先上传一张已加密的图片！'); // 现在这个提示是准确的
                 return;
             }
 
@@ -704,7 +700,6 @@
 
             setTimeout(() => {
                 try {
-                    // 解密AES字符串
                     const decrypted = CryptoJS.AES.decrypt(encryptedData, password);
                     const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
                     
@@ -714,18 +709,14 @@
                         return;
                     }
 
-                    // 解析JSON
                     const encryptData = JSON.parse(decryptedString);
 
-                    // *** 修复点 3：恢复原图 ***
-                    // 检查JSON中是否有我们存的 originalImage
                     if (encryptData.originalImage) {
-                        processedImageData = encryptData.originalImage; // 100% 恢复原图
+                        processedImageData = encryptData.originalImage; 
                         displayProcessedImage(processedImageData);
                         hideLoading(loading);
                         showMessage('🔓 图片解密成功！已完整恢复原图');
                     } else {
-                        // 这是一个备用逻辑，理论上不应该执行
                         throw new Error('加密数据中未找到原始图片');
                     }
                 } catch (error) {
@@ -755,13 +746,20 @@
             const link = document.createElement('a');
             
             // 检查下载的是加密预览图还是解密后的原图
-            const isEncrypted = processedImageData.includes('ENCRYPTED_DATA:');
+            // 只有加密图才有 EXIF 数据，piexif.load 不会报错
+            let isEncrypted = false;
+            try {
+                const exif = piexif.load(processedImageData);
+                if (exif.Exif && exif.Exif[piexif.ExifIFD.UserComment]) {
+                    isEncrypted = true;
+                }
+            } catch (e) {
+                // 不是JPEG或没有EXIF，是解密后的原图
+            }
             
-            // 动态设置文件名
             if (isEncrypted) {
                 link.download = 'encrypted_image.jpg';
             } else {
-                // 尝试从Data URL中获取原始格式
                 const mimeMatch = processedImageData.match(/data:image\/(\w+);/);
                 const extension = mimeMatch ? mimeMatch[1] : 'png';
                 link.download = `decrypted_image.${extension}`;
