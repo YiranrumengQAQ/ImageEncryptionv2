@@ -456,7 +456,7 @@
             <div class="info-banner">
                 <div class="info-icon">💡</div>
                 <div class="info-text">
-                    <strong>安全提示：</strong>本工具使用AES-256军事级加密算法。加密时保持原始尺寸和格式（PNG保持PNG，JPG保持JPG），质量设为92%（PNG为100%），体积与原图几乎一致。加密显示图采用XOR密码混淆，完全看不清原图，带有"CONFIDENTIAL"水印标识。解密后将100%恢复原图（尺寸、质量、体积、格式完全一致）。加密数据嵌入图片中，无需额外文件。
+                    <strong>安全提示：</strong>本工具使用AES-256军事级加密算法，原始图片完整保存在加密数据中。加密显示图采用基于密码的XOR混淆，完全无法识别原始内容，带有水印标识。解密后将完美恢复原始图片，尺寸、质量、体积完全一致。加密展示图采用JPEG压缩（质量75%），体积更小便于分享。
                 </div>
             </div>
         </div>
@@ -524,11 +524,10 @@
                     
                     if (encryptedDataMatch) {
                         try {
-                            const compressedData = encryptedDataMatch[1];
-                            encryptedData = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(compressedData));
+                            encryptedData = decodeURIComponent(encryptedDataMatch[1]);
                             processedImageData = dataUrl;
                             displayProcessedImage(dataUrl);
-                            showMessage('✅ 检测到加密图片，可直接解密！');
+                            showMessage('检测到加密图片，可直接解密！');
                         } catch (error) {
                             resetProcessedPreview();
                             showMessage('图片上传成功！');
@@ -599,8 +598,8 @@
                     const originalDataUrl = originalImage.src;
                     
                     const metaData = {
-                        img: originalDataUrl,
-                        t: Date.now()
+                        originalImage: originalDataUrl,
+                        timestamp: Date.now()
                     };
                     const metaString = JSON.stringify(metaData);
 
@@ -638,18 +637,18 @@
 
                     const originalFormat = originalImage.src.match(/data:image\/(\w+);/);
                     const format = originalFormat ? originalFormat[1] : 'jpeg';
-                    let quality = 0.85;
+                    let quality = 0.92;
                     
                     if (format === 'png') {
-                        quality = 0.90;
+                        quality = 1.0;
                     }
 
-                    let encryptedImageDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    let encryptedImageDataUrl = canvas.toDataURL(`image/${format}`, quality);
                     
-                    const compressedData = LZString.compressToBase64(encrypted);
+                    const compressedData = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(encrypted));
                     encryptedImageDataUrl = encryptedImageDataUrl.replace(
-                        'data:image/jpeg;base64,',
-                        `data:image/jpeg;ED:${compressedData};base64,`
+                        `data:image/${format};base64,`,
+                        `data:image/${format};ENCRYPTED_DATA:${compressedData};base64,`
                     );
                     
                     processedImageData = encryptedImageDataUrl;
@@ -657,7 +656,6 @@
                     hideLoading(loading);
                     showMessage('🔒 图片加密成功！');
                 } catch (error) {
-                    console.error(error);
                     alert('❌ 加密失败，请重试！');
                     hideLoading(loading);
                 }
@@ -690,16 +688,29 @@
                         return;
                     }
 
-                    const metaData = JSON.parse(decryptedString);
+                    const encryptData = JSON.parse(decryptedString);
 
-                    if (metaData.originalImage) {
-                        processedImageData = metaData.originalImage;
+                    if (encryptData.originalImage) {
+                        processedImageData = encryptData.originalImage;
                         displayProcessedImage(processedImageData);
                         hideLoading(loading);
-                        showMessage('🔓 图片解密成功！已完整恢复原图（尺寸、质量、体积完全一致）');
+                        showMessage('🔓 图片解密成功！已完整恢复原图');
                     } else {
-                        alert('❌ 解密数据格式错误！');
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = encryptData.width;
+                        canvas.height = encryptData.height;
+
+                        const imageData = ctx.createImageData(canvas.width, canvas.height);
+                        for (let i = 0; i < encryptData.data.length; i++) {
+                            imageData.data[i] = encryptData.data[i];
+                        }
+
+                        ctx.putImageData(imageData, 0, 0);
+                        processedImageData = canvas.toDataURL('image/png');
+                        displayProcessedImage(processedImageData);
                         hideLoading(loading);
+                        showMessage('🔓 图片解密成功！');
                     }
                 } catch (error) {
                     alert('❌ 解密失败！密码可能不正确。');
@@ -735,14 +746,10 @@
             const isEncrypted = encryptedData !== null && processedImageData.includes('ENCRYPTED_DATA:');
             
             if (isEncrypted) {
-                const formatMatch = processedImageData.match(/data:image\/(\w+);/);
-                const format = formatMatch ? formatMatch[1] : 'jpeg';
-                link.download = `encrypted_image.${format}`;
+                link.download = 'encrypted_image.jpg';
                 link.href = processedImageData;
             } else {
-                const formatMatch = processedImageData.match(/data:image\/(\w+);/);
-                const format = formatMatch ? formatMatch[1] : 'png';
-                link.download = `decrypted_image.${format}`;
+                link.download = 'decrypted_image.png';
                 link.href = processedImageData;
             }
             
