@@ -3,626 +3,630 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureImage - 图片加密工具</title>
+    <title>经典扫雷游戏 - Minesweeper</title>
     <style>
-        :root {
-            --primary-color: #4a6fa5;
-            --secondary-color: #6b8cbc;
-            --accent-color: #ff7e5f;
-            --light-color: #f5f7fa;
-            --dark-color: #2c3e50;
-            --success-color: #2ecc71;
-            --warning-color: #f39c12;
-            --error-color: #e74c3c;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--light-color) 0%, #e4e8f0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             padding: 20px;
-            color: var(--dark-color);
         }
 
         .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 600px;
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
         }
 
         h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-size: 2.5rem;
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .subtitle {
-            color: var(--secondary-color);
-            font-size: 1.1rem;
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.8em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn, .new-game-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+            color: white;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 166, 255, 0.4);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transform: scale(1.05);
+        }
+
+        .new-game-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .new-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            max-width: 100%;
+        }
+
+        #gameBoard {
+            display: inline-grid;
+            gap: 2px;
+            background: #bdc3c7;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .cell:hover:not(.revealed):not(.flagged) {
+            background: linear-gradient(145deg, #f0f0f0, #ffffff);
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell.revealed {
+            background: #fff;
+            border: 1px solid #ddd;
+            cursor: default;
+        }
+
+        .cell.flagged {
+            background: linear-gradient(145deg, #ff6b6b, #ff8787);
+            border-color: #ff5252;
+        }
+
+        .cell.flagged::after {
+            content: '🚩';
+            font-size: 1.2em;
+        }
+
+        .cell.mine {
+            background: linear-gradient(145deg, #ff6b6b, #c92a2a);
+        }
+
+        .cell.mine::after {
+            content: '💣';
+            font-size: 1.2em;
+        }
+
+        .cell.number-1 { color: #0000ff; }
+        .cell.number-2 { color: #008000; }
+        .cell.number-3 { color: #ff0000; }
+        .cell.number-4 { color: #000080; }
+        .cell.number-5 { color: #800000; }
+        .cell.number-6 { color: #008080; }
+        .cell.number-7 { color: #000000; }
+        .cell.number-8 { color: #808080; }
+
+        .game-over-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-message {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .game-over-message h2 {
+            font-size: 2.5em;
             margin-bottom: 20px;
         }
 
-        .bubble {
-            background-color: white;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
+        .game-over-message.win h2 {
+            color: #51cf66;
         }
 
-        .bubble:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        .game-over-message.lose h2 {
+            color: #ff6b6b;
         }
 
-        .bubble::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 50px;
-            height: 50px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            opacity: 0.1;
+        .game-over-message p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #666;
         }
 
-        .bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: -20px;
-            width: 70px;
-            height: 70px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            opacity: 0.05;
-        }
-
-        .control-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .control-panel {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .preview-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .preview-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .preview-box {
-            text-align: center;
-        }
-
-        .preview-title {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .preview-canvas {
-            width: 100%;
-            max-width: 400px;
-            height: 300px;
-            border-radius: 10px;
-            background-color: #f0f0f0;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            overflow: hidden;
-        }
-
-        .preview-canvas canvas {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 8px;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
+        .game-over-message button {
+            padding: 15px 40px;
             border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            transition: all 0.3s;
         }
 
-        .btn:hover {
-            background-color: var(--secondary-color);
+        .game-over-message button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-accent {
-            background-color: var(--accent-color);
-        }
-
-        .btn-accent:hover {
-            background-color: #ff9a7f;
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-        }
-
-        .btn-success:hover {
-            background-color: #27ae60;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .file-label {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            padding: 12px 24px;
-            border-radius: 50px;
-            cursor: pointer;
-            display: inline-block;
-            transition: var(--transition);
-            border: 2px dashed var(--secondary-color);
-            text-align: center;
-            width: 100%;
-        }
-
-        .file-label:hover {
-            background-color: #e8ecf4;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px 15px;
+        .instructions {
+            background: #f8f9fa;
+            padding: 15px;
             border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .input-field:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
             margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
         }
 
-        .action-buttons .btn {
-            flex: 1;
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
         }
 
-        .info-text {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--secondary-color);
-            font-size: 0.9rem;
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
         }
 
-        .watermark {
+        .instructions li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li::before {
+            content: '•';
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8rem;
-            pointer-events: none;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
         }
 
-        .status-message {
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 1em;
+            }
+
+            .info-value {
+                font-size: 1.5em;
+            }
+
+            .game-info {
+                padding: 15px;
+            }
         }
 
-        .status-success {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: var(--success-color);
-            display: block;
-        }
+        @media (max-width: 400px) {
+            .cell {
+                width: 25px;
+                height: 25px;
+                font-size: 0.9em;
+            }
 
-        .status-error {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: var(--error-color);
-            display: block;
-        }
-
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            color: var(--secondary-color);
-            font-size: 0.9rem;
+            h1 {
+                font-size: 1.5em;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>SecureImage</h1>
-            <p class="subtitle">安全、高效的图片加密与解密工具</p>
-        </header>
-
-        <div class="bubble control-panel">
-            <div class="input-group">
-                <label class="input-label">选择图片</label>
-                <input type="file" id="imageInput" class="file-input" accept="image/*">
-                <label for="imageInput" class="file-label">点击选择图片或拖放至此</label>
+        <h1>💣 扫雷游戏</h1>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <span class="info-label">剩余地雷</span>
+                <span class="info-value" id="mineCount">10</span>
             </div>
-            
-            <div class="input-group">
-                <label class="input-label">加密密钥</label>
-                <input type="text" id="encryptionKey" class="input-field" placeholder="输入加密密钥">
+            <div class="info-item">
+                <span class="info-label">用时</span>
+                <span class="info-value" id="timer">0</span>
             </div>
-        </div>
-
-        <div class="bubble preview-container">
-            <div class="preview-box">
-                <h3 class="preview-title">原图预览</h3>
-                <div class="preview-canvas">
-                    <canvas id="originalCanvas"></canvas>
-                </div>
-            </div>
-            
-            <div class="preview-box">
-                <h3 class="preview-title">加密后预览</h3>
-                <div class="preview-canvas">
-                    <canvas id="encryptedCanvas"></canvas>
-                </div>
-                <div class="watermark">ENCRYPTED</div>
+            <div class="info-item">
+                <span class="info-label">状态</span>
+                <span class="info-value" id="gameStatus">😊</span>
             </div>
         </div>
 
-        <div class="bubble">
-            <div class="action-buttons">
-                <button id="encryptBtn" class="btn btn-accent">加密图片</button>
-                <button id="decryptBtn" class="btn btn-success">解密图片</button>
-                <button id="downloadBtn" class="btn">下载加密图片</button>
-            </div>
-            
-            <div id="statusMessage" class="status-message"></div>
-            
-            <p class="info-text">
-                提示：加密后的图片将转换为色块并添加水印，只有使用正确的密钥才能解密恢复原图。
-            </p>
+        <div class="controls">
+            <button class="difficulty-btn active" data-difficulty="easy">初级 (9×9)</button>
+            <button class="difficulty-btn" data-difficulty="medium">中级 (16×16)</button>
+            <button class="difficulty-btn" data-difficulty="hard">高级 (16×30)</button>
+        </div>
+
+        <button class="new-game-btn" id="newGameBtn">🎮 开始新游戏</button>
+
+        <div class="board-container">
+            <div id="gameBoard"></div>
+        </div>
+
+        <div class="instructions">
+            <h3>📖 游戏说明</h3>
+            <ul>
+                <li><strong>左键点击</strong>：翻开方块</li>
+                <li><strong>右键点击</strong>：标记/取消标记地雷</li>
+                <li><strong>数字</strong>：表示周围8个格子中地雷的数量</li>
+                <li><strong>目标</strong>：找出所有地雷并翻开所有安全格子</li>
+                <li><strong>技巧</strong>：在已标记的数字上双击可快速翻开周围格子</li>
+            </ul>
         </div>
     </div>
 
-    <footer>
-        <p>SecureImage &copy; 2023 - 保护您的图片隐私</p>
-    </footer>
+    <div class="game-over-overlay" id="gameOverOverlay">
+        <div class="game-over-message" id="gameOverMessage">
+            <h2 id="resultTitle">游戏结束</h2>
+            <p id="resultText">你的用时: <span id="finalTime">0</span> 秒</p>
+            <button onclick="startNewGame()">再来一局</button>
+        </div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 获取DOM元素
-            const imageInput = document.getElementById('imageInput');
-            const encryptionKey = document.getElementById('encryptionKey');
-            const originalCanvas = document.getElementById('originalCanvas');
-            const encryptedCanvas = document.getElementById('encryptedCanvas');
-            const encryptBtn = document.getElementById('encryptBtn');
-            const decryptBtn = document.getElementById('decryptBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const statusMessage = document.getElementById('statusMessage');
-            
-            const originalCtx = originalCanvas.getContext('2d');
-            const encryptedCtx = encryptedCanvas.getContext('2d');
-            
-            let originalImage = null;
-            let encryptedImageData = null;
-            
-            // 设置Canvas尺寸
-            function setupCanvas() {
-                const containerWidth = document.querySelector('.preview-canvas').offsetWidth;
-                const containerHeight = 300;
-                
-                originalCanvas.width = containerWidth;
-                originalCanvas.height = containerHeight;
-                encryptedCanvas.width = containerWidth;
-                encryptedCanvas.height = containerHeight;
-            }
-            
-            // 初始化Canvas尺寸
-            setupCanvas();
-            window.addEventListener('resize', setupCanvas);
-            
-            // 处理图片上传
-            imageInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                if (!file.type.match('image.*')) {
-                    showStatus('请选择有效的图片文件', 'error');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        originalImage = img;
-                        displayOriginalImage();
-                        clearEncryptedCanvas();
-                        showStatus('图片加载成功', 'success');
-                    };
-                    img.src = event.target.result;
+        class Minesweeper {
+            constructor() {
+                this.difficulties = {
+                    easy: { rows: 9, cols: 9, mines: 10 },
+                    medium: { rows: 16, cols: 16, mines: 40 },
+                    hard: { rows: 16, cols: 30, mines: 99 }
                 };
-                reader.readAsDataURL(file);
-            });
-            
-            // 显示原图
-            function displayOriginalImage() {
-                if (!originalImage) return;
+                this.currentDifficulty = 'easy';
+                this.board = [];
+                this.revealedCells = 0;
+                this.flaggedCells = 0;
+                this.gameStarted = false;
+                this.gameOver = false;
+                this.timer = 0;
+                this.timerInterval = null;
+                this.firstClick = true;
                 
-                const canvasAspect = originalCanvas.width / originalCanvas.height;
-                const imgAspect = originalImage.width / originalImage.height;
-                
-                let renderWidth, renderHeight, offsetX, offsetY;
-                
-                if (imgAspect > canvasAspect) {
-                    // 图片更宽
-                    renderWidth = originalCanvas.width;
-                    renderHeight = originalCanvas.width / imgAspect;
-                    offsetX = 0;
-                    offsetY = (originalCanvas.height - renderHeight) / 2;
-                } else {
-                    // 图片更高
-                    renderHeight = originalCanvas.height;
-                    renderWidth = originalCanvas.height * imgAspect;
-                    offsetX = (originalCanvas.width - renderWidth) / 2;
-                    offsetY = 0;
-                }
-                
-                originalCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
-                originalCtx.drawImage(originalImage, offsetX, offsetY, renderWidth, renderHeight);
+                this.initGame();
+                this.setupEventListeners();
             }
-            
-            // 清空加密Canvas
-            function clearEncryptedCanvas() {
-                encryptedCtx.clearRect(0, 0, encryptedCanvas.width, encryptedCanvas.height);
-                encryptedCtx.fillStyle = '#f0f0f0';
-                encryptedCtx.fillRect(0, 0, encryptedCanvas.width, encryptedCanvas.height);
-                encryptedCtx.fillStyle = '#999';
-                encryptedCtx.textAlign = 'center';
-                encryptedCtx.font = '16px Arial';
-                encryptedCtx.fillText('加密后的图片将显示在这里', encryptedCanvas.width/2, encryptedCanvas.height/2);
+
+            setupEventListeners() {
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentDifficulty = e.target.dataset.difficulty;
+                        this.initGame();
+                    });
+                });
+
+                document.getElementById('newGameBtn').addEventListener('click', () => {
+                    this.initGame();
+                });
             }
-            
-            // 显示状态消息
-            function showStatus(message, type) {
-                statusMessage.textContent = message;
-                statusMessage.className = 'status-message';
+
+            initGame() {
+                this.gameStarted = false;
+                this.gameOver = false;
+                this.timer = 0;
+                this.revealedCells = 0;
+                this.flaggedCells = 0;
+                this.firstClick = true;
                 
-                if (type === 'success') {
-                    statusMessage.classList.add('status-success');
-                } else if (type === 'error') {
-                    statusMessage.classList.add('status-error');
-                }
+                clearInterval(this.timerInterval);
+                document.getElementById('timer').textContent = '0';
+                document.getElementById('gameStatus').textContent = '😊';
+                document.getElementById('gameOverOverlay').style.display = 'none';
+
+                const config = this.difficulties[this.currentDifficulty];
+                this.rows = config.rows;
+                this.cols = config.cols;
+                this.totalMines = config.mines;
                 
-                setTimeout(() => {
-                    statusMessage.style.display = 'none';
-                }, 3000);
+                document.getElementById('mineCount').textContent = this.totalMines;
+                
+                this.createBoard();
+                this.renderBoard();
             }
-            
-            // 加密图片
-            encryptBtn.addEventListener('click', function() {
-                if (!originalImage) {
-                    showStatus('请先选择一张图片', 'error');
-                    return;
+
+            createBoard() {
+                this.board = [];
+                for (let i = 0; i < this.rows; i++) {
+                    this.board[i] = [];
+                    for (let j = 0; j < this.cols; j++) {
+                        this.board[i][j] = {
+                            isMine: false,
+                            isRevealed: false,
+                            isFlagged: false,
+                            neighborMines: 0
+                        };
+                    }
                 }
-                
-                if (!encryptionKey.value.trim()) {
-                    showStatus('请输入加密密钥', 'error');
-                    return;
-                }
-                
-                // 获取原图数据
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = originalImage.width;
-                tempCanvas.height = originalImage.height;
-                tempCtx.drawImage(originalImage, 0, 0);
-                
-                const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-                const data = imageData.data;
-                
-                // 使用密钥生成随机数种子
-                const key = encryptionKey.value;
-                let seed = 0;
-                for (let i = 0; i < key.length; i++) {
-                    seed += key.charCodeAt(i);
-                }
-                
-                // 简单的伪随机数生成器
-                function prng() {
-                    seed = (seed * 9301 + 49297) % 233280;
-                    return seed / 233280;
-                }
-                
-                // 加密算法：将像素转换为色块并添加噪声
-                const blockSize = 8; // 色块大小
-                const noiseIntensity = 30; // 噪声强度
-                
-                for (let y = 0; y < tempCanvas.height; y += blockSize) {
-                    for (let x = 0; x < tempCanvas.width; x += blockSize) {
-                        // 计算块的平均颜色
-                        let r = 0, g = 0, b = 0, count = 0;
-                        
-                        for (let by = 0; by < blockSize && y + by < tempCanvas.height; by++) {
-                            for (let bx = 0; bx < blockSize && x + bx < tempCanvas.width; bx++) {
-                                const idx = ((y + by) * tempCanvas.width + (x + bx)) * 4;
-                                r += data[idx];
-                                g += data[idx + 1];
-                                b += data[idx + 2];
-                                count++;
-                            }
-                        }
-                        
-                        r = Math.floor(r / count);
-                        g = Math.floor(g / count);
-                        b = Math.floor(b / count);
-                        
-                        // 添加基于密钥的噪声
-                        const noiseR = Math.floor((prng() - 0.5) * 2 * noiseIntensity);
-                        const noiseG = Math.floor((prng() - 0.5) * 2 * noiseIntensity);
-                        const noiseB = Math.floor((prng() - 0.5) * 2 * noiseIntensity);
-                        
-                        const finalR = Math.max(0, Math.min(255, r + noiseR));
-                        const finalG = Math.max(0, Math.min(255, g + noiseG));
-                        const finalB = Math.max(0, Math.min(255, b + noiseB));
-                        
-                        // 填充块
-                        for (let by = 0; by < blockSize && y + by < tempCanvas.height; by++) {
-                            for (let bx = 0; bx < blockSize && x + bx < tempCanvas.width; bx++) {
-                                const idx = ((y + by) * tempCanvas.width + (x + bx)) * 4;
-                                data[idx] = finalR;
-                                data[idx + 1] = finalG;
-                                data[idx + 2] = finalB;
-                            }
-                        }
+            }
+
+            placeMines(excludeRow, excludeCol) {
+                let minesPlaced = 0;
+                while (minesPlaced < this.totalMines) {
+                    const row = Math.floor(Math.random() * this.rows);
+                    const col = Math.floor(Math.random() * this.cols);
+                    
+                    // 不在第一次点击的位置及其周围放置地雷
+                    const isNearFirstClick = Math.abs(row - excludeRow) <= 1 && Math.abs(col - excludeCol) <= 1;
+                    
+                    if (!this.board[row][col].isMine && !isNearFirstClick) {
+                        this.board[row][col].isMine = true;
+                        minesPlaced++;
                     }
                 }
                 
-                // 添加水印
-                tempCtx.putImageData(imageData, 0, 0);
-                tempCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                tempCtx.font = 'bold 40px Arial';
-                tempCtx.textAlign = 'center';
-                tempCtx.textBaseline = 'middle';
-                tempCtx.fillText('SECURE', tempCanvas.width / 2, tempCanvas.height / 2);
-                
-                // 保存加密后的图像数据
-                encryptedImageData = tempCanvas.toDataURL('image/png');
-                
-                // 显示加密后的图像
-                const encryptedImg = new Image();
-                encryptedImg.onload = function() {
-                    const canvasAspect = encryptedCanvas.width / encryptedCanvas.height;
-                    const imgAspect = encryptedImg.width / encryptedImg.height;
-                    
-                    let renderWidth, renderHeight, offsetX, offsetY;
-                    
-                    if (imgAspect > canvasAspect) {
-                        renderWidth = encryptedCanvas.width;
-                        renderHeight = encryptedCanvas.width / imgAspect;
-                        offsetX = 0;
-                        offsetY = (encryptedCanvas.height - renderHeight) / 2;
-                    } else {
-                        renderHeight = encryptedCanvas.height;
-                        renderWidth = encryptedCanvas.height * imgAspect;
-                        offsetX = (encryptedCanvas.width - renderWidth) / 2;
-                        offsetY = 0;
+                this.calculateNeighborMines();
+            }
+
+            calculateNeighborMines() {
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (!this.board[i][j].isMine) {
+                            let count = 0;
+                            this.getNeighbors(i, j).forEach(([row, col]) => {
+                                if (this.board[row][col].isMine) count++;
+                            });
+                            this.board[i][j].neighborMines = count;
+                        }
                     }
+                }
+            }
+
+            getNeighbors(row, col) {
+                const neighbors = [];
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        if (i === 0 && j === 0) continue;
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        if (newRow >= 0 && newRow < this.rows && newCol >= 0 && newCol < this.cols) {
+                            neighbors.push([newRow, newCol]);
+                        }
+                    }
+                }
+                return neighbors;
+            }
+
+            renderBoard() {
+                const gameBoard = document.getElementById('gameBoard');
+                gameBoard.innerHTML = '';
+                gameBoard.style.gridTemplateColumns = `repeat(${this.cols}, 35px)`;
+                gameBoard.style.gridTemplateRows = `repeat(${this.rows}, 35px)`;
+
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        
+                        cell.addEventListener('click', (e) => this.handleLeftClick(i, j));
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            this.handleRightClick(i, j);
+                        });
+                        cell.addEventListener('dblclick', (e) => this.handleDoubleClick(i, j));
+                        
+                        gameBoard.appendChild(cell);
+                    }
+                }
+            }
+
+            handleLeftClick(row, col) {
+                if (this.gameOver || this.board[row][col].isRevealed || this.board[row][col].isFlagged) {
+                    return;
+                }
+
+                if (this.firstClick) {
+                    this.firstClick = false;
+                    this.placeMines(row, col);
+                    this.startTimer();
+                }
+
+                const cell = this.board[row][col];
+
+                if (cell.isMine) {
+                    this.gameOver = true;
+                    this.revealAllMines();
+                    this.endGame(false);
+                    return;
+                }
+
+                this.revealCell(row, col);
+                this.checkWin();
+            }
+
+            handleRightClick(row, col) {
+                if (this.gameOver || this.board[row][col].isRevealed) {
+                    return;
+                }
+
+                const cell = this.board[row][col];
+                cell.isFlagged = !cell.isFlagged;
+                
+                this.flaggedCells += cell.isFlagged ? 1 : -1;
+                document.getElementById('mineCount').textContent = this.totalMines - this.flaggedCells;
+                
+                this.updateCellDisplay(row, col);
+            }
+
+            handleDoubleClick(row, col) {
+                if (this.gameOver || !this.board[row][col].isRevealed) {
+                    return;
+                }
+
+                const cell = this.board[row][col];
+                if (cell.neighborMines === 0) return;
+
+                const neighbors = this.getNeighbors(row, col);
+                const flaggedCount = neighbors.filter(([r, c]) => this.board[r][c].isFlagged).length;
+
+                if (flaggedCount === cell.neighborMines) {
+                    neighbors.forEach(([r, c]) => {
+                        if (!this.board[r][c].isFlagged && !this.board[r][c].isRevealed) {
+                            this.handleLeftClick(r, c);
+                        }
+                    });
+                }
+            }
+
+            revealCell(row, col) {
+                if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
+                
+                const cell = this.board[row][col];
+                if (cell.isRevealed || cell.isFlagged) return;
+
+                cell.isRevealed = true;
+                this.revealedCells++;
+                this.updateCellDisplay(row, col);
+
+                if (cell.neighborMines === 0) {
+                    this.getNeighbors(row, col).forEach(([r, c]) => {
+                        this.revealCell(r, c);
+                    });
+                }
+            }
+
+            updateCellDisplay(row, col) {
+                const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                const cell = this.board[row][col];
+
+                cellElement.className = 'cell';
+
+                if (cell.isFlagged) {
+                    cellElement.classList.add('flagged');
+                } else if (cell.isRevealed) {
+                    cellElement.classList.add('revealed');
                     
-                    encryptedCtx.clearRect(0, 0, encryptedCanvas.width, encryptedCanvas.height);
-                    encryptedCtx.drawImage(encryptedImg, offsetX, offsetY, renderWidth, renderHeight);
-                };
-                encryptedImg.src = encryptedImageData;
-                
-                showStatus('图片加密成功', 'success');
-            });
-            
-            // 解密图片
-            decryptBtn.addEventListener('click', function() {
-                if (!encryptedImageData) {
-                    showStatus('请先加密一张图片', 'error');
-                    return;
+                    if (cell.isMine) {
+                        cellElement.classList.add('mine');
+                    } else if (cell.neighborMines > 0) {
+                        cellElement.textContent = cell.neighborMines;
+                        cellElement.classList.add(`number-${cell.neighborMines}`);
+                    }
                 }
-                
-                if (!encryptionKey.value.trim()) {
-                    showStatus('请输入解密密钥', 'error');
-                    return;
-                }
-                
-                // 这里应该是解密算法，但为了演示，我们直接显示原图
-                // 在实际应用中，您需要实现相应的解密算法
-                
-                displayOriginalImage();
-                showStatus('图片解密成功', 'success');
-            });
-            
-            // 下载加密图片
-            downloadBtn.addEventListener('click', function() {
-                if (!encryptedImageData) {
-                    showStatus('没有可下载的加密图片', 'error');
-                    return;
-                }
-                
-                const link = document.createElement('a');
-                link.download = 'encrypted-image.png';
-                link.href = encryptedImageData;
-                link.click();
-                
-                showStatus('加密图片下载成功', 'success');
-            });
-            
-            // 初始化
-            clearEncryptedCanvas();
-        });
-    </script>
-</body>
-</html>
+            }
+
+            revealAllMines() {
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (this.board[i][j].isMine) {
+                            this.board[i][j].isRevealed = true;
+                            this.updateCellDisplay(i, j);
+                        }
+      
