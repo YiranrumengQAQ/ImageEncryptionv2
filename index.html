@@ -12,9 +12,9 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacMacFont, 'Segoe UI', 'Roboto', sans-serif;
-            /* 主背景色改为蓝色系渐变 */
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 50%, #003366 100%); 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            /* 主题色：改为黄色/金色系渐变 */
+            background: linear-gradient(135deg, #f7b733 0%, #f6a623 50%, #f09819 100%);
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -33,11 +33,13 @@
         }
 
         .header {
-            /* 头部背景改为蓝色系渐变 */
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            /* 头部：改为黄色/金色系渐变 */
+            background: linear-gradient(135deg, #f5c518 0%, #e6a700 100%);
             padding: 32px;
             text-align: center;
             color: white;
+            /* 增加一点文字阴影以提高可读性 */
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         .header h1 {
@@ -100,9 +102,64 @@
 
         .password-input:focus {
             outline: none;
-            /* 焦点颜色改为蓝色 */
-            border-color: #3498db; 
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1); 
+            /* 焦点颜色：改为黄色 */
+            border-color: #f5c518;
+            box-shadow: 0 0 0 4px rgba(245, 197, 24, 0.1);
+        }
+        
+        /* *** 新增：模式切换开关 *** */
+        .mode-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+        .mode-switch-wrapper label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            /* 选中时（有损模式）的颜色：黄色 */
+            background-color: #f5c518;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
         }
 
         .button-grid {
@@ -155,25 +212,25 @@
         }
 
         .btn-upload {
-            /* 上传按钮改为蓝色系渐变 */
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+            /* 上传按钮：改为黄色系 */
+            background: linear-gradient(135deg, #f5c518 0%, #e6a700 100%);
             color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .btn-encrypt {
-            /* 加密按钮改为深蓝或紫色系（与蓝色搭配） */
-            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); /* 紫色系 */
+            /* 加密按钮：保持紫色系以示区别 */
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
             color: white;
         }
 
         .btn-decrypt {
-            /* 解密按钮改为蓝色系渐变 */
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+            /* 解密按钮：保持蓝色系以示区别 */
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
         }
 
         .btn-download {
-            /* 下载按钮保持绿色，作为成功的提示色 */
             background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
             color: white;
         }
@@ -197,9 +254,9 @@
         }
 
         .preview-card:hover {
-            /* 预览卡片 hover 边框改为蓝色 */
-            border-color: #3498db; 
-            box-shadow: 0 8px 16px rgba(52, 152, 219, 0.15); 
+            /* 预览卡片 hover：改为黄色 */
+            border-color: #f5c518;
+            box-shadow: 0 8px 16px rgba(245, 197, 24, 0.15);
         }
 
         .preview-header {
@@ -217,9 +274,10 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            /* 预览图标背景改为蓝色系渐变 */
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); 
+            /* 预览图标背景：改为黄色系 */
+            background: linear-gradient(135deg, #f5c518 0%, #e6a700 100%);
             color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .preview-title {
@@ -244,8 +302,8 @@
         }
 
         .preview-box:hover {
-            /* 预览框 hover 边框改为蓝色 */
-            border-color: #3498db; 
+            /* 预览框 hover：改为黄色 */
+            border-color: #f5c518;
             background: #f1f5f9;
         }
 
@@ -289,8 +347,8 @@
             width: 50px;
             height: 50px;
             border: 5px solid #e2e8f0;
-            /* spinner 顶部颜色改为蓝色 */
-            border-top-color: #3498db; 
+            /* spinner 颜色：改为黄色 */
+            border-top-color: #f5c518;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -300,26 +358,26 @@
         }
 
         .info-banner {
-            /* 信息条背景改为浅蓝色系 */
-            background: linear-gradient(135deg, #e0f2ff 0%, #cceeff 100%); 
+            /* 信息条：改为浅黄色 */
+            background: #fff8e1;
             padding: 20px 24px;
             border-radius: 12px;
             display: flex;
             align-items: start;
             gap: 12px;
             margin-top: 32px;
-            /* 信息条边框改为蓝色 */
-            border: 1px solid #aaddff; 
+            border: 1px solid #ffe57f;
         }
 
         .info-icon {
             font-size: 24px;
             flex-shrink: 0;
+            color: #f5c518;
         }
 
         .info-text {
-            /* 信息条文字颜色改为深蓝色 */
-            color: #0056b3; 
+            /* 信息条文字：改为棕色，在黄底上更易读 */
+            color: #795548;
             font-size: 14px;
             line-height: 1.6;
         }
@@ -409,6 +467,15 @@
                     <label class="password-label">加密密码</label>
                     <input type="password" class="password-input" id="passwordInput" placeholder="请输入安全密码（用于加密和解密）">
                 </div>
+                
+                <div class="mode-switch-wrapper">
+                    <label for="lossyModeToggle" style="color: #d9534f; font-weight: 600;">无损模式 (体积大)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="lossyModeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <label for="lossyModeToggle" style="color: #5cb85c; font-weight: 600;">有损模式 (体积小)</label>
+                </div>
 
                 <div class="button-grid">
                     <div class="file-input-wrapper">
@@ -470,7 +537,8 @@
             <div class="info-banner">
                 <div class="info-icon">💡</div>
                 <div class="info-text">
-                    <strong>安全提示：</strong>本工具使用 <strong>AES-256 + PBKDF2</strong> 强加密。加密后的文件是一个可在相册中预览的JPG（带水印），但尾部附加了加密数据，可100%恢复原图。
+                    <strong>安全提示：</strong>本工具使用 <strong>AES-256 + PBKDF2</strong> 强加密，并绑定网站密钥。<br>
+                    <strong>模式选择：</strong>请在上方选择加密模式。**无损模式**可100%恢复原图，但体积大；**有损模式**体积小，但只能恢复预览图。
                 </div>
             </div>
         </div>
@@ -483,17 +551,25 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        let originalImage = null; // 用于 *显示* 原始预览
-        let originalFile = null;  // 存储原始文件
-        let processedBlob = null; // 存储最终的 Blob (Jpg+Payload)
-        let encryptedDataPayload = null; // 加密/解密用的AES payload *对象*
-        let processedImageData = null; // 用于解密后的图片预览
+        let originalImage = null; 
+        let originalFile = null;  
+        let processedBlob = null; 
+        let encryptedDataPayload = null; // 存储从文件提取的完整 payload
+        let processedImageData = null; 
+        
+        // --- v13 配置 ---
+        const lossyModeToggle = document.getElementById('lossyModeToggle');
+        // --- 安全配置 (v10) ---
+        const PBKDF2_ITERATIONS = 10000;
+        const KEY_SIZE_BITS = 256;
+        const SITE_SECRET_KEY = "yiranrumeng.github.io-v13-secret-pepper";
+        const PAYLOAD_SEPARATOR = '---ENCRYPTED_PAYLOAD_v13---';
 
         const fileInput = document.getElementById('fileInput');
         const encryptBtn = document.getElementById('encryptBtn');
         const decryptBtn = document.getElementById('decryptBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const passwordInput = document = document.getElementById('passwordInput');
+        const passwordInput = document.getElementById('passwordInput');
         const originalPreview = document.getElementById('originalPreview');
         const processedPreview = document.getElementById('processedPreview');
         const loadingOriginal = document.getElementById('loadingOriginal');
@@ -501,16 +577,12 @@
         const successMessage = document.getElementById('successMessage');
         const messageText = document.getElementById('messageText');
         
-        const PBKDF2_ITERATIONS = 10000;
-        const KEY_SIZE_BITS = 256;
-        
-        const PAYLOAD_SEPARATOR = '---ENCRYPTED_PAYLOAD---';
-
         fileInput.addEventListener('change', handleFileSelect);
         encryptBtn.addEventListener('click', encryptImage);
         decryptBtn.addEventListener('click', decryptImage);
         downloadBtn.addEventListener('click', downloadImage);
 
+        // [showMessage, showLoading, hideLoading, reset... 函数不变]
         function showMessage(text) {
             messageText.textContent = text;
             successMessage.classList.add('show');
@@ -553,7 +625,8 @@
             processedPreview.classList.add('empty');
         }
 
-        function handleFileSelect(e) {
+        // *** v13 handleFileSelect (基于 v11 修复版) ***
+        async function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
 
@@ -572,10 +645,12 @@
                 const buffer = e.target.result;
                 
                 try {
+                    // 尝试提取 payload
                     const { previewBlob, payload } = await extractPayload(buffer);
 
                     if (payload) {
-                        encryptedDataPayload = payload;
+                        // 找到了！这是加密文件
+                        encryptedDataPayload = payload; // 存储 {mode: '...', data: ...}
                         originalFile = new File([previewBlob], "preview.jpg", { type: "image/jpeg" });
 
                         const img = await blobToImage(previewBlob);
@@ -585,15 +660,17 @@
                         showMessage('加密图片已加载，请输入密码解密。');
 
                     } else {
+                        // 未找到：这是普通图片
                         const img = await blobToImage(file);
                         originalImage = img;
                         originalFile = file;
                         displayImage(originalPreview, img);
                         hideLoading(loadingOriginal);
-                        showMessage('图片上传成功！请输入密码加密。');
+                        showMessage('图片上传成功！请选择模式并加密。');
                     }
                 } catch (err) {
-                    alert('❌ 文件读取失败，可能已损坏。');
+                    console.error("File processing error:", err);
+                    alert('❌ 文件读取失败，可能已损坏或格式不支持。');
                     hideLoading(loadingOriginal);
                 }
             };
@@ -604,8 +681,50 @@
             reader.readAsArrayBuffer(file);
         }
         
+        // *** v13 extractPayload (修复了 v10 的 Bug) ***
+        async function extractPayload(buffer) {
+            const view = new Uint8Array(buffer);
+            // 搜索窗口必须足够大，能容纳整个 payload。
+            // 这是一个权衡。我们改为从末尾搜索标记。
+            const decoder = new TextDecoder("utf-8");
+            
+            // 从末尾读取最多 5KB 寻找标记
+            // payload 本身（JSON）可能很大，但我们的分隔符很小
+            const searchSliceSize = 5120; // 5KB
+            const slice = buffer.slice(Math.max(0, buffer.byteLength - searchSliceSize));
+            const textSlice = decoder.decode(slice);
+            
+            const separatorIndexInSlice = textSlice.indexOf(PAYLOAD_SEPARATOR);
+            
+            if (separatorIndexInSlice > -1) {
+                try {
+                    // 找到了，计算它在完整 buffer 中的位置
+                    const separatorIndexInBufer = (buffer.byteLength - slice.byteLength) + separatorIndexInSlice;
+                    
+                    const payloadText = decoder.decode(buffer.slice(separatorIndexInBufer + PAYLOAD_SEPARATOR.length));
+                    const payload = JSON.parse(payloadText);
+                    const previewBlob = new Blob([buffer.slice(0, separatorIndexInBufer)], {type: "image/jpeg"});
+                    
+                    // 检查是否是 v13 格式
+                    if (payload.mode && payload.data) {
+                        return { previewBlob, payload };
+                    }
+                } catch (e) {
+                     // JSON 解析失败，忽略
+                     console.error("Payload parse error:", e);
+                }
+            }
+
+            // 未找到
+            return { previewBlob: new Blob([buffer]), payload: null };
+        }
+        
         function blobToImage(blob) {
             return new Promise((resolve, reject) => {
+                if (!blob || blob.size === 0) {
+                     reject(new Error('无法加载空的图片 Blob'));
+                     return;
+                }
                 const img = new Image();
                 const url = URL.createObjectURL(blob);
                 img.onload = () => {
@@ -628,48 +747,32 @@
             }
             return new Blob([u8arr], {type:mime});
         }
-
-        async function extractPayload(buffer) {
-            const view = new Uint8Array(buffer);
-            const searchWindow = 1024 * 500; // 扩大搜索范围到 500KB，以防 payload 较大
-            let payload = null;
-            let previewBlob = null;
-
-            // 寻找JPG的EOI（End Of Image）标记：FF D9
-            // 之后就是我们追加的Payload
-            for (let i = view.length - 1; i > view.length - searchWindow && i > 0; i--) {
-                if (view[i] === 0xD9 && view[i-1] === 0xFF) {
-                    const separatorIndex = i + 1; // EOI 标记之后开始就是 payload
-                    if (separatorIndex < view.length) {
-                        try {
-                            const payloadSlice = buffer.slice(separatorIndex);
-                            const payloadText = new TextDecoder("utf-8").decode(payloadSlice);
-                            
-                            if (payloadText.startsWith(PAYLOAD_SEPARATOR)) {
-                                const jsonText = payloadText.substring(PAYLOAD_SEPARATOR.length);
-                                const parsed = JSON.parse(jsonText);
-                                
-                                if (parsed.type && parsed.salt) {
-                                    payload = parsed;
-                                    // 预览部分是文件从头到 EOI 标记结束
-                                    previewBlob = new Blob([buffer.slice(0, separatorIndex)], {type: "image/jpeg"});
-                                    break;
-                                }
-                            }
-                        } catch(e) {
-                            // JSON 解析失败或分隔符不对，忽略
-                        }
-                    }
-                }
-            }
-
-            if (!payload) {
-                // 未找到 payload，整个文件都是预览 (可能是原始图片)
-                previewBlob = new Blob([buffer]);
-            }
-            
-            return { previewBlob, payload };
+        
+        function blobToWordArray(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const buffer = e.target.result;
+                    const wordArray = CryptoJS.lib.WordArray.create(buffer);
+                    resolve(wordArray);
+                };
+                reader.onerror = () => {
+                    reject(new Error("无法读取 Blob"));
+                };
+                reader.readAsArrayBuffer(blob);
+            });
         }
+        
+        function wordArrayToBlob(wordArray, mimeType) {
+            const buffer = wordArray.toString(CryptoJS.enc.Latin1);
+            const n = buffer.length;
+            const u8arr = new Uint8Array(n);
+            for (let i = 0; i < n; i++) {
+                u8arr[i] = buffer.charCodeAt(i);
+            }
+            return new Blob([u8arr], { type: mimeType });
+        }
+
 
         function displayImage(container, img) {
             const oldImg = container.querySelector('img');
@@ -684,6 +787,7 @@
             container.appendChild(clonedImg);
         }
 
+        // *** v13 encryptImage (双模式) ***
         async function encryptImage() {
             if (!originalImage || !originalFile) {
                 alert('❌ 请先选择一张图片！');
@@ -694,6 +798,8 @@
                 alert('❌ 请输入密码！');
                 return;
             }
+            
+            const isLossyMode = lossyModeToggle.checked;
 
             processedImageData = null; 
             encryptedDataPayload = null;
@@ -701,38 +807,54 @@
             const loading = document.getElementById('loadingProcessed');
             showLoading(loading);
             
-            // 1. 生成预览图 (Data URL)
             const previewDataUrl = createPreviewCanvas(originalImage, password);
             const previewBlob = dataURLtoBlob(previewDataUrl);
             
-            // 2. 异步读取文件字节，然后执行加密
             try {
-                const fileBuffer = await originalFile.arrayBuffer();
-                const payloadData = CryptoJS.lib.WordArray.create(fileBuffer); 
-                const mimeType = originalFile.type;
-
-                // 3. PBKDF2 安全加密
+                const finalPassword = password + SITE_SECRET_KEY;
                 const salt = CryptoJS.lib.WordArray.random(128 / 8); 
                 const iv = CryptoJS.lib.WordArray.random(128 / 8); 
 
-                const key = CryptoJS.PBKDF2(password, salt, {
+                const key = CryptoJS.PBKDF2(finalPassword, salt, {
                     keySize: KEY_SIZE_BITS / 32,
                     iterations: PBKDF2_ITERATIONS
                 });
-                const encrypted = CryptoJS.AES.encrypt(payloadData, key, { iv: iv });
                 
-                // 4. 打包 Payload 数据 (JSON)
-                const payload = {
-                    type: mimeType,
-                    salt: salt.toString(CryptoJS.enc.Hex),
-                    iv: iv.toString(CryptoJS.enc.Hex),
-                    iterations: PBKDF2_ITERATIONS,
-                    ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
-                };
-                encryptedDataPayload = payload;
+                let payloadData; // {mode: '...', data: {...}}
+                
+                if (isLossyMode) {
+                    // --- 有损模式 (v12 逻辑) ---
+                    const previewWordArray = await blobToWordArray(previewBlob);
+                    const encrypted = CryptoJS.AES.encrypt(previewWordArray, key, { iv: iv });
+                    
+                    payloadData = {
+                        mode: 'lossy',
+                        data: {
+                            type: "image/jpeg", // 预览图的类型
+                            salt: salt.toString(CryptoJS.enc.Hex),
+                            iv: iv.toString(CryptoJS.enc.Hex),
+                            ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
+                        }
+                    };
+                } else {
+                    // --- 无损模式 (v11 逻辑) ---
+                    const fileBuffer = await originalFile.arrayBuffer();
+                    const originalWordArray = CryptoJS.lib.WordArray.create(fileBuffer); 
+                    const encrypted = CryptoJS.AES.encrypt(originalWordArray, key, { iv: iv });
 
-                // 5. 将 Payload 转换为带有分隔符的 Blob
-                const payloadString = PAYLOAD_SEPARATOR + JSON.stringify(payload);
+                    payloadData = {
+                        mode: 'lossless',
+                        data: {
+                            type: originalFile.type, // 原文件的类型
+                            salt: salt.toString(CryptoJS.enc.Hex),
+                            iv: iv.toString(CryptoJS.enc.Hex),
+                            ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64)
+                        }
+                    };
+                }
+                
+                // 5. 将 Payload 转换为带分隔符的 Blob
+                const payloadString = PAYLOAD_SEPARATOR + JSON.stringify(payloadData);
                 const payloadBlob = new Blob([payloadString], { type: "text/plain" });
 
                 // 6. 合并预览图片 Blob 和 Payload Blob
@@ -751,6 +873,7 @@
         }
 
         function createPreviewCanvas(img, password) {
+            // [函数和 v10 一样]
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             const maxSize = 1920;
@@ -802,6 +925,7 @@
             return canvas.toDataURL('image/jpeg', 0.75);
         }
 
+        // *** v13 decryptImage (双模式) ***
         function decryptImage() {
             if (!encryptedDataPayload) {
                 alert('❌ 请先上传一个加密图片！');
@@ -820,16 +944,17 @@
 
             setTimeout(() => {
                 try {
-                    const payload = encryptedDataPayload;
+                    const payload = encryptedDataPayload.data; // {type, salt, iv, ...}
                     
                     const salt = CryptoJS.enc.Hex.parse(payload.salt);
                     const iv = CryptoJS.enc.Hex.parse(payload.iv);
-                    const iterations = payload.iterations || 10000;
                     const ciphertext_b64 = payload.ciphertext;
 
-                    const key = CryptoJS.PBKDF2(password, salt, {
+                    const finalPassword = password + SITE_SECRET_KEY;
+                    
+                    const key = CryptoJS.PBKDF2(finalPassword, salt, {
                         keySize: KEY_SIZE_BITS / 32,
-                        iterations: iterations
+                        iterations: PBKDF2_ITERATIONS // v11 和 v12 迭代次数一样
                     });
                     
                     const cipherParams = CryptoJS.lib.CipherParams.create({
@@ -848,7 +973,12 @@
                     
                     displayProcessedImage(processedImageData);
                     hideLoading(loading);
-                    showMessage('🔓 数据解密成功！已恢复原图。');
+                    
+                    if (encryptedDataPayload.mode === 'lossless') {
+                        showMessage('🔓 数据解密成功！已恢复100%原图。');
+                    } else {
+                        showMessage('🔓 数据解密成功！已恢复（有损）预览图。');
+                    }
                     
                     encryptedDataPayload = null; 
                     processedBlob = null;
@@ -872,6 +1002,7 @@
         }
 
         function downloadImage() {
+            // [函数和 v10 一样]
             const link = document.createElement('a');
 
             if (processedBlob) {
