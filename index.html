@@ -1,632 +1,1140 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>经典扫雷游戏 - Minesweeper</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <title>图片加密小工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+  <!-- 简单的响应式 PEPC 风格布局（类似卡片 + 面板） -->
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0f172a;
+      --bg-soft: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56,189,248,.12);
+      --border-soft: rgba(148,163,184,.35);
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --danger: #f97373;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 45px rgba(15,23,42,.65);
+      --blur-bg: blur(22px);
+    }
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #1d283a 0, #020617 52%, #000 100%);
+      color: var(--text);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
 
-        .game-info {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+    .shell {
+      width: 100%;
+      max-width: 1120px;
+      margin: 18px auto;
+      padding: 12px;
+    }
 
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-        }
+    .glass {
+      border-radius: 24px;
+      border: 1px solid rgba(148,163,184,.16);
+      background: radial-gradient(circle at top left, rgba(56,189,248,.06), rgba(15,23,42,.96));
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 22px;
+      backdrop-filter: var(--blur-bg);
+    }
 
-        .info-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
 
-        .info-value {
-            font-size: 1.8em;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 10px;
-            min-width: 60px;
-            text-align: center;
-        }
+    header h1 {
+      font-size: 1.25rem;
+      margin: 0;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: #e5f3ff;
+    }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+    header p {
+      margin: 0;
+      font-size: .82rem;
+      color: var(--text-soft);
+    }
 
-        .difficulty-btn, .new-game-btn {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-width: 100px;
-        }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top left, rgba(56,189,248,.32), rgba(15,23,42,.9));
+      border: 1px solid rgba(56,189,248,.55);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #e0f2fe;
+    }
 
-        .difficulty-btn {
-            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-            color: white;
-        }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,.25);
+    }
 
-        .difficulty-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 166, 255, 0.4);
-        }
+    /* 主体布局：左右两栏，移动端自动纵向排列 */
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+      gap: 14px;
+    }
 
-        .difficulty-btn.active {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            transform: scale(1.05);
-        }
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
 
-        .new-game-btn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            width: 100%;
-        }
+    .panel {
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, rgba(15,23,42,.96), rgba(15,23,42,.94));
+      border: 1px solid var(--border-soft);
+      padding: 14px 14px 16px;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .new-game-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
-        }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,.18) 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(96,165,250,.22) 0, transparent 55%);
+      opacity: .4;
+      pointer-events: none;
+    }
 
-        .board-container {
-            display: flex;
-            justify-content: center;
-            overflow: auto;
-            max-width: 100%;
-        }
+    .panel-inner {
+      position: relative;
+      z-index: 1;
+    }
 
-        #gameBoard {
-            display: inline-grid;
-            gap: 2px;
-            background: #bdc3c7;
-            padding: 5px;
-            border-radius: 10px;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
+    .panel-title {
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      color: #9ca3ff;
+      margin-bottom: 4px;
+    }
 
-        .cell {
-            width: 35px;
-            height: 35px;
-            background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-        }
+    .panel-sub {
+      font-size: .78rem;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
 
-        .cell:hover:not(.revealed):not(.flagged) {
-            background: linear-gradient(145deg, #f0f0f0, #ffffff);
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
+    /* 控制区 */
 
-        .cell.revealed {
-            background: #fff;
-            border: 1px solid #ddd;
-            cursor: default;
-        }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
 
-        .cell.flagged {
-            background: linear-gradient(145deg, #ff6b6b, #ff8787);
-            border-color: #ff5252;
-        }
+    .field-label {
+      font-size: .78rem;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .cell.flagged::after {
-            content: '🚩';
-            font-size: 1.2em;
-        }
+    .field-label span.key {
+      font-weight: 500;
+      color: #e5e7ff;
+    }
 
-        .cell.mine {
-            background: linear-gradient(145deg, #ff6b6b, #c92a2a);
-        }
+    .field-label small {
+      font-size: .7rem;
+      opacity: .85;
+    }
 
-        .cell.mine::after {
-            content: '💣';
-            font-size: 1.2em;
-        }
+    .file-drop {
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(148,163,184,.65);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      background: radial-gradient(circle at top left, rgba(15,23,42,.9), rgba(15,23,42,.96));
+    }
 
-        .cell.number-1 { color: #0000ff; }
-        .cell.number-2 { color: #008000; }
-        .cell.number-3 { color: #ff0000; }
-        .cell.number-4 { color: #000080; }
-        .cell.number-5 { color: #800000; }
-        .cell.number-6 { color: #008080; }
-        .cell.number-7 { color: #000000; }
-        .cell.number-8 { color: #808080; }
+    .file-drop:hover {
+      border-color: var(--accent);
+      background: radial-gradient(circle at top left, rgba(56,189,248,.12), rgba(15,23,42,.96));
+    }
 
-        .game-over-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+    .file-drop-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: .8rem;
+    }
 
-        .game-over-message {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            animation: slideIn 0.5s;
-        }
+    .file-drop-main span {
+      color: var(--text-soft);
+    }
 
-        @keyframes slideIn {
-            from {
-                transform: scale(0.5);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
+    .file-drop-main button {
+      border: 0;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: .74rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #0b1120;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-        .game-over-message h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
+    .file-drop-main button:active {
+      transform: scale(.96);
+    }
 
-        .game-over-message.win h2 {
-            color: #51cf66;
-        }
+    .file-drop-hint {
+      font-size: .72rem;
+      color: var(--text-soft);
+      opacity: .8;
+    }
 
-        .game-over-message.lose h2 {
-            color: #ff6b6b;
-        }
+    input[type="file"] {
+      display: none;
+    }
 
-        .game-over-message p {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            color: #666;
-        }
+    .field-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-        .game-over-message button {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            transition: all 0.3s;
-        }
+    .field {
+      flex: 1 1 min(220px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-        .game-over-message button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
-        }
+    .field input[type="text"],
+    .field input[type="number"],
+    .field select {
+      background: rgba(15,23,42,.9);
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.6);
+      padding: 6px 10px;
+      font-size: .8rem;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+    }
 
-        .instructions {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: #666;
-        }
+    .field input[type="text"]:focus,
+    .field input[type="number"]:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56,189,248,.4);
+    }
 
-        .instructions h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .78rem;
+      color: var(--text-soft);
+    }
 
-        .instructions ul {
-            list-style: none;
-            padding-left: 0;
-        }
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+    }
 
-        .instructions li {
-            padding: 5px 0;
-            padding-left: 20px;
-            position: relative;
-        }
+    .slider-val {
+      width: 40px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
 
-        .instructions li::before {
-            content: '•';
-            position: absolute;
-            left: 0;
-            color: #667eea;
-            font-weight: bold;
-        }
+    .checkbox-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: .78rem;
+      color: var(--text-soft);
+    }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
+    .checkbox-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
 
-            h1 {
-                font-size: 1.8em;
-            }
+    .checkbox-row input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
 
-            .cell {
-                width: 30px;
-                height: 30px;
-                font-size: 1em;
-            }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 4px;
+    }
 
-            .info-value {
-                font-size: 1.5em;
-            }
+    .btn {
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .78rem;
+      border: 1px solid rgba(148,163,184,.6);
+      background: linear-gradient(145deg, rgba(15,23,42,.96), rgba(15,23,42,.9));
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-            .game-info {
-                padding: 15px;
-            }
-        }
+    .btn span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
 
-        @media (max-width: 400px) {
-            .cell {
-                width: 25px;
-                height: 25px;
-                font-size: 0.9em;
-            }
+    .btn-primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+    }
 
-            h1 {
-                font-size: 1.5em;
-            }
-        }
-    </style>
+    .btn-ghost {
+      background: transparent;
+    }
+
+    .btn:active {
+      transform: scale(.97);
+    }
+
+    .status-line {
+      margin-top: 8px;
+      font-size: .72rem;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .status-line strong {
+      color: #e5e7ff;
+      font-weight: 500;
+    }
+
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: .7rem;
+      background: rgba(15,23,42,.9);
+      border: 1px solid rgba(148,163,184,.5);
+    }
+
+    .status-badge.ok {
+      border-color: rgba(34,197,94,.7);
+      color: #bbf7d0;
+    }
+
+    .status-badge.warn {
+      border-color: rgba(249,115,22,.8);
+      color: #fed7aa;
+    }
+
+    .status-badge.err {
+      border-color: rgba(248,113,113,.9);
+      color: #fecaca;
+    }
+
+    /* 预览区 */
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .preview-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .preview-card {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148,163,184,.45);
+      background: radial-gradient(circle at top left, rgba(15,23,42,.92), rgba(15,23,42,.98));
+      padding: 8px 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .preview-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: .76rem;
+      color: var(--text-soft);
+    }
+
+    .preview-head span.title {
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: #e5e7ff;
+      font-size: .74rem;
+    }
+
+    .preview-head span.meta {
+      font-size: .7rem;
+      opacity: .9;
+    }
+
+    .preview-box {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: radial-gradient(circle at center, rgba(15,23,42,1), rgba(3,7,18,1));
+      border: 1px solid rgba(30,64,175,.5);
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .preview-placeholder {
+      font-size: .75rem;
+      color: var(--text-soft);
+      text-align: center;
+    }
+
+    .preview-overlay-tag {
+      position: absolute;
+      inset: 8px auto auto 8px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(15,23,42,.82);
+      border: 1px solid rgba(148,163,184,.5);
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: #9ca3ff;
+    }
+
+    .inspector {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: .7rem;
+      color: var(--text-soft);
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: .7rem;
+      border: 1px solid rgba(148,163,184,.5);
+      background: rgba(15,23,42,.9);
+      color: #e5e7ff;
+    }
+
+    .chip.accent {
+      border-color: rgba(56,189,248,.85);
+      background: rgba(8,47,73,.95);
+      color: #e0f2fe;
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    a.inline-link {
+      color: #7dd3fc;
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(125,211,252,.65);
+    }
+
+    a.inline-link:hover {
+      color: #38bdf8;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💣 扫雷游戏</h1>
-        
-        <div class="game-info">
-            <div class="info-item">
-                <span class="info-label">剩余地雷</span>
-                <span class="info-value" id="mineCount">10</span>
+<div class="shell">
+  <div class="glass">
+    <header>
+      <div>
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>Client‑Side Image Cipher</span>
+        </div>
+        <h1>图片轻量加密预览器</h1>
+        <p>本地浏览器完成像素打乱 + 可逆加密；原图与加密图并排预览，不上传到服务器。</p>
+      </div>
+      <div>
+        <p>适合做「看不清但能解密」的分享图、示例图等场景。</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- 左侧：控制区 -->
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="panel-title">Control · 控制台</div>
+          <div class="panel-sub">导入图片、设置密钥和强度，然后一键加密/解密。参数会保存在浏览器本地存储中。</div>
+
+          <div class="control-group">
+            <!-- 文件选择 -->
+            <label class="field-label">
+              <span class="key">图片源</span>
+              <small>支持 JPG / PNG / WebP，建议不超过 8MB</small>
+            </label>
+            <label class="file-drop" id="fileDrop">
+              <div class="file-drop-main">
+                <span id="fileName">拖拽图片到这里，或点击选择文件</span>
+                <button type="button">选择图片</button>
+              </div>
+              <div class="file-drop-hint">
+                本工具不会上传图片到服务器，所有处理都在你的浏览器内存中完成。
+              </div>
+              <input type="file" id="fileInput" accept="image/*" />
+            </label>
+          </div>
+
+          <div class="control-group">
+            <!-- 密钥 & 模式 -->
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">
+                  <span class="key">加密密钥</span>
+                  <small>同一密钥才能正确解密</small>
+                </label>
+                <input type="text" id="keyInput" placeholder="例如：fox-tail-2025" />
+              </div>
+              <div class="field">
+                <label class="field-label">
+                  <span class="key">像素块大小</span>
+                  <small>块越大越看不清</small>
+                </label>
+                <input type="number" id="blockSizeInput" min="2" max="64" value="8" />
+              </div>
             </div>
-            <div class="info-item">
-                <span class="info-label">用时</span>
-                <span class="info-value" id="timer">0</span>
+
+            <div class="slider-row">
+              <span>打乱强度</span>
+              <input type="range" id="strengthRange" min="0" max="100" value="70" />
+              <span class="slider-val" id="strengthLabel">70%</span>
             </div>
-            <div class="info-item">
-                <span class="info-label">状态</span>
-                <span class="info-value" id="gameStatus">😊</span>
+
+            <div class="checkbox-row">
+              <label>
+                <input type="checkbox" id="previewBlur" checked />
+                预览时对加密图额外加一点模糊（CSS，仅视觉效果）
+              </label>
+              <label>
+                <input type="checkbox" id="rememberSettings" checked />
+                记住当前设置和最后一张图片
+              </label>
             </div>
-        </div>
+          </div>
 
-        <div class="controls">
-            <button class="difficulty-btn active" data-difficulty="easy">初级 (9×9)</button>
-            <button class="difficulty-btn" data-difficulty="medium">中级 (16×16)</button>
-            <button class="difficulty-btn" data-difficulty="hard">高级 (16×30)</button>
-        </div>
+          <div class="control-group">
+            <!-- 按钮 -->
+            <div class="btn-row">
+              <button class="btn btn-primary" id="encryptBtn">
+                <span class="dot"></span> 加密 / 打乱
+              </button>
+              <button class="btn" id="decryptBtn">尝试解密还原</button>
+              <button class="btn btn-ghost" id="downloadBtn">下载当前加密图</button>
+              <button class="btn btn-ghost" id="clearBtn">清空 & 重置</button>
+            </div>
 
-        <button class="new-game-btn" id="newGameBtn">🎮 开始新游戏</button>
+            <div class="status-line" id="statusLine">
+              <span>状态：<strong>等待加载图片</strong></span>
+              <span class="status-badge warn">未加载图片</span>
+            </div>
+          </div>
 
-        <div class="board-container">
-            <div id="gameBoard"></div>
+          <div class="chip-row">
+            <div class="chip accent">轻量像素置换，可逆</div>
+            <div class="chip">输出压缩 JPEG，体积控制较好</div>
+            <div class="chip">本地运行，适合 Demo / 教学 / 简单隐藏</div>
+          </div>
         </div>
+      </section>
 
-        <div class="instructions">
-            <h3>📖 游戏说明</h3>
-            <ul>
-                <li><strong>左键点击</strong>：翻开方块</li>
-                <li><strong>右键点击</strong>：标记/取消标记地雷</li>
-                <li><strong>数字</strong>：表示周围8个格子中地雷的数量</li>
-                <li><strong>目标</strong>：找出所有地雷并翻开所有安全格子</li>
-                <li><strong>技巧</strong>：在已标记的数字上双击可快速翻开周围格子</li>
-            </ul>
+      <!-- 右侧：预览区 -->
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="panel-title">Preview · 预览</div>
+          <div class="panel-sub">左侧原图，右侧为加密后图像。你可以调整参数后重新加密进行对比。</div>
+
+          <div class="preview-grid">
+            <!-- 原图 -->
+            <div class="preview-card">
+              <div class="preview-head">
+                <span class="title">原始图像</span>
+                <span class="meta" id="metaOriginal">尚未加载</span>
+              </div>
+              <div class="preview-box">
+                <span class="preview-overlay-tag">Source</span>
+                <canvas id="canvasOriginal"></canvas>
+                <div class="preview-placeholder" id="placeholderOriginal">
+                  请选择图片后，这里会显示原图预览。
+                </div>
+              </div>
+              <div class="inspector" id="inspectorOriginal">
+                <span>尺寸：–</span>
+                <span>估计体积：–</span>
+              </div>
+            </div>
+
+            <!-- 加密图 -->
+            <div class="preview-card">
+              <div class="preview-head">
+                <span class="title">加密 / 打乱图像</span>
+                <span class="meta" id="metaEncrypted">尚未生成</span>
+              </div>
+              <div class="preview-box" id="encryptedContainer">
+                <span class="preview-overlay-tag">Cipher</span>
+                <canvas id="canvasEncrypted"></canvas>
+                <div class="preview-placeholder" id="placeholderEncrypted">
+                  生成加密图后，这里会显示结果预览。
+                </div>
+              </div>
+              <div class="inspector" id="inspectorEncrypted">
+                <span>尺寸：–</span>
+                <span>估计体积：–</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chip-row" style="margin-top:10px;">
+            <div class="chip danger">
+              提示：这是简易演示级加密，<span>不适合真正高安全场景</span>。
+            </div>
+            <div class="chip">
+              真正安全需求请考虑服务端 AES 等专业方案。
+            </div>
+          </div>
         </div>
+      </section>
     </div>
+  </div>
+</div>
 
-    <div class="game-over-overlay" id="gameOverOverlay">
-        <div class="game-over-message" id="gameOverMessage">
-            <h2 id="resultTitle">游戏结束</h2>
-            <p id="resultText">你的用时: <span id="finalTime">0</span> 秒</p>
-            <button onclick="startNewGame()">再来一局</button>
-        </div>
-    </div>
+<script>
+  // DOM 元素
+  const fileInput = document.getElementById('fileInput');
+  const fileDrop = document.getElementById('fileDrop');
+  const fileNameLabel = document.getElementById('fileName');
+  const keyInput = document.getElementById('keyInput');
+  const blockSizeInput = document.getElementById('blockSizeInput');
+  const strengthRange = document.getElementById('strengthRange');
+  const strengthLabel = document.getElementById('strengthLabel');
+  const previewBlur = document.getElementById('previewBlur');
+  const rememberSettings = document.getElementById('rememberSettings');
+  const encryptBtn = document.getElementById('encryptBtn');
+  const decryptBtn = document.getElementById('decryptBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const statusLine = document.getElementById('statusLine');
 
-    <script>
-        class Minesweeper {
-            constructor() {
-                this.difficulties = {
-                    easy: { rows: 9, cols: 9, mines: 10 },
-                    medium: { rows: 16, cols: 16, mines: 40 },
-                    hard: { rows: 16, cols: 30, mines: 99 }
-                };
-                this.currentDifficulty = 'easy';
-                this.board = [];
-                this.revealedCells = 0;
-                this.flaggedCells = 0;
-                this.gameStarted = false;
-                this.gameOver = false;
-                this.timer = 0;
-                this.timerInterval = null;
-                this.firstClick = true;
-                
-                this.initGame();
-                this.setupEventListeners();
-            }
+  const canvasOriginal = document.getElementById('canvasOriginal');
+  const canvasEncrypted = document.getElementById('canvasEncrypted');
+  const ctxOriginal = canvasOriginal.getContext('2d');
+  const ctxEncrypted = canvasEncrypted.getContext('2d');
 
-            setupEventListeners() {
-                document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                        this.currentDifficulty = e.target.dataset.difficulty;
-                        this.initGame();
-                    });
-                });
+  const placeholderOriginal = document.getElementById('placeholderOriginal');
+  const placeholderEncrypted = document.getElementById('placeholderEncrypted');
+  const metaOriginal = document.getElementById('metaOriginal');
+  const metaEncrypted = document.getElementById('metaEncrypted');
+  const inspectorOriginal = document.getElementById('inspectorOriginal');
+  const inspectorEncrypted = document.getElementById('inspectorEncrypted');
+  const encryptedContainer = document.getElementById('encryptedContainer');
 
-                document.getElementById('newGameBtn').addEventListener('click', () => {
-                    this.initGame();
-                });
-            }
+  // 状态
+  let originalImage = new Image();
+  let hasOriginal = false;
+  let hasEncrypted = false;
+  let lastEncryptedDataURL = null;
+  let lastEncryptedPixels = null; // 原始像素数组
+  let lastEncryptedMeta = null;
 
-            initGame() {
-                this.gameStarted = false;
-                this.gameOver = false;
-                this.timer = 0;
-                this.revealedCells = 0;
-                this.flaggedCells = 0;
-                this.firstClick = true;
-                
-                clearInterval(this.timerInterval);
-                document.getElementById('timer').textContent = '0';
-                document.getElementById('gameStatus').textContent = '😊';
-                document.getElementById('gameOverOverlay').style.display = 'none';
+  // 工具：更新状态行
+  function setStatus(text, level = 'info') {
+    statusLine.innerHTML = '';
+    const left = document.createElement('span');
+    left.innerHTML = '状态：<strong>' + text + '</strong>';
 
-                const config = this.difficulties[this.currentDifficulty];
-                this.rows = config.rows;
-                this.cols = config.cols;
-                this.totalMines = config.mines;
-                
-                document.getElementById('mineCount').textContent = this.totalMines;
-                
-                this.createBoard();
-                this.renderBoard();
-            }
+    const right = document.createElement('span');
+    right.className = 'status-badge ' + (level === 'ok' ? 'ok' : level === 'warn' ? 'warn' : level === 'err' ? 'err' : '');
+    right.textContent = level === 'ok'
+      ? '已就绪'
+      : level === 'warn'
+        ? '提示'
+        : level === 'err'
+          ? '错误'
+          : '信息';
 
-            createBoard() {
-                this.board = [];
-                for (let i = 0; i < this.rows; i++) {
-                    this.board[i] = [];
-                    for (let j = 0; j < this.cols; j++) {
-                        this.board[i][j] = {
-                            isMine: false,
-                            isRevealed: false,
-                            isFlagged: false,
-                            neighborMines: 0
-                        };
-                    }
-                }
-            }
+    statusLine.appendChild(left);
+    statusLine.appendChild(right);
+  }
 
-            placeMines(excludeRow, excludeCol) {
-                let minesPlaced = 0;
-                while (minesPlaced < this.totalMines) {
-                    const row = Math.floor(Math.random() * this.rows);
-                    const col = Math.floor(Math.random() * this.cols);
-                    
-                    // 不在第一次点击的位置及其周围放置地雷
-                    const isNearFirstClick = Math.abs(row - excludeRow) <= 1 && Math.abs(col - excludeCol) <= 1;
-                    
-                    if (!this.board[row][col].isMine && !isNearFirstClick) {
-                        this.board[row][col].isMine = true;
-                        minesPlaced++;
-                    }
-                }
-                
-                this.calculateNeighborMines();
-            }
+  // 工具：估算 base64 图像体积
+  function estimateBase64Size(dataURL) {
+    if (!dataURL) return '–';
+    const base64 = dataURL.split(',')[1] || '';
+    const bytes = Math.floor(base64.length * 0.75); // 粗略估计
+    if (bytes < 1024) return bytes + ' B';
+    const kb = bytes / 1024;
+    if (kb < 1024) return kb.toFixed(1) + ' KB';
+    const mb = kb / 1024;
+    return mb.toFixed(2) + ' MB';
+  }
 
-            calculateNeighborMines() {
-                for (let i = 0; i < this.rows; i++) {
-                    for (let j = 0; j < this.cols; j++) {
-                        if (!this.board[i][j].isMine) {
-                            let count = 0;
-                            this.getNeighbors(i, j).forEach(([row, col]) => {
-                                if (this.board[row][col].isMine) count++;
-                            });
-                            this.board[i][j].neighborMines = count;
-                        }
-                    }
-                }
-            }
+  // 工具：绘制原图到 canvas
+  function drawOriginalToCanvas() {
+    const maxWidth = 800; // 控制单个维度，防止超大图片拖慢
+    const maxHeight = 800;
+    let w = originalImage.naturalWidth;
+    let h = originalImage.naturalHeight;
 
-            getNeighbors(row, col) {
-                const neighbors = [];
-                for (let i = -1; i <= 1; i++) {
-                    for (let j = -1; j <= 1; j++) {
-                        if (i === 0 && j === 0) continue;
-                        const newRow = row + i;
-                        const newCol = col + j;
-                        if (newRow >= 0 && newRow < this.rows && newCol >= 0 && newCol < this.cols) {
-                            neighbors.push([newRow, newCol]);
-                        }
-                    }
-                }
-                return neighbors;
-            }
+    const scale = Math.min(1, maxWidth / w, maxHeight / h);
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
 
-            renderBoard() {
-                const gameBoard = document.getElementById('gameBoard');
-                gameBoard.innerHTML = '';
-                gameBoard.style.gridTemplateColumns = `repeat(${this.cols}, 35px)`;
-                gameBoard.style.gridTemplateRows = `repeat(${this.rows}, 35px)`;
+    canvasOriginal.width = w;
+    canvasOriginal.height = h;
+    ctxOriginal.clearRect(0, 0, w, h);
+    ctxOriginal.drawImage(originalImage, 0, 0, w, h);
 
-                for (let i = 0; i < this.rows; i++) {
-                    for (let j = 0; j < this.cols; j++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'cell';
-                        cell.dataset.row = i;
-                        cell.dataset.col = j;
-                        
-                        cell.addEventListener('click', (e) => this.handleLeftClick(i, j));
-                        cell.addEventListener('contextmenu', (e) => {
-                            e.preventDefault();
-                            this.handleRightClick(i, j);
-                        });
-                        cell.addEventListener('dblclick', (e) => this.handleDoubleClick(i, j));
-                        
-                        gameBoard.appendChild(cell);
-                    }
-                }
-            }
+    placeholderOriginal.style.display = 'none';
+    hasOriginal = true;
 
-            handleLeftClick(row, col) {
-                if (this.gameOver || this.board[row][col].isRevealed || this.board[row][col].isFlagged) {
-                    return;
-                }
+    metaOriginal.textContent = '尺寸：' + w + ' × ' + h;
+    inspectorOriginal.children[0].textContent = '尺寸：' + w + ' × ' + h;
 
-                if (this.firstClick) {
-                    this.firstClick = false;
-                    this.placeMines(row, col);
-                    this.startTimer();
-                }
+    // 暂时估算原图体积（从 canvas 导出）
+    const tmp = canvasOriginal.toDataURL('image/jpeg', 0.9);
+    inspectorOriginal.children[1].textContent = '估计体积：' + estimateBase64Size(tmp);
+  }
 
-                const cell = this.board[row][col];
+  // 工具：伪随机数生成（基于密钥 & 块索引）
+  function pseudoRandom(seed) {
+    let x = seed | 0;
+    return function () {
+      // 32-bit xorshift
+      x ^= x << 13;
+      x ^= x >>> 17;
+      x ^= x << 5;
+      // 转换到 [0,1)
+      return (x >>> 0) / 4294967296;
+    };
+  }
 
-                if (cell.isMine) {
-                    this.gameOver = true;
-                    this.revealAllMines();
-                    this.endGame(false);
-                    return;
-                }
+  // 工具：简单 hash 将字符串 + 数字 -> 种子
+  function makeSeed(str, salt) {
+    let h = 2166136261 ^ salt;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h | 0;
+  }
 
-                this.revealCell(row, col);
-                this.checkWin();
-            }
+  // 核心：基于像素块的可逆打乱算法
+  function processImageCipher(mode) {
+    if (!hasOriginal && !hasEncrypted) {
+      setStatus('请先加载一张图片', 'warn');
+      return;
+    }
 
-            handleRightClick(row, col) {
-                if (this.gameOver || this.board[row][col].isRevealed) {
-                    return;
-                }
+    const key = keyInput.value.trim();
+    if (!key) {
+      setStatus('请先输入加密密钥（任意字符串）', 'warn');
+      keyInput.focus();
+      return;
+    }
 
-                const cell = this.board[row][col];
-                cell.isFlagged = !cell.isFlagged;
-                
-                this.flaggedCells += cell.isFlagged ? 1 : -1;
-                document.getElementById('mineCount').textContent = this.totalMines - this.flaggedCells;
-                
-                this.updateCellDisplay(row, col);
-            }
+    const blockSize = parseInt(blockSizeInput.value, 10) || 8;
+    const strength = parseInt(strengthRange.value, 10) || 70;
 
-            handleDoubleClick(row, col) {
-                if (this.gameOver || !this.board[row][col].isRevealed) {
-                    return;
-                }
+    // 处理目标画布：加密时基于原图，解密时基于加密图
+    let srcCanvas, srcCtx, dstCanvas, dstCtx;
+    if (mode === 'encrypt') {
+      if (!hasOriginal) {
+        setStatus('尚未加载原图，无法加密', 'warn');
+        return;
+      }
+      srcCanvas = canvasOriginal;
+      srcCtx = ctxOriginal;
+    } else {
+      if (!hasEncrypted || !lastEncryptedPixels) {
+        setStatus('当前没有可解密的图像内容', 'warn');
+        return;
+      }
+      srcCanvas = canvasEncrypted;
+      srcCtx = ctxEncrypted;
+    }
 
-                const cell = this.board[row][col];
-                if (cell.neighborMines === 0) return;
+    const w = srcCanvas.width;
+    const h = srcCanvas.height;
 
-                const neighbors = this.getNeighbors(row, col);
-                const flaggedCount = neighbors.filter(([r, c]) => this.board[r][c].isFlagged).length;
+    dstCanvas = canvasEncrypted;
+    dstCtx = ctxEncrypted;
+    dstCanvas.width = w;
+    dstCanvas.height = h;
 
-                if (flaggedCount === cell.neighborMines) {
-                    neighbors.forEach(([r, c]) => {
-                        if (!this.board[r][c].isFlagged && !this.board[r][c].isRevealed) {
-                            this.handleLeftClick(r, c);
-                        }
-                    });
-                }
-            }
+    const imageData = (mode === 'encrypt')
+      ? srcCtx.getImageData(0, 0, w, h)
+      : new ImageData(new Uint8ClampedArray(lastEncryptedPixels), w, h);
 
-            revealCell(row, col) {
-                if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
-                
-                const cell = this.board[row][col];
-                if (cell.isRevealed || cell.isFlagged) return;
+    const data = imageData.data;
+    const out = new Uint8ClampedArray(data.length);
 
-                cell.isRevealed = true;
-                this.revealedCells++;
-                this.updateCellDisplay(row, col);
+    const blocksX = Math.ceil(w / blockSize);
+    const blocksY = Math.ceil(h / blockSize);
 
-                if (cell.neighborMines === 0) {
-                    this.getNeighbors(row, col).forEach(([r, c]) => {
-                        this.revealCell(r, c);
-                    });
-                }
-            }
+    // 为了可逆，对每个块使用同一“置换方案”
+    for (let by = 0; by < blocksY; by++) {
+      for (let bx = 0; bx < blocksX; bx++) {
+        const blockIndex = by * blocksX + bx;
+        const seed = makeSeed(key, blockIndex + (mode === 'encrypt' ? 1 : 99991));
+        const rand = pseudoRandom(seed);
 
-            updateCellDisplay(row, col) {
-                const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                const cell = this.board[row][col];
+        const blockW = Math.min(blockSize, w - bx * blockSize);
+        const blockH = Math.min(blockSize, h - by * blockSize);
+        const blockPixels = [];
 
-                cellElement.className = 'cell';
+        // 收集块内像素索引
+        for (let y = 0; y < blockH; y++) {
+          for (let x = 0; x < blockW; x++) {
+            const gx = bx * blockSize + x;
+            const gy = by * blockSize + y;
+            const idx = (gy * w + gx) * 4;
+            blockPixels.push(idx);
+          }
+        }
 
-                if (cell.isFlagged) {
-                    cellElement.classList.add('flagged');
-                } else if (cell.isRevealed) {
-                    cellElement.classList.add('revealed');
-                    
-                    if (cell.isMine) {
-                        cellElement.classList.add('mine');
-                    } else if (cell.neighborMines > 0) {
-                        cellElement.textContent = cell.neighborMines;
-                        cellElement.classList.add(`number-${cell.neighborMines}`);
-                    }
-                }
-            }
+        const total = blockPixels.length;
+        const degree = strength / 100; // 0 ~ 1
 
-            revealAllMines() {
-                for (let i = 0; i < this.rows; i++) {
-                    for (let j = 0; j < this.cols; j++) {
-                        if (this.board[i][j].isMine) {
-                            this.board[i][j].isRevealed = true;
-                            this.updateCellDisplay(i, j);
-                        }
-      
+        // 为块内像素生成一个置换数组
+        const perm = blockPixels.slice();
+        for (let i = perm.length - 1; i > 0; i--) {
+          const j = Math.floor(rand() * (i + 1));
+          const tmp = perm[i];
+          perm[i] = perm[j];
+          perm[j] = tmp;
+        }
+
+        // 根据 "degree" 决定置换程度
+        const limit = Math.floor(total * degree);
+
+        if (mode === 'encrypt') {
+          for (let i = 0; i < total; i++) {
+            const fromIdx = blockPixels[i];
+            const toIdx = i < limit ? perm[i] : blockPixels[i];
+            out[toIdx] = data[fromIdx];
+            out[toIdx + 1] = data[fromIdx + 1];
+            out[toIdx + 2] = data[fromIdx + 2];
+            out[toIdx + 3] = data[fromIdx + 3];
+          }
+        } else {
+          // 解密：用同样的 perm 将像素移动回原来位置
+          for (let i = 0; i < total; i++) {
+            const toIdx = blockPixels[i];
+            const fromIdx = i < limit ? perm[i] : blockPixels[i];
+            out[toIdx] = data[fromIdx];
+            out[toIdx + 1] = data[fromIdx + 1];
+            out[toIdx + 2] = data[fromIdx + 2];
+            out[toIdx + 3] = data[fromIdx + 3];
+          }
+        }
+      }
+    }
+
+    dstCtx.putImageData(new ImageData(out, w, h), 0, 0);
+    placeholderEncrypted.style.display = 'none';
+    hasEncrypted = true;
+    lastEncryptedPixels = out;
+
+    // 预览阶段导出 JPEG，控制体积（画质 0.8）
+    const quality = mode === 'encrypt' ? 0.8 : 0.9;
+    const dataURL = dstCanvas.toDataURL('image/jpeg', quality);
+    lastEncryptedDataURL = dataURL;
+    lastEncryptedMeta = {
+      width: w,
+      height: h,
+      quality,
+      strength,
+      blockSize
+    };
+
+    metaEncrypted.textContent =
+      (mode === 'encrypt' ? '已生成加密图：' : '已尝试解密：') +
+      w + ' × ' + h;
+    inspectorEncrypted.children[0].textContent = '尺寸：' + w + ' × ' + h;
+    inspectorEncrypted.children[1].textContent = '估计体积：' + estimateBase64Size(dataURL);
+
+    if (mode === 'encrypt') {
+      setStatus('加密 / 打乱完成，可以下载或尝试解密', 'ok');
+    } else {
+      setStatus('解密完成，如果密钥和参数正确，应接近原图', 'ok');
+    }
+
+    // 额外视觉模糊（只影响显示，不影响数据）
+    applyPreviewBlur();
+    // 记住到 localStorage
+    persistIfNeeded();
+  }
+
+  // 根据勾选状态给右侧预览加 CSS blur
+  function applyPreviewBlur() {
+    if (previewBlur.checked) {
+      encryptedContainer.style.filter = 'blur(3px)';
+    } else {
+      encryptedContainer.style.filter = 'none';
+    }
+  }
+
+  // localStorage 键名
+  const STORAGE_KEY = 'imageCipherSettings_v1';
+
+  function persistIfNeeded() {
+    if (!rememberSettings.checked) return;
+    const payload = {
+      key: keyInput.value,
+      blockSize: parseInt(blockSizeInput.value, 10) || 8,
+      strength: parseInt(strengthRange.value, 10) || 70,
+      previewBlur: previewBlur.checked,
+      rememberSettings: rememberSettings.checked,
+      encryptedDataURL: lastEncryptedDataURL,
+      encryptedMeta: lastEncryptedMeta
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.warn('localStorage 保存失败：', e);
+    }
+  }
+
+  function restoreIfAny() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data) return;
+
+      if (typeof data.key === 'string') keyInput.value = data.key;
+      if (typeof data.blockSize === 'number') blockSizeInput.value = data.blockSize;
+      if (typeof data.strength === 'number') {
+        strengthRange.value = data.strength;
+        strengthLabel.textContent = data.strength + '%';
+      }
+      if (typeof data.previewBlur === 'boolean') previewBlur.checked = data.previewBlur;
+      if (typeof data.rememberSettings === 'boolean') rememberSettings.checked = data.rememberSettings;
+
+      if (data.encryptedDataURL && data.encryptedMeta) {
+        // 恢复加密图预览
+        const img = new Image();
+        img.onload = () => {
+          const w = img.naturalWidth;
+          const h = img.naturalHeight;
+          canvasEncrypted.width = w;
+          canvasEncrypted.height = h;
+          ctxEncrypted.drawImage(img, 0, 0, w, h);
+          placeholderEncrypted.style.display = 'none';
+          hasEncrypted = true;
+          lastEncryptedDataURL = data.encryptedDataURL;
+          lastEncryptedMeta = data.encryptedMeta;
+
+          metaEncrypted.textContent = '从上次会话恢复：' + w + ' × ' + h;
+          inspectorEncrypted.children[0].textContent = '尺寸：' + w + ' × ' + h;
+          inspectorEncrypted.children[1].textContent = '估计体积：' + estimateBase64Size(data.encryptedDataURL);
+          applyPreviewBlur();
+          setStatus('已从 localStorage 恢复上次的加密图和设置', 'ok');
+        };
+        img.src = data.encryptedDataURL;
+      }
+    } catch (e) {
+      console.warn('localStorage 读取失败：', e);
+    }
+  }
+
+  // 事件绑定
+
+  strengthRange.addEventListener('input', () => {
+    strengthLabel.textContent = strengthRange.value + '%';
+  });
+
+  previewBlur.addEventListener('change', () => {
+    applyPreviewBlur();
+    persistIfNeeded();
+  });
+
+  rememberSettings.addEventListener('change', () => {
+    persistIfNeeded();
+  });
+
+  fileDrop.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileDrop.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileDrop.style.borderColor = '#38bdf8';
+  });
+
+  fileDrop.addEventListener('dragleave', () => {
+    fileDrop.style.borderColor = 'rgba(148,163,184,.65)';
+  });
+
+  fileDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileDrop.style.borderColor = 'rgba(148,163,184,.65)';
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFile(file);
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFile(file);
+    }
+  });
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) {
+      setStatus('请选择图片文件（而不是其它类型）', 'err');
+      return;
+    }
+
+    fileNameLabel.textContent = file.name;
+    setStatus('正在读取图片…', 'info');
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      originalImage = new Image();
+      originalImage.onload = () => {
+        drawOriginalToCanvas();
+        setStatus('图片加载完成，可以开始加密', 'ok');
+      };
+      originalImage.src = ev.target.result;
+    };
+    reader.onerror = () => {
+      setStatus('读取文件失败', 'err');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  encryptBtn.addEventListener('click', () => {
+    processImageCipher('encrypt');
+  });
+
+  decryptBtn.addEventListener('click', () => {
+    processImageCipher('decrypt');
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (!lastEncryptedDataURL) {
+      setStatus('当前没有可下载的加密图像', 'warn');
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = lastEncryptedDataURL;
+    const key = keyInput.value.trim() || 'no-key';
+    a.download = 'cipher-' + key.replace(/[^a-z0-9-]+/gi, '_') + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setStatus('已触发浏览器下载加密图像', 'ok');
+  });
+
+  clearBtn.addEventListener('click', () => {
+    ctxOriginal.clearRect(0, 0, canvasOriginal.width, canvasOriginal.height);
+    ctxEncrypted.clearRect(0, 0, canvasEncrypted.width, canvasEncrypted.height);
+    canvasOriginal.width = canvasOriginal.height = 0;
+    canvasEncrypted.width = canvasEncrypted.height = 0;
+    placeholderOriginal.style.display = '';
+    placeholderEncrypted.style.display = '';
+    fileNameLabel.textContent = '拖拽图片到这里，或点击选择文件';
+    metaOriginal.textContent = '尚未加载';
+    metaEncrypted.textContent = '尚未生成';
+    inspectorOriginal.children[0].textContent = '尺寸：–';
+    inspectorOriginal.children[1].textContent = '估计体积：–';
+    inspectorEncrypted.children[0].textContent = '尺寸：–';
+    inspectorEncrypted.children[1].textContent = '估计体积：–';
+    hasOriginal = false;
+    hasEncrypted = false;
+    lastEncryptedDataURL = null;
+    lastEncryptedPixels = null;
+    lastEncryptedMeta = null;
+    setStatus('已清空当前状态', 'info');
+  });
+
+  // 初始
+  window.addEventListener('DOMContentLoaded', () => {
+    applyPreviewBlur();
+    restoreIfAny();
+  });
+</script>
+</body>
+</html>
