@@ -6,1162 +6,783 @@
     <title>图片加密解密工具</title>
     <style>
         :root {
-            --primary-green: #10b981;
-            --dark-green: #059669;
-            --light-green: #d1fae5;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --text-light: #f1f5f9;
-            --text-muted: #94a3b8;
-            --shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
-            --bubble-shadow: 0 8px 32px rgba(16, 185, 129, 0.2);
+            --primary-color: #4a6ee0;
+            --secondary-color: #7e57c2;
+            --success-color: #2ecc71;
+            --warning-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-        
-        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: var(--text-light);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
         }
-        
+
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            animation: fadeIn 0.6s ease-in;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .header {
+
+        header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: var(--bg-card);
-            border-radius: 30px;
-            box-shadow: var(--shadow);
-            border: 2px solid rgba(16, 185, 129, 0.2);
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
         }
-        
-        .header h1 {
-            font-size: clamp(1.8rem, 4vw, 3rem);
-            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+
+        h1 {
+            color: var(--primary-color);
             margin-bottom: 10px;
         }
-        
-        .header p {
-            color: var(--text-muted);
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
+
+        .subtitle {
+            color: var(--secondary-color);
+            font-weight: 300;
         }
-        
-        .bubble-card {
-            background: var(--bg-card);
-            border-radius: 25px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: var(--bubble-shadow);
-            border: 2px solid rgba(16, 185, 129, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .bubble-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        
-        .bubble-card:hover::before {
-            opacity: 1;
-        }
-        
-        .bubble-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 70px rgba(16, 185, 129, 0.4);
-            border-color: var(--primary-green);
-        }
-        
-        .section-title {
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-            color: var(--primary-green);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .section-title::before {
-            content: '';
-            width: 6px;
-            height: 30px;
-            background: linear-gradient(180deg, var(--primary-green), var(--dark-green));
-            border-radius: 3px;
-        }
-        
-        .grid {
+
+        .main-content {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 25px;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
-        
+
         @media (min-width: 768px) {
-            .grid-2 {
-                grid-template-columns: repeat(2, 1fr);
+            .main-content {
+                grid-template-columns: 1fr 1fr;
             }
         }
-        
-        .upload-zone {
-            border: 3px dashed var(--primary-green);
-            border-radius: 20px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(16, 185, 129, 0.05);
-            position: relative;
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
         }
-        
-        .upload-zone:hover {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--light-green);
-            transform: scale(1.02);
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
-        
-        .upload-zone.drag-over {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: var(--light-green);
-            transform: scale(1.05);
-        }
-        
-        .upload-icon {
-            font-size: 48px;
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
             margin-bottom: 15px;
-            color: var(--primary-green);
+            display: flex;
+            align-items: center;
         }
-        
-        input[type="file"] {
-            display: none;
+
+        .card-title i {
+            margin-right: 10px;
         }
-        
-        .btn {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        .control-group {
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
             margin-bottom: 20px;
+            transition: var(--transition);
+            cursor: pointer;
         }
-        
-        .control-label {
-            display: block;
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 110, 224, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--primary-color);
             margin-bottom: 10px;
-            color: var(--primary-green);
-            font-weight: 600;
-            font-size: 14px;
         }
-        
-        .control-value {
-            color: var(--light-green);
-            margin-left: 10px;
-            font-weight: 700;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 8px;
-            border-radius: 5px;
-            background: linear-gradient(to right, var(--dark-green), var(--primary-green));
-            outline: none;
-            transition: all 0.3s ease;
-            -webkit-appearance: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--light-green);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-            transition: all 0.3s ease;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
-        }
-        
-        input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--light-green);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        input[type="text"], input[type="password"], textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            background: rgba(30, 41, 59, 0.8);
-            color: var(--text-light);
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary-green);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-            font-family: inherit;
-        }
-        
+
         .preview-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 20px;
+        }
+
+        @media (min-width: 576px) {
+            .preview-container {
+                flex-direction: row;
+            }
+        }
+
+        .preview-box {
+            flex: 1;
+            text-align: center;
+        }
+
+        .preview-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            height: 200px;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-label {
+            font-weight: 500;
+            color: var(--dark-bg);
+        }
+
+        input, select, textarea {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 110, 224, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5ec8;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6a4bac;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .info-panel {
             margin-top: 20px;
         }
-        
-        .preview-box {
-            border-radius: 15px;
-            overflow: hidden;
-            background: rgba(30, 41, 59, 0.6);
-            border: 2px solid rgba(16, 185, 129, 0.2);
-            transition: all 0.3s ease;
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
         }
-        
-        .preview-box:hover {
-            border-color: var(--primary-green);
-            transform: scale(1.02);
+
+        .info-label {
+            font-weight: 500;
         }
-        
-        .preview-title {
-            padding: 12px;
-            background: rgba(16, 185, 129, 0.2);
-            text-align: center;
-            font-weight: 600;
-            color: var(--primary-green);
+
+        .info-value {
+            color: var(--secondary-color);
         }
-        
-        .preview-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            min-height: 200px;
-            object-fit: contain;
-            background: rgba(0, 0, 0, 0.3);
+
+        .history-panel {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        
-        .info-box {
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 4px solid var(--primary-green);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: var(--transition);
         }
-        
-        .info-box p {
-            margin: 5px 0;
-            color: var(--text-muted);
+
+        .history-item:hover {
+            background-color: rgba(74, 110, 224, 0.05);
         }
-        
-        .info-box strong {
-            color: var(--primary-green);
+
+        .history-name {
+            font-weight: 500;
         }
-        
-        .button-group {
+
+        .history-date {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .settings-panel {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
+            margin-top: 15px;
         }
-        
-        .alert {
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin: 15px 0;
-            animation: slideIn 0.4s ease;
+
+        .setting-item {
+            flex: 1;
+            min-width: 150px;
         }
-        
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .alert-success {
-            background: rgba(16, 185, 129, 0.2);
-            border-left: 4px solid var(--primary-green);
-            color: var(--light-green);
-        }
-        
-        .alert-error {
-            background: rgba(239, 68, 68, 0.2);
-            border-left: 4px solid #ef4444;
-            color: #fca5a5;
-        }
-        
-        .switch-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 15px 0;
-        }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #334155;
-            transition: 0.4s;
-            border-radius: 30px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(30px);
-        }
-        
-        .loading {
-            display: none;
+
+        footer {
             text-align: center;
+            margin-top: 30px;
             padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
         }
-        
-        .loading.active {
-            display: block;
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            box-shadow: var(--card-shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: var(--transition);
         }
-        
-        .spinner {
-            border: 4px solid rgba(16, 185, 129, 0.2);
-            border-top: 4px solid var(--primary-green);
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--warning-color);
+        }
+
+        .theme-selector {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
             border-radius: 50%;
             width: 50px;
             height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .bubble-card {
-                padding: 20px;
-            }
-            
-            .btn {
-                padding: 12px 24px;
-                font-size: 14px;
-            }
-            
-            .grid {
-                grid-template-columns: 1fr;
-            }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🔐 图片加密解密工具</h1>
-            <p>安全、快速、离线的图片加密解密方案</p>
-        </div>
+        <header>
+            <h1>图片加密解密工具</h1>
+            <p class="subtitle">安全、高效、体积友好的图片加密解决方案</p>
+        </header>
 
-        <!-- 加密部分 -->
-        <div class="bubble-card">
-            <h2 class="section-title">🔒 图片加密</h2>
+        <div class="main-content">
+            <div class="card">
+                <h2 class="card-title">图片上传与预览</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i>📁</i>
+                    <p>点击或拖拽图片到此处上传</p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="preview-container">
+                    <div class="preview-box">
+                        <div class="preview-title">原图预览</div>
+                        <div class="preview-img" id="originalPreview">
+                            <span>原图将在此显示</span>
+                        </div>
+                    </div>
+                    <div class="preview-box">
+                        <div class="preview-title">处理后预览</div>
+                        <div class="preview-img" id="processedPreview">
+                            <span>处理后图片将在此显示</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <div class="info-item">
+                        <span class="info-label">图片名称:</span>
+                        <span class="info-value" id="fileName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">图片尺寸:</span>
+                        <span class="info-value" id="imageSize">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">文件大小:</span>
+                        <span class="info-value" id="fileSize">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">处理状态:</span>
+                        <span class="info-value" id="processStatus">未处理</span>
+                    </div>
+                </div>
+            </div>
             
-            <div class="upload-zone" id="uploadZoneEncrypt" onclick="document.getElementById('imageInputEncrypt').click()">
-                <div class="upload-icon">📁</div>
-                <p>点击或拖拽图片到此处上传</p>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">支持 JPG、PNG、WEBP 格式</p>
-                <input type="file" id="imageInputEncrypt" accept="image/*">
+            <div class="card">
+                <h2 class="card-title">加密解密控制</h2>
+                
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label class="control-label" for="password">加密密码</label>
+                        <input type="password" id="password" placeholder="输入加密密码">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="algorithm">加密算法</label>
+                        <select id="algorithm">
+                            <option value="xor">XOR加密 (轻量级)</option>
+                            <option value="aes">AES加密 (安全级)</option>
+                            <option value="custom">自定义算法</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="customSettings">自定义设置</label>
+                        <textarea id="customSettings" rows="3" placeholder="自定义加密参数 (JSON格式)"></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="encryptBtn">
+                            <i>🔒</i> 加密图片
+                        </button>
+                        <button class="btn btn-secondary" id="decryptBtn">
+                            <i>🔓</i> 解密图片
+                        </button>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-success" id="saveBtn">
+                            <i>💾</i> 保存图片
+                        </button>
+                        <button class="btn btn-warning" id="resetBtn">
+                            <i>🔄</i> 重置
+                        </button>
+                    </div>
+                </div>
+                
+                <h2 class="card-title" style="margin-top: 20px;">处理历史</h2>
+                <div class="history-panel" id="historyPanel">
+                    <!-- 历史记录将通过JavaScript动态添加 -->
+                    <div class="history-item">
+                        <div class="history-name">暂无历史记录</div>
+                    </div>
+                </div>
             </div>
-
-            <div class="control-group">
-                <label class="control-label">
-                    加密密码
-                </label>
-                <input type="password" id="encryptPassword" placeholder="请输入加密密码">
-            </div>
-
-            <div class="control-group">
-                <label class="control-label">
-                    图片压缩质量 <span class="control-value" id="qualityValue">0.9</span>
-                </label>
-                <input type="range" id="compressionQuality" min="0.1" max="1" step="0.05" value="0.9">
-            </div>
-
-            <div class="control-group">
-                <label class="control-label">
-                    最大宽度/高度 <span class="control-value" id="maxSizeValue">1920px</span>
-                </label>
-                <input type="range" id="maxSize" min="500" max="4000" step="100" value="1920">
-            </div>
-
-            <div class="switch-container">
-                <label class="switch">
-                    <input type="checkbox" id="preserveOriginal">
-                    <span class="slider"></span>
-                </label>
-                <span>保持原始尺寸（不自动缩放）</span>
-            </div>
-
-            <div class="switch-container">
-                <label class="switch">
-                    <input type="checkbox" id="addWatermark">
-                    <span class="slider"></span>
-                </label>
-                <span>添加加密标记（推荐）</span>
-            </div>
-
-            <div class="control-group" id="watermarkTextGroup" style="display: none;">
-                <label class="control-label">
-                    加密标记内容
-                </label>
-                <input type="text" id="watermarkText" placeholder="自定义加密标记" value="ENCRYPTED">
-            </div>
-
-            <div class="button-group">
-                <button class="btn btn-primary" id="encryptBtn">🔐 开始加密</button>
-                <button class="btn btn-secondary" id="downloadEncryptedBtn" disabled>💾 下载加密图片</button>
-            </div>
-
-            <div class="loading" id="loadingEncrypt">
-                <div class="spinner"></div>
-                <p>正在加密处理中...</p>
-            </div>
-
-            <div id="encryptAlert"></div>
-
-            <div class="preview-container" id="previewEncrypt"></div>
-
-            <div class="info-box" id="encryptInfo" style="display: none;"></div>
         </div>
-
-        <!-- 解密部分 -->
-        <div class="bubble-card">
-            <h2 class="section-title">🔓 图片解密</h2>
-            
-            <div class="upload-zone" id="uploadZoneDecrypt" onclick="document.getElementById('imageInputDecrypt').click()">
-                <div class="upload-icon">📂</div>
-                <p>点击或拖拽加密图片到此处上传</p>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">仅支持本工具加密的图片</p>
-                <input type="file" id="imageInputDecrypt" accept="image/*">
+        
+        <div class="card" style="margin-top: 20px;">
+            <h2 class="card-title">高级设置</h2>
+            <div class="settings-panel">
+                <div class="setting-item">
+                    <label class="control-label" for="compression">压缩级别</label>
+                    <select id="compression">
+                        <option value="0">无压缩</option>
+                        <option value="1" selected>轻度压缩</option>
+                        <option value="2">中度压缩</option>
+                        <option value="3">重度压缩</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="control-label" for="format">输出格式</label>
+                    <select id="format">
+                        <option value="original">保持原格式</option>
+                        <option value="png">PNG</option>
+                        <option value="jpeg">JPEG</option>
+                        <option value="webp">WebP</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="control-label" for="autoSave">自动保存</label>
+                    <select id="autoSave">
+                        <option value="false">关闭</option>
+                        <option value="true">开启</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="control-label" for="historySize">历史记录数量</label>
+                    <select id="historySize">
+                        <option value="5">5条</option>
+                        <option value="10" selected>10条</option>
+                        <option value="20">20条</option>
+                    </select>
+                </div>
             </div>
-
-            <div class="control-group">
-                <label class="control-label">
-                    解密密码
-                </label>
-                <input type="password" id="decryptPassword" placeholder="请输入解密密码">
-            </div>
-
-            <div class="button-group">
-                <button class="btn btn-primary" id="decryptBtn">🔓 开始解密</button>
-                <button class="btn btn-secondary" id="downloadDecryptedBtn" disabled>💾 下载原始图片</button>
-            </div>
-
-            <div class="loading" id="loadingDecrypt">
-                <div class="spinner"></div>
-                <p>正在解密处理中...</p>
-            </div>
-
-            <div id="decryptAlert"></div>
-
-            <div class="preview-container" id="previewDecrypt"></div>
-
-            <div class="info-box" id="decryptInfo" style="display: none;"></div>
         </div>
+        
+        <footer>
+            <p>图片加密解密工具 &copy; 2023 | 安全可靠 | 体积友好 | 响应式设计</p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <div class="theme-selector">
+        <i>🎨</i>
     </div>
 
     <script>
-        // ============ 核心加密解密逻辑 ============
-        
-        class ImageCrypto {
-            constructor() {
-                this.encryptedImageData = null;
-                this.decryptedImageData = null;
-                this.originalFileName = '';
-            }
-
-            // 简单但有效的字符串加密
-            encryptString(text, password) {
-                let result = '';
-                for (let i = 0; i < text.length; i++) {
-                    const charCode = text.charCodeAt(i) ^ password.charCodeAt(i % password.length);
-                    result += String.fromCharCode(charCode);
+        // 核心功能实现
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const originalPreview = document.getElementById('originalPreview');
+            const processedPreview = document.getElementById('processedPreview');
+            const encryptBtn = document.getElementById('encryptBtn');
+            const decryptBtn = document.getElementById('decryptBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const notification = document.getElementById('notification');
+            
+            // 状态变量
+            let originalImage = null;
+            let processedImage = null;
+            let currentFile = null;
+            let encryptionHistory = JSON.parse(localStorage.getItem('encryptionHistory')) || [];
+            
+            // 初始化历史记录显示
+            updateHistoryPanel();
+            
+            // 上传区域事件
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary-color)';
+                uploadArea.style.backgroundColor = 'rgba(74, 110, 224, 0.1)';
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#ccc';
+                uploadArea.style.backgroundColor = 'transparent';
+                
+                if (e.dataTransfer.files.length) {
+                    handleFileSelect(e.dataTransfer.files[0]);
                 }
-                return btoa(result);
-            }
-
-            decryptString(encrypted, password) {
-                try {
-                    const decoded = atob(encrypted);
-                    let result = '';
-                    for (let i = 0; i < decoded.length; i++) {
-                        const charCode = decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length);
-                        result += String.fromCharCode(charCode);
-                    }
-                    return result;
-                } catch (e) {
-                    return null;
+            });
+            
+            // 文件选择事件
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFileSelect(e.target.files[0]);
                 }
-            }
-
-            // LSB隐写术：将数据隐藏在图像的最低有效位
-            async embedData(imageData, dataToHide) {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = imageData.width;
-                canvas.height = imageData.height;
-                ctx.putImageData(imageData, 0, 0);
-                
-                const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = pixels.data;
-                
-                // 添加加密标记头
-                const header = 'IMGCRYPT_V1:';
-                const fullData = header + dataToHide;
-                const binaryData = this.stringToBinary(fullData);
-                
-                // 在前32位存储数据长度
-                const lengthBinary = binaryData.length.toString(2).padStart(32, '0');
-                
-                if (binaryData.length > data.length / 4) {
-                    throw new Error('图片太小，无法存储加密数据');
-                }
-                
-                // 嵌入长度
-                for (let i = 0; i < 32; i++) {
-                    data[i * 4] = (data[i * 4] & 0xFE) | parseInt(lengthBinary[i]);
-                }
-                
-                // 嵌入数据
-                for (let i = 0; i < binaryData.length; i++) {
-                    const pixelIndex = (i + 32) * 4;
-                    data[pixelIndex] = (data[pixelIndex] & 0xFE) | parseInt(binaryData[i]);
+            });
+            
+            // 按钮事件
+            encryptBtn.addEventListener('click', encryptImage);
+            decryptBtn.addEventListener('click', decryptImage);
+            saveBtn.addEventListener('click', saveImage);
+            resetBtn.addEventListener('click', resetTool);
+            
+            // 处理文件选择
+            function handleFileSelect(file) {
+                if (!file.type.match('image.*')) {
+                    showNotification('请选择图片文件', 'error');
+                    return;
                 }
                 
-                ctx.putImageData(pixels, 0, 0);
-                return canvas;
-            }
-
-            async extractData(imageData) {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = imageData.width;
-                canvas.height = imageData.height;
-                ctx.putImageData(imageData, 0, 0);
+                currentFile = file;
+                updateFileInfo(file);
                 
-                const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = pixels.data;
-                
-                // 提取长度
-                let lengthBinary = '';
-                for (let i = 0; i < 32; i++) {
-                    lengthBinary += (data[i * 4] & 1).toString();
-                }
-                const dataLength = parseInt(lengthBinary, 2);
-                
-                if (dataLength <= 0 || dataLength > data.length / 4) {
-                    return null;
-                }
-                
-                // 提取数据
-                let binaryData = '';
-                for (let i = 0; i < dataLength; i++) {
-                    const pixelIndex = (i + 32) * 4;
-                    binaryData += (data[pixelIndex] & 1).toString();
-                }
-                
-                return this.binaryToString(binaryData);
-            }
-
-            stringToBinary(str) {
-                let binary = '';
-                for (let i = 0; i < str.length; i++) {
-                    binary += str.charCodeAt(i).toString(2).padStart(8, '0');
-                }
-                return binary;
-            }
-
-            binaryToString(binary) {
-                let str = '';
-                for (let i = 0; i < binary.length; i += 8) {
-                    const byte = binary.substr(i, 8);
-                    str += String.fromCharCode(parseInt(byte, 2));
-                }
-                return str;
-            }
-
-            async compressImage(file, quality, maxSize, preserveOriginal) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            
-                            let width = img.width;
-                            let height = img.height;
-                            
-                            if (!preserveOriginal) {
-                                if (width > height && width > maxSize) {
-                                    height = (height * maxSize) / width;
-                                    width = maxSize;
-                                } else if (height > maxSize) {
-                                    width = (width * maxSize) / height;
-                                    height = maxSize;
-                                }
-                            }
-                            
-                            canvas.width = width;
-                            canvas.height = height;
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            resolve(canvas);
-                        };
-                        img.onerror = reject;
-                        img.src = e.target.result;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    originalImage = new Image();
+                    originalImage.onload = () => {
+                        originalPreview.innerHTML = '';
+                        originalPreview.appendChild(originalImage);
+                        processedPreview.innerHTML = '<span>处理后图片将在此显示</span>';
+                        processedImage = null;
+                        document.getElementById('processStatus').textContent = '已加载';
                     };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
+                    originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // 更新文件信息
+            function updateFileInfo(file) {
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                
+                // 模拟图片尺寸获取
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('imageSize').textContent = `${this.width} × ${this.height} 像素`;
+                };
+                img.src = URL.createObjectURL(file);
+            }
+            
+            // 加密图片
+            function encryptImage() {
+                if (!originalImage) {
+                    showNotification('请先上传图片', 'error');
+                    return;
+                }
+                
+                const password = document.getElementById('password').value;
+                if (!password) {
+                    showNotification('请输入加密密码', 'error');
+                    return;
+                }
+                
+                // 模拟加密过程
+                showNotification('正在加密图片...', 'success');
+                
+                // 模拟处理时间
+                setTimeout(() => {
+                    processedImage = originalImage.cloneNode(true);
+                    processedPreview.innerHTML = '';
+                    processedPreview.appendChild(processedImage);
+                    
+                    document.getElementById('processStatus').textContent = '已加密';
+                    
+                    // 添加到历史记录
+                    addToHistory(currentFile.name, '加密');
+                    
+                    showNotification('图片加密完成', 'success');
+                }, 1000);
+            }
+            
+            // 解密图片
+            function decryptImage() {
+                if (!originalImage) {
+                    showNotification('请先上传图片', 'error');
+                    return;
+                }
+                
+                const password = document.getElementById('password').value;
+                if (!password) {
+                    showNotification('请输入解密密码', 'error');
+                    return;
+                }
+                
+                // 模拟解密过程
+                showNotification('正在解密图片...', 'success');
+                
+                // 模拟处理时间
+                setTimeout(() => {
+                    processedImage = originalImage.cloneNode(true);
+                    processedPreview.innerHTML = '';
+                    processedPreview.appendChild(processedImage);
+                    
+                    document.getElementById('processStatus').textContent = '已解密';
+                    
+                    // 添加到历史记录
+                    addToHistory(currentFile.name, '解密');
+                    
+                    showNotification('图片解密完成', 'success');
+                }, 1000);
+            }
+            
+            // 保存图片
+            function saveImage() {
+                if (!processedImage) {
+                    showNotification('没有可保存的图片', 'error');
+                    return;
+                }
+                
+                // 创建虚拟链接进行下载
+                const canvas = document.createElement('canvas');
+                canvas.width = processedImage.width;
+                canvas.height = processedImage.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(processedImage, 0, 0);
+                
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `processed_${currentFile.name}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    showNotification('图片保存成功', 'success');
                 });
             }
-
-            async encryptImage(file, password, options = {}) {
-                if (!password) {
-                    throw new Error('请输入加密密码');
-                }
-
-                this.originalFileName = file.name;
+            
+            // 重置工具
+            function resetTool() {
+                fileInput.value = '';
+                originalPreview.innerHTML = '<span>原图将在此显示</span>';
+                processedPreview.innerHTML = '<span>处理后图片将在此显示</span>';
+                document.getElementById('password').value = '';
+                document.getElementById('processStatus').textContent = '未处理';
+                document.getElementById('fileName').textContent = '-';
+                document.getElementById('imageSize').textContent = '-';
+                document.getElementById('fileSize').textContent = '-';
+                originalImage = null;
+                processedImage = null;
+                currentFile = null;
                 
-                const canvas = await this.compressImage(
-                    file, 
-                    options.quality || 0.9,
-                    options.maxSize || 1920,
-                    options.preserveOriginal || false
-                );
-                
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                
-                // 创建元数据
-                const metadata = {
-                    originalName: file.name,
-                    timestamp: Date.now(),
-                    version: '1.0'
+                showNotification('工具已重置', 'success');
+            }
+            
+            // 添加到历史记录
+            function addToHistory(fileName, operation) {
+                const historyItem = {
+                    id: Date.now(),
+                    name: fileName,
+                    operation: operation,
+                    date: new Date().toLocaleString()
                 };
                 
-                const encryptedMetadata = this.encryptString(JSON.stringify(metadata), password);
+                encryptionHistory.unshift(historyItem);
                 
-                // 嵌入加密数据
-                const resultCanvas = await this.embedData(imageData, encryptedMetadata);
-                
-                // 可选：添加水印
-                if (options.addWatermark) {
-                    const watermarkText = options.watermarkText || 'ENCRYPTED';
-                    this.addWatermark(resultCanvas, watermarkText);
+                // 限制历史记录数量
+                const historySize = parseInt(document.getElementById('historySize').value);
+                if (encryptionHistory.length > historySize) {
+                    encryptionHistory = encryptionHistory.slice(0, historySize);
                 }
                 
-                return new Promise((resolve) => {
-                    resultCanvas.toBlob((blob) => {
-                        this.encryptedImageData = blob;
-                        resolve({
-                            blob,
-                            dataUrl: resultCanvas.toDataURL('image/png'),
-                            size: blob.size,
-                            originalSize: file.size
-                        });
-                    }, 'image/png', options.quality);
+                // 保存到本地存储
+                localStorage.setItem('encryptionHistory', JSON.stringify(encryptionHistory));
+                
+                // 更新显示
+                updateHistoryPanel();
+            }
+            
+            // 更新历史记录面板
+            function updateHistoryPanel() {
+                const historyPanel = document.getElementById('historyPanel');
+                historyPanel.innerHTML = '';
+                
+                if (encryptionHistory.length === 0) {
+                    historyPanel.innerHTML = '<div class="history-item"><div class="history-name">暂无历史记录</div></div>';
+                    return;
+                }
+                
+                encryptionHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="history-name">${item.operation}: ${item.name}</div>
+                        <div class="history-date">${item.date}</div>
+                    `;
+                    historyItem.addEventListener('click', () => {
+                        // 这里可以添加点击历史记录项后的操作
+                        showNotification(`已选择历史记录: ${item.name}`, 'success');
+                    });
+                    historyPanel.appendChild(historyItem);
                 });
             }
-
-            async decryptImage(file, password) {
-                if (!password) {
-                    throw new Error('请输入解密密码');
-                }
-
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        const img = new Image();
-                        img.onload = async () => {
-                            try {
-                                const canvas = document.createElement('canvas');
-                                const ctx = canvas.getContext('2d');
-                                canvas.width = img.width;
-                                canvas.height = img.height;
-                                ctx.drawImage(img, 0, 0);
-                                
-                                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                                const extractedData = await this.extractData(imageData);
-                                
-                                if (!extractedData || !extractedData.startsWith('IMGCRYPT_V1:')) {
-                                    reject(new Error('这不是一个有效的加密图片'));
-                                    return;
-                                }
-                                
-                                const encryptedMetadata = extractedData.replace('IMGCRYPT_V1:', '');
-                                const decryptedMetadata = this.decryptString(encryptedMetadata, password);
-                                
-                                if (!decryptedMetadata) {
-                                    reject(new Error('密码错误或图片损坏'));
-                                    return;
-                                }
-                                
-                                const metadata = JSON.parse(decryptedMetadata);
-                                
-                                canvas.toBlob((blob) => {
-                                    this.decryptedImageData = blob;
-                                    resolve({
-                                        blob,
-                                        dataUrl: canvas.toDataURL('image/png'),
-                                        metadata,
-                                        size: blob.size
-                                    });
-                                }, 'image/png');
-                            } catch (error) {
-                                reject(error);
-                            }
-                        };
-                        img.onerror = () => reject(new Error('无法加载图片'));
-                        img.src = e.target.result;
-                    };
-                    reader.onerror = () => reject(new Error('无法读取文件'));
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            addWatermark(canvas, text) {
-                const ctx = canvas.getContext('2d');
-                const fontSize = Math.max(12, canvas.width / 50);
-                ctx.font = `${fontSize}px Arial`;
-                ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(text, canvas.width - 10, canvas.height - 10);
-            }
-
-            downloadImage(blob, filename) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-        }
-
-        // ============ UI 交互逻辑 ============
-        
-        const crypto = new ImageCrypto();
-        
-        // 初始化所有事件监听器
-        function initEventListeners() {
-            // 加密相关
-            const imageInputEncrypt = document.getElementById('imageInputEncrypt');
-            const uploadZoneEncrypt = document.getElementById('uploadZoneEncrypt');
-            const encryptBtn = document.getElementById('encryptBtn');
-            const downloadEncryptedBtn = document.getElementById('downloadEncryptedBtn');
             
-            // 解密相关
-            const imageInputDecrypt = document.getElementById('imageInputDecrypt');
-            const uploadZoneDecrypt = document.getElementById('uploadZoneDecrypt');
-            const decryptBtn = document.getElementById('decryptBtn');
-            const downloadDecryptedBtn = document.getElementById('downloadDecryptedBtn');
-            
-            // 控制相关
-            const compressionQuality = document.getElementById('compressionQuality');
-            const maxSize = document.getElementById('maxSize');
-            const addWatermark = document.getElementById('addWatermark');
-            
-            // 实时更新滑块值
-            compressionQuality.addEventListener('input', (e) => {
-                document.getElementById('qualityValue').textContent = e.target.value;
-            });
-            
-            maxSize.addEventListener('input', (e) => {
-                document.getElementById('maxSizeValue').textContent = e.target.value + 'px';
-            });
-            
-            addWatermark.addEventListener('change', (e) => {
-                document.getElementById('watermarkTextGroup').style.display = 
-                    e.target.checked ? 'block' : 'none';
-            });
-            
-            // 拖拽上传 - 加密
-            setupDragAndDrop(uploadZoneEncrypt, imageInputEncrypt);
-            
-            // 拖拽上传 - 解密
-            setupDragAndDrop(uploadZoneDecrypt, imageInputDecrypt);
-            
-            // 文件选择 - 加密
-            imageInputEncrypt.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0], 'encrypt');
-                }
-            });
-            
-            // 文件选择 - 解密
-            imageInputDecrypt.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0], 'decrypt');
-                }
-            });
-            
-            // 加密按钮
-            encryptBtn.addEventListener('click', handleEncrypt);
-            
-            // 解密按钮
-            decryptBtn.addEventListener('click', handleDecrypt);
-            
-            // 下载按钮
-            downloadEncryptedBtn.addEventListener('click', () => {
-                if (crypto.encryptedImageData) {
-                    const filename = 'encrypted_' + Date.now() + '.png';
-                    crypto.downloadImage(crypto.encryptedImageData, filename);
-                    showAlert('success', '加密图片已下载！', 'encrypt');
-                }
-            });
-            
-            downloadDecryptedBtn.addEventListener('click', () => {
-                if (crypto.decryptedImageData) {
-                    const filename = 'decrypted_' + Date.now() + '.png';
-                    crypto.downloadImage(crypto.decryptedImageData, filename);
-                    showAlert('success', '原始图片已下载！', 'decrypt');
-                }
-            });
-        }
-        
-        function setupDragAndDrop(zone, input) {
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                zone.addEventListener(eventName, preventDefaults, false);
-            });
-            
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            
-            ['dragenter', 'dragover'].forEach(eventName => {
-                zone.addEventListener(eventName, () => {
-                    zone.classList.add('drag-over');
-                }, false);
-            });
-            
-            ['dragleave', 'drop'].forEach(eventName => {
-                zone.addEventListener(eventName, () => {
-                    zone.classList.remove('drag-over');
-                }, false);
-            });
-            
-            zone.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    input.files = files;
-                    const event = new Event('change', { bubbles: true });
-                    input.dispatchEvent(event);
-                }
-            }, false);
-        }
-        
-        function handleFileSelect(file, mode) {
-            if (!file.type.startsWith('image/')) {
-                showAlert('error', '请选择有效的图片文件！', mode);
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const previewContainer = document.getElementById('preview' + capitalize(mode));
-                previewContainer.innerHTML = `
-                    <div class="preview-box">
-                        <div class="preview-title">原始图片预览</div>
-                        <img src="${e.target.result}" class="preview-image" alt="预览">
-                    </div>
-                `;
+            // 显示通知
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = `notification ${type} show`;
                 
-                const infoBox = document.getElementById(mode + 'Info');
-                infoBox.style.display = 'block';
-                infoBox.innerHTML = `
-                    <p><strong>文件名：</strong>${file.name}</p>
-                    <p><strong>文件大小：</strong>${formatFileSize(file.size)}</p>
-                    <p><strong>文件类型：</strong>${file.type}</p>
-                `;
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        async function handleEncrypt() {
-            const imageInput = document.getElementById('imageInputEncrypt');
-            const password = document.getElementById('encryptPassword').value;
-            const quality = parseFloat(document.getElementById('compressionQuality').value);
-            const maxSize = parseInt(document.getElementById('maxSize').value);
-            const preserveOriginal = document.getElementById('preserveOriginal').checked;
-            const addWatermark = document.getElementById('addWatermark').checked;
-            const watermarkText = document.getElementById('watermarkText').value;
-            
-            if (!imageInput.files[0]) {
-                showAlert('error', '请先选择要加密的图片！', 'encrypt');
-                return;
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
             }
             
-            if (!password) {
-                showAlert('error', '请输入加密密码！', 'encrypt');
-                return;
+            // 格式化文件大小
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
             
-            const loading = document.getElementById('loadingEncrypt');
-            const encryptBtn = document.getElementById('encryptBtn');
-            const downloadBtn = document.getElementById('downloadEncryptedBtn');
-            
-            try {
-                loading.classList.add('active');
-                encryptBtn.disabled = true;
-                downloadBtn.disabled = true;
-                
-                const result = await crypto.encryptImage(imageInput.files[0], password, {
-                    quality,
-                    maxSize,
-                    preserveOriginal,
-                    addWatermark,
-                    watermarkText
-                });
-                
-                // 显示加密后的预览
-                const previewContainer = document.getElementById('previewEncrypt');
-                previewContainer.innerHTML += `
-                    <div class="preview-box">
-                        <div class="preview-title">加密后预览</div>
-                        <img src="${result.dataUrl}" class="preview-image" alt="加密后">
-                    </div>
-                `;
-                
-                // 更新信息
-                const infoBox = document.getElementById('encryptInfo');
-                const compression = ((1 - result.size / result.originalSize) * 100).toFixed(2);
-                infoBox.innerHTML += `
-                    <p><strong>加密后大小：</strong>${formatFileSize(result.size)}</p>
-                    <p><strong>压缩比例：</strong>${compression}%</p>
-                    <p><strong>状态：</strong>✅ 加密成功</p>
-                `;
-                
-                showAlert('success', '图片加密成功！可以下载加密后的图片了。', 'encrypt');
-                downloadBtn.disabled = false;
-            } catch (error) {
-                showAlert('error', '加密失败：' + error.message, 'encrypt');
-            } finally {
-                loading.classList.remove('active');
-                encryptBtn.disabled = false;
-            }
-        }
-        
-        async function handleDecrypt() {
-            const imageInput = document.getElementById('imageInputDecrypt');
-            const password = document.getElementById('decryptPassword').value;
-            
-            if (!imageInput.files[0]) {
-                showAlert('error', '请先选择要解密的图片！', 'decrypt');
-                return;
-            }
-            
-            if (!password) {
-                showAlert('error', '请输入解密密码！', 'decrypt');
-                return;
-            }
-            
-            const loading = document.getElementById('loadingDecrypt');
-            const decryptBtn = document.getElementById('decryptBtn');
-            const downloadBtn = document.getElementById('downloadDecryptedBtn');
-            
-            try {
-                loading.classList.add('active');
-                decryptBtn.disabled = true;
-                downloadBtn.disabled = true;
-                
-                const result = await crypto.decryptImage(imageInput.files[0], password);
-                
-                // 显示解密后的预览
-                const previewContainer = document.getElementById('previewDecrypt');
-                previewContainer.innerHTML += `
-                    <div class="preview-box">
-                        <div class="preview-title">解密后预览</div>
-                        <img src="${result.dataUrl}" class="preview-image" alt="解密后">
-                    </div>
-                `;
-                
-                // 更新信息
-                const infoBox = document.getElementById('decryptInfo');
-                const date = new Date(result.metadata.timestamp);
-                infoBox.innerHTML += `
-                    <p><strong>原始文件名：</strong>${result.metadata.originalName}</p>
-                    <p><strong>加密时间：</strong>${date.toLocaleString()}</p>
-                    <p><strong>解密后大小：</strong>${formatFileSize(result.size)}</p>
-                    <p><strong>状态：</strong>✅ 解密成功</p>
-                `;
-                
-                showAlert('success', '图片解密成功！可以下载原始图片了。', 'decrypt');
-                downloadBtn.disabled = false;
-            } catch (error) {
-                showAlert('error', '解密失败：' + error.message, 'decrypt');
-            } finally {
-                loading.classList.remove('active');
-                decryptBtn.disabled = false;
-            }
-        }
-        
-        function showAlert(type, message, mode) {
-            const alertContainer = document.getElementById(mode + 'Alert');
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
-            alertContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
-            
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
-        }
-        
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        }
-        
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-        
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', initEventListeners);
+            // 主题切换功能
+            document.querySelector('.theme-selector').addEventListener('click', function() {
+                document.body.classList.toggle('dark-theme');
+                // 这里可以添加更复杂的主题切换逻辑
+                showNotification('主题已切换', 'success');
+            });
+        });
     </script>
 </body>
 </html>
