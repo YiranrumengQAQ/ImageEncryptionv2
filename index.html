@@ -18,7 +18,7 @@
       padding:20px;
     }
     .container {
-      max-width:900px;
+      max-width:1200px;
       width:100%;
       background:#fff;
       box-shadow:0 8px 32px rgba(6,122,253,0.15);
@@ -72,10 +72,10 @@
       display:block;
     }
     
-    /* 双栏布局 */
+    /* 三栏布局 */
     .content-wrapper {
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns:300px 1fr 1fr;
       gap:24px;
       margin-bottom:20px;
     }
@@ -94,14 +94,14 @@
       margin-bottom:8px;
       color:#0d3879;
       font-weight:600;
-      font-size:0.95em;
+      font-size:0.9em;
     }
     input[type="file"], input[type="password"], input[type="text"] {
       width:100%;
-      padding:13px 16px;
+      padding:12px 14px;
       border:2px solid #d7e8ff;
       border-radius:10px;
-      font-size:0.95em;
+      font-size:0.9em;
       background:#f9fcff;
       transition:all 0.3s;
       color:#0d3879;
@@ -116,7 +116,51 @@
       color:#9ec5ed;
     }
     
-    /* 右侧预览区域 */
+    /* 按钮组 */
+    .button-group {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:auto;
+    }
+    
+    .btn {
+      width:100%;
+      padding:14px;
+      border:none;
+      color:#fff;
+      font-weight:700;
+      font-size:0.95em;
+      border-radius:10px;
+      cursor:pointer;
+      transition:all 0.3s;
+      letter-spacing:0.5px;
+    }
+    .btn-primary {
+      background:linear-gradient(135deg, #067afd 0%, #0561d4 100%);
+      box-shadow:0 4px 12px rgba(6,122,253,0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(6,122,253,0.4);
+    }
+    .btn-success {
+      background:linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      box-shadow:0 4px 12px rgba(76,175,80,0.3);
+    }
+    .btn-success:hover:not(:disabled) {
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(76,175,80,0.4);
+    }
+    .btn:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .btn:active:not(:disabled) {
+      transform:translateY(0);
+    }
+    
+    /* 预览区域 */
     .preview-section {
       display:flex;
       flex-direction:column;
@@ -125,7 +169,10 @@
       margin-bottom:8px;
       color:#0d3879;
       font-weight:600;
-      font-size:0.95em;
+      font-size:0.9em;
+      display:flex;
+      align-items:center;
+      gap:6px;
     }
     .preview-container {
       flex:1;
@@ -135,7 +182,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:280px;
+      min-height:300px;
       position:relative;
       overflow:hidden;
       transition:all 0.3s;
@@ -148,7 +195,7 @@
     .preview-placeholder {
       text-align:center;
       color:#9ec5ed;
-      font-size:0.9em;
+      font-size:0.85em;
       padding:20px;
     }
     .preview-placeholder svg {
@@ -176,7 +223,7 @@
       color:#fff;
       padding:6px 14px;
       border-radius:20px;
-      font-size:0.8em;
+      font-size:0.75em;
       font-weight:700;
       box-shadow:0 2px 8px rgba(255,107,107,0.4);
       display:none;
@@ -215,7 +262,7 @@
       animation:float 3s ease-in-out infinite;
     }
     .encrypted-overlay p {
-      font-size:1.1em;
+      font-size:1em;
       font-weight:600;
       margin:0;
     }
@@ -224,28 +271,23 @@
       50% { transform:translateY(-10px); }
     }
     
-    .btn {
-      width:100%;
-      padding:16px;
-      border:none;
-      background:linear-gradient(135deg, #067afd 0%, #0561d4 100%);
+    .success-badge {
+      position:absolute;
+      top:12px;
+      right:12px;
+      background:linear-gradient(135deg, #4caf50 0%, #45a049 100%);
       color:#fff;
+      padding:6px 14px;
+      border-radius:20px;
+      font-size:0.75em;
       font-weight:700;
-      font-size:1.05em;
-      border-radius:10px;
-      cursor:pointer;
-      transition:all 0.3s;
-      margin-top:auto;
-      letter-spacing:0.5px;
-      box-shadow:0 4px 12px rgba(6,122,253,0.3);
+      box-shadow:0 2px 8px rgba(76,175,80,0.4);
+      display:none;
     }
-    .btn:hover {
-      transform:translateY(-2px);
-      box-shadow:0 6px 20px rgba(6,122,253,0.4);
+    .success-badge.show {
+      display:block;
     }
-    .btn:active {
-      transform:translateY(0);
-    }
+    
     .msg {
       margin-top:20px;
       padding:16px;
@@ -285,6 +327,15 @@
       border-top:1px solid #e3f2fd;
     }
     
+    @media (max-width:1024px){
+      .content-wrapper {
+        grid-template-columns:1fr 1fr;
+      }
+      .form-section {
+        grid-column:1 / -1;
+      }
+    }
+    
     @media (max-width:768px){
       .content-wrapper {
         grid-template-columns:1fr;
@@ -321,18 +372,42 @@
           <label>🔑 设置密码</label>
           <input type="password" id="encPass" placeholder="请输入强密码(至少6位)">
         </div>
-        <button class="btn" onclick="encryptFile()">🔒 加密并下载</button>
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="encryptFile()">🔒 加密图片</button>
+          <button class="btn btn-success" id="encDownloadBtn" onclick="downloadEncrypted()" disabled>📥 下载加密文件</button>
+        </div>
       </div>
       
-      <!-- 右侧预览 -->
+      <!-- 原图预览 -->
       <div class="preview-section">
-        <div class="preview-label">📷 原图预览</div>
+        <div class="preview-label">
+          <span>📷 原始图片</span>
+        </div>
         <div class="preview-container" id="encPreview">
           <div class="preview-placeholder">
             <svg fill="#9ec5ed" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-            <p>选择图片后将显示预览</p>
+            <p>选择图片后显示预览</p>
           </div>
           <img id="encPreviewImg" class="preview-image" alt="原图预览">
+        </div>
+      </div>
+      
+      <!-- 处理后预览 -->
+      <div class="preview-section">
+        <div class="preview-label">
+          <span>🔐 处理后效果</span>
+        </div>
+        <div class="preview-container" id="encResultPreview">
+          <div class="preview-placeholder">
+            <svg fill="#9ec5ed" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <p>加密成功后显示效果</p>
+          </div>
+          <div class="encrypted-overlay" id="encResultOverlay">
+            <svg fill="#fff" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <p>🔐 已加密</p>
+            <p style="font-size:0.8em;margin-top:8px;opacity:0.8;">内容已安全加密保护</p>
+          </div>
+          <div class="encrypted-badge" id="encResultBadge">🔐 已加密</div>
         </div>
       </div>
     </div>
@@ -351,23 +426,43 @@
           <label>🔑 输入密码</label>
           <input type="password" id="decPass" placeholder="请输入加密时的密码">
         </div>
-        <button class="btn" onclick="decryptFile()">🔓 解密并下载</button>
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="decryptFile()">🔓 解密图片</button>
+          <button class="btn btn-success" id="decDownloadBtn" onclick="downloadDecrypted()" disabled>📥 下载解密文件</button>
+        </div>
       </div>
       
-      <!-- 右侧预览 -->
+      <!-- 原始（加密）文件预览 -->
       <div class="preview-section">
-        <div class="preview-label">🔒 文件预览</div>
+        <div class="preview-label">
+          <span>🔒 原始文件</span>
+        </div>
         <div class="preview-container" id="decPreview">
           <div class="preview-placeholder">
             <svg fill="#9ec5ed" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-            <p>选择文件后将显示状态</p>
+            <p>选择文件后显示状态</p>
           </div>
           <div class="encrypted-overlay" id="encryptedOverlay">
             <svg fill="#fff" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
             <p>🔐 加密文件</p>
-            <p style="font-size:0.85em;margin-top:8px;opacity:0.8;">输入密码后可解密查看</p>
+            <p style="font-size:0.8em;margin-top:8px;opacity:0.8;">输入密码后可解密查看</p>
           </div>
           <div class="encrypted-badge" id="encryptedBadge">🔐 已加密</div>
+        </div>
+      </div>
+      
+      <!-- 处理后（解密）预览 -->
+      <div class="preview-section">
+        <div class="preview-label">
+          <span>✅ 处理后效果</span>
+        </div>
+        <div class="preview-container" id="decResultPreview">
+          <div class="preview-placeholder">
+            <svg fill="#9ec5ed" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <p>解密成功后显示图片</p>
+          </div>
+          <img id="decResultImg" class="preview-image" alt="解密后的图片">
+          <div class="success-badge" id="decResultBadge">✅ 解密成功</div>
         </div>
       </div>
     </div>
@@ -381,17 +476,20 @@
 </div>
 
 <script type="module">
-// 导入加密库
 import { XChaCha20Poly1305 } from 'https://cdn.jsdelivr.net/npm/@stablelib/xchacha20poly1305@1.0.1/+esm';
 import { randomBytes } from 'https://cdn.jsdelivr.net/npm/@stablelib/random@1.0.2/+esm';
 
-// 暴露到全局
 window.XChaCha20Poly1305 = XChaCha20Poly1305;
 window.randomBytes = randomBytes;
 window.cryptoLoaded = true;
 </script>
 
 <script>
+// 全局变量存储加密/解密后的数据
+let encryptedData = null;
+let decryptedData = null;
+let currentFileName = '';
+
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -408,20 +506,32 @@ function switchTab(tab) {
 }
 
 function resetPreviews() {
-  // 重置加密预览
+  // 重置加密页面
   document.getElementById('encPreview').classList.remove('has-image');
   document.getElementById('encPreviewImg').classList.remove('show');
   document.getElementById('encPreviewImg').src = '';
+  document.getElementById('encResultPreview').classList.remove('has-image');
+  document.getElementById('encResultOverlay').classList.remove('show');
+  document.getElementById('encResultBadge').classList.remove('show');
+  document.getElementById('encDownloadBtn').disabled = true;
+  encryptedData = null;
   
-  // 重置解密预览
+  // 重置解密页面
   document.getElementById('decPreview').classList.remove('has-image');
   document.getElementById('encryptedOverlay').classList.remove('show');
   document.getElementById('encryptedBadge').classList.remove('show');
+  document.getElementById('decResultPreview').classList.remove('has-image');
+  document.getElementById('decResultImg').classList.remove('show');
+  document.getElementById('decResultImg').src = '';
+  document.getElementById('decResultBadge').classList.remove('show');
+  document.getElementById('decDownloadBtn').disabled = true;
+  decryptedData = null;
 }
 
 function previewEncryptImage(input) {
   const file = input.files[0];
   if(file && file.type.startsWith('image/')) {
+    currentFileName = file.name;
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = document.getElementById('encPreviewImg');
@@ -429,6 +539,13 @@ function previewEncryptImage(input) {
       img.src = e.target.result;
       img.classList.add('show');
       container.classList.add('has-image');
+      
+      // 重置结果预览
+      document.getElementById('encResultPreview').classList.remove('has-image');
+      document.getElementById('encResultOverlay').classList.remove('show');
+      document.getElementById('encResultBadge').classList.remove('show');
+      document.getElementById('encDownloadBtn').disabled = true;
+      encryptedData = null;
     };
     reader.readAsDataURL(file);
   }
@@ -437,17 +554,24 @@ function previewEncryptImage(input) {
 function previewDecryptFile(input) {
   const file = input.files[0];
   if(file) {
+    currentFileName = file.name;
     const container = document.getElementById('decPreview');
     const overlay = document.getElementById('encryptedOverlay');
     const badge = document.getElementById('encryptedBadge');
     
-    // 检查是否是加密文件（通常以.encrypted结尾）
+    // 重置结果预览
+    document.getElementById('decResultPreview').classList.remove('has-image');
+    document.getElementById('decResultImg').classList.remove('show');
+    document.getElementById('decResultImg').src = '';
+    document.getElementById('decResultBadge').classList.remove('show');
+    document.getElementById('decDownloadBtn').disabled = true;
+    decryptedData = null;
+    
     if(file.name.endsWith('.encrypted')) {
       container.classList.add('has-image');
       overlay.classList.add('show');
       badge.classList.add('show');
     } else {
-      // 如果不是标准加密文件，尝试读取检查
       checkIfEncrypted(file).then(isEncrypted => {
         if(isEncrypted) {
           container.classList.add('has-image');
@@ -460,11 +584,9 @@ function previewDecryptFile(input) {
 }
 
 async function checkIfEncrypted(file) {
-  // 简单检查文件是否可能是加密文件
   try {
     const data = await file.slice(0, 100).arrayBuffer();
     const dataArray = new Uint8Array(data);
-    // 检查文件长度和基本结构
     return file.size >= 56 && dataArray.length >= 56;
   } catch(e) {
     return false;
@@ -542,19 +664,43 @@ async function encryptFile() {
     output.set(nonce, 32);
     output.set(encrypted, 56);
 
-    const blob = new Blob([output], {type: 'application/octet-stream'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = file.name + '.encrypted';
-    a.click();
-    URL.revokeObjectURL(url);
+    // 保存加密数据
+    encryptedData = output;
+    currentFileName = file.name;
 
-    showMsg('✅ 加密成功！文件已下载', 'success');
+    // 显示加密后效果
+    const resultContainer = document.getElementById('encResultPreview');
+    const resultOverlay = document.getElementById('encResultOverlay');
+    const resultBadge = document.getElementById('encResultBadge');
+    resultContainer.classList.add('has-image');
+    resultOverlay.classList.add('show');
+    resultBadge.classList.add('show');
+
+    // 启用下载按钮
+    document.getElementById('encDownloadBtn').disabled = false;
+
+    showMsg('✅ 加密成功！可以点击下载按钮保存文件', 'success');
   } catch(err) {
     showMsg('❌ 加密失败: ' + err.message, 'error');
     console.error(err);
   }
+}
+
+function downloadEncrypted() {
+  if(!encryptedData) {
+    showMsg('❌ 没有可下载的加密文件', 'error');
+    return;
+  }
+
+  const blob = new Blob([encryptedData], {type: 'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = currentFileName + '.encrypted';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showMsg('✅ 文件已下载！', 'success');
 }
 
 async function decryptFile() {
@@ -601,32 +747,67 @@ async function decryptFile() {
       throw new Error('密码错误或文件已损坏');
     }
 
+    // 保存解密数据
+    decryptedData = decrypted;
+    currentFileName = file.name;
+
+    // 显示解密后预览（如果是图片）
     let filename = file.name;
     if(filename.endsWith('.encrypted')) {
       filename = filename.slice(0, -10);
-    } else {
-      filename = 'decrypted_' + filename;
     }
 
-    const blob = new Blob([decrypted], {type: 'application/octet-stream'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    if(filename.match(/.(jpg|jpeg|png|gif|webp|bmp)$/i)) {
+      const imgUrl = URL.createObjectURL(new Blob([decrypted], {type: 'image/png'}));
+      const resultImg = document.getElementById('decResultImg');
+      const resultContainer = document.getElementById('decResultPreview');
+      const resultBadge = document.getElementById('decResultBadge');
+      
+      resultImg.src = imgUrl;
+      resultImg.classList.add('show');
+      resultContainer.classList.add('has-image');
+      resultBadge.classList.add('show');
+    }
 
-    showMsg('✅ 解密成功！文件已下载', 'success');
+    // 启用下载按钮
+    document.getElementById('decDownloadBtn').disabled = false;
+
+    showMsg('✅ 解密成功！可以点击下载按钮保存文件', 'success');
   } catch(err) {
     showMsg('❌ 解密失败: ' + err.message, 'error');
     console.error(err);
   }
 }
 
-// 暴露函数到全局
+function downloadDecrypted() {
+  if(!decryptedData) {
+    showMsg('❌ 没有可下载的解密文件', 'error');
+    return;
+  }
+
+  let filename = currentFileName;
+  if(filename.endsWith('.encrypted')) {
+    filename = filename.slice(0, -10);
+  } else {
+    filename = 'decrypted_' + filename;
+  }
+
+  const blob = new Blob([decryptedData], {type: 'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showMsg('✅ 文件已下载！', 'success');
+}
+
 window.switchTab = switchTab;
 window.encryptFile = encryptFile;
 window.decryptFile = decryptFile;
+window.downloadEncrypted = downloadEncrypted;
+window.downloadDecrypted = downloadDecrypted;
 window.previewEncryptImage = previewEncryptImage;
 window.previewDecryptFile = previewDecryptFile;
 </script>
