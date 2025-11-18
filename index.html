@@ -3,1772 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片加密解密工具 / Image Encryption Tool</title>
+    <title>冬日温暖礼盒 ❄️</title>
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --success: #4cc9f0;
-            --warning: #f72585;
-            --dark: #212529;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-            --border-radius: 12px;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: var(--dark);
-            line-height: 1.6;
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
             min-height: 100vh;
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: winter-gradient 20s ease infinite;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @keyframes winter-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 雪花效果 */
+        .snowflake {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: snowfall linear infinite;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0.3;
+            }
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            z-index: 10;
             position: relative;
         }
 
         h1 {
-            color: var(--primary);
-            margin-bottom: 10px;
+            color: white;
             font-size: 2.5rem;
-        }
-
-        .subtitle {
-            color: var(--secondary);
-            font-weight: 300;
-            font-size: 1.2rem;
-        }
-
-        .language-switcher {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .lang-btn {
-            padding: 8px 15px;
-            border: 2px solid var(--primary);
-            background: white;
-            color: var(--primary);
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .lang-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--box-shadow);
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            color: var(--primary);
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: title-glow 3s ease-in-out infinite;
         }
 
-        .upload-area {
-            border: 3px dashed var(--primary);
-            border-radius: var(--border-radius);
-            padding: 40px 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: var(--transition);
-            cursor: pointer;
-            background: rgba(67, 97, 238, 0.05);
+        @keyframes title-glow {
+            0%, 100% { text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3); }
+            50% { text-shadow: 0 4px 40px rgba(255, 255, 255, 0.8); }
         }
 
-        .upload-area:hover {
-            background: rgba(67, 97, 238, 0.1);
-            border-color: var(--secondary);
-        }
-
-        .upload-area.dragover {
-            background: rgba(67, 97, 238, 0.15);
-        }
-
-        .upload-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
-            color: var(--primary);
-        }
-
-        .preview-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        @media (min-width: 768px) {
-            .preview-container {
-                flex-direction: row;
-            }
-        }
-
-        .preview-box {
-            flex: 1;
-            text-align: center;
-        }
-
-        .preview-title {
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: var(--secondary);
-        }
-
-        .preview-img {
-            width: 100%;
-            height: 250px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gray);
-            overflow: hidden;
+        .gift-box-container {
             position: relative;
-        }
-
-        .preview-img img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .control-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .control-label {
-            font-weight: 600;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        input, select, textarea {
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        .btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            transition: transform 0.3s ease;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
+        .gift-box-container:hover {
+            transform: scale(1.05);
         }
 
-        .btn-primary:hover:not(:disabled) {
-            background: var(--secondary);
-            transform: translateY(-2px);
+        .gift-box-container:active {
+            transform: scale(0.95);
         }
 
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover:not(:disabled) {
-            background: #3aa8d8;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn-warning:hover:not(:disabled) {
-            background: #e01a6f;
-            transform: translateY(-2px);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .btn-group .btn {
-            flex: 1;
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .info-panel {
-            margin-top: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .info-label {
-            font-weight: 500;
-        }
-
-        .info-value {
-            color: var(--secondary);
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            box-shadow: var(--box-shadow);
-            z-index: 1000;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: var(--transition);
-        }
-
-        .notification.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            background: var(--success);
-        }
-
-        .notification.error {
-            background: var(--warning);
-        }
-
-        .theme-selector {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--box-shadow);
-            cursor: pointer;
-            z-index: 100;
-        }
-
-        .encryption-level {
-            margin-top: 10px;
-        }
-
-        .level-indicator {
-            height: 8px;
-            background: #eee;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .level-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background: #eee;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--success);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .settings-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .setting-item {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        .custom-algorithm-panel {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border-left: 4px solid var(--success);
-        }
-
-        .tab-container {
-            margin-top: 15px;
-        }
-
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: var(--transition);
-        }
-
-        .tab.active {
-            border-bottom-color: var(--primary);
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .algorithm-info {
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: var(--gray);
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 5px;
-        }
-
-        .algorithm-example {
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: var(--gray);
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 5px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .advanced-settings {
-            margin-top: 20px;
-        }
-
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .history-panel {
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .history-item:hover {
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-
-        .history-name {
-            font-weight: 500;
-        }
-
-        .history-date {
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-
-        .encryption-status {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .encryption-status.encrypted {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .encryption-status.not-encrypted {
-            background-color: #ffebee;
-            color: #c62828;
-        }
-
-        .file-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-
-        .file-info-item {
-            text-align: center;
-            flex: 1;
-        }
-
-        .file-info-value {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .file-info-label {
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-
-        .toggle-switch {
+        .gift-box {
             position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
         }
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
+        .box-body {
+            width: 180px;
+            height: 140px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 15px;
             position: absolute;
-            cursor: pointer;
+            bottom: 0;
+            left: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .box-lid {
+            width: 200px;
+            height: 60px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px 15px 5px 5px;
+            position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+            z-index: 2;
         }
 
-        .toggle-slider:before {
+        .ribbon-vertical {
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, #ffd700, #ffed4e);
             position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .ribbon-horizontal {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(to bottom, #ffd700, #ffed4e);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .bow {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 40px;
+            z-index: 3;
+        }
+
+        .bow-left, .bow-right {
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #ffd700, #ffb700);
+            border-radius: 50% 50% 0 50%;
+            position: absolute;
+            top: 10px;
+        }
+
+        .bow-left {
+            left: 0;
+            transform: rotate(-45deg);
+        }
+
+        .bow-right {
+            right: 0;
+            transform: rotate(45deg);
+        }
+
+        .bow-center {
+            width: 15px;
+            height: 15px;
+            background: #ffd700;
             border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
-        input:checked + .toggle-slider {
-            background-color: var(--primary);
+        .gift-box-container.opened .box-lid {
+            transform: translateY(-80px) rotateX(-20deg) rotateZ(10deg);
+            opacity: 0.9;
         }
 
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
+        .hint-text {
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 30px;
+            opacity: 0.8;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .custom-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
         }
 
-        .custom-checkbox input {
-            width: 18px;
-            height: 18px;
+        /* 温暖话语样式 */
+        .warm-message {
+            position: fixed;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 100;
+            animation: float-up 4s ease-out forwards;
+            white-space: nowrap;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scale(0.5) rotate(0deg);
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1) rotate(5deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-300px) scale(0.8) rotate(var(--rotate-end));
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .gift-box {
+                width: 150px;
+                height: 150px;
+            }
+
+            .box-body {
+                width: 135px;
+                height: 105px;
+                left: 7.5px;
+            }
+
+            .box-lid {
+                width: 150px;
+                height: 45px;
+            }
+
+            .warm-message {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .hint-text {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="language-switcher">
-                <button class="lang-btn active" data-lang="zh">中文</button>
-                <button class="lang-btn" data-lang="en">English</button>
-            </div>
-            <h1 data-i18n="title">🔐 图片加密解密工具</h1>
-            <p class="subtitle" data-i18n="subtitle">安全、高效、体积友好的图片加密解决方案</p>
-        </header>
-
-        <div class="main-content">
-            <div class="card">
-                <h2 class="card-title" data-i18n="uploadTitle">📁 图片上传与预览</h2>
-                
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📁</div>
-                    <h3 data-i18n="uploadHint">点击或拖拽图片到此处上传</h3>
-                    <p data-i18n="uploadFormats">支持 JPG, PNG, GIF, BMP, WEBP 等所有图片格式</p>
-                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        <h1>❄️ 冬日温暖礼盒 ❄️</h1>
+        <div class="gift-box-container" id="giftBox">
+            <div class="gift-box">
+                <div class="box-lid">
+                    <div class="bow">
+                        <div class="bow-left"></div>
+                        <div class="bow-right"></div>
+                        <div class="bow-center"></div>
+                    </div>
+                    <div class="ribbon-vertical"></div>
                 </div>
-                
-                <div class="preview-container">
-                    <div class="preview-box">
-                        <div class="preview-title" data-i18n="originalPreview">原图预览</div>
-                        <div class="preview-img" id="originalPreview">
-                            <span data-i18n="originalPlaceholder">原图将在此显示</span>
-                        </div>
-                    </div>
-                    <div class="preview-box">
-                        <div class="preview-title" data-i18n="processedPreview">处理后预览</div>
-                        <div class="preview-img" id="processedPreview">
-                            <span data-i18n="processedPlaceholder">处理后图片将在此显示</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="file-info">
-                    <div class="file-info-item">
-                        <div class="file-info-value" id="fileName">-</div>
-                        <div class="file-info-label" data-i18n="fileName">文件名称</div>
-                    </div>
-                    <div class="file-info-item">
-                        <div class="file-info-value" id="imageSize">-</div>
-                        <div class="file-info-label" data-i18n="imageSize">图片尺寸</div>
-                    </div>
-                    <div class="file-info-item">
-                        <div class="file-info-value" id="fileSize">-</div>
-                        <div class="file-info-label" data-i18n="fileSize">文件大小</div>
-                    </div>
-                </div>
-                
-                <div class="info-panel">
-                    <div class="info-item">
-                        <span class="info-label" data-i18n="encryptionLevel">加密强度:</span>
-                        <div class="encryption-level">
-                            <div class="level-indicator">
-                                <div class="level-fill" id="encryptionLevel"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label" data-i18n="processStatus">处理状态:</span>
-                        <span class="info-value" id="processStatus" data-i18n="ready">准备就绪</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label" data-i18n="encryptionStatus">加密状态:</span>
-                        <span class="info-value">
-                            <span class="encryption-status not-encrypted" id="encryptionStatus" data-i18n="notEncrypted">未加密</span>
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2 class="card-title" data-i18n="controlsTitle">🔧 加密解密控制</h2>
-                
-                <div class="control-panel">
-                    <div class="control-group">
-                        <label class="control-label" for="password">
-                            🔑 <span data-i18n="passwordLabel">加密密码</span>
-                        </label>
-                        <input type="password" id="password" data-i18n-placeholder="passwordPlaceholder" placeholder="输入加密密码">
-                    </div>
-                    
-                    <div class="control-group">
-                        <label class="control-label" for="algorithm">
-                            ⚙️ <span data-i18n="algorithmLabel">加密算法</span>
-                        </label>
-                        <select id="algorithm">
-                            <option value="xor" data-i18n="xorAlgorithm">XOR加密 (轻量级)</option>
-                            <option value="aes" data-i18n="aesAlgorithm">AES加密 (安全级)</option>
-                            <option value="rc4" data-i18n="rc4Algorithm">RC4流加密</option>
-                            <option value="chaos" data-i18n="chaosAlgorithm">混沌加密</option>
-                            <option value="custom" data-i18n="customAlgorithm">自定义算法</option>
-                        </select>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label class="control-label" for="encryptionStrength">
-                            ⚡ <span data-i18n="strengthLabel">加密强度</span>
-                        </label>
-                        <input type="range" id="encryptionStrength" min="1" max="10" value="5">
-                        <div class="level-indicator">
-                            <div class="level-fill" id="strengthIndicator" style="width: 50%;"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Custom Algorithm Panel -->
-                    <div class="custom-algorithm-panel" id="customAlgorithmPanel">
-                        <div class="tab-container">
-                            <div class="tabs">
-                                <div class="tab active" data-i18n="encryptTab" data-tab="encrypt">加密函数</div>
-                                <div class="tab" data-i18n="decryptTab" data-tab="decrypt">解密函数</div>
-                                <div class="tab" data-i18n="exampleTab" data-tab="example">算法示例</div>
-                            </div>
-                            
-                            <div class="tab-content active" id="encryptTab">
-                                <label class="control-label" data-i18n="customEncryptLabel">自定义加密函数:</label>
-                                <textarea id="customEncrypt" rows="6" data-i18n-placeholder="customEncryptPlaceholder" placeholder="输入自定义加密函数，格式: function encrypt(data, password, strength) { ... }"></textarea>
-                                <div class="algorithm-info" data-i18n="customEncryptInfo">
-                                    函数参数说明:
-                                    <ul>
-                                        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>
-                                        <li><code>password</code>: 字符串，用户输入的密码</li>
-                                        <li><code>strength</code>: 数字，加密强度(1-10)</li>
-                                    </ul>
-                                    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。
-                                </div>
-                            </div>
-                            
-                            <div class="tab-content" id="decryptTab">
-                                <label class="control-label" data-i18n="customDecryptLabel">自定义解密函数:</label>
-                                <textarea id="customDecrypt" rows="6" data-i18n-placeholder="customDecryptPlaceholder" placeholder="输入自定义解密函数，格式: function decrypt(data, password, strength) { ... }"></textarea>
-                                <div class="algorithm-info" data-i18n="customDecryptInfo">
-                                    函数参数说明:
-                                    <ul>
-                                        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>
-                                        <li><code>password</code>: 字符串，用户输入的密码</li>
-                                        <li><code>strength</code>: 数字，加密强度(1-10)</li>
-                                    </ul>
-                                    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。
-                                </div>
-                            </div>
-                            
-                            <div class="tab-content" id="exampleTab">
-                                <label class="control-label" data-i18n="exampleLabel">算法示例:</label>
-                                <div class="algorithm-example" data-i18n="algorithmExample">
-// XOR加密算法示例
-function encrypt(data, password, strength) {
-    const passwordLength = password.length;
-    const keyMultiplier = strength * 10;
-    
-    for (let i = 0; i < data.data.length; i += 4) {
-        const charIndex = (i / 4) % passwordLength;
-        const key = password.charCodeAt(charIndex) * keyMultiplier;
-        
-        data.data[i] = data.data[i] ^ key;     // R
-        data.data[i+1] = data.data[i+1] ^ key; // G
-        data.data[i+2] = data.data[i+2] ^ key; // B
-    }
-}
-
-// XOR解密算法示例
-function decrypt(data, password, strength) {
-    // XOR加密和解密使用相同的算法
-    encrypt(data, password, strength);
-}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button class="btn btn-primary" id="encryptBtn" data-i18n="encryptBtn">
-                            🔒 加密图片
-                        </button>
-                        <button class="btn btn-secondary" id="decryptBtn" data-i18n="decryptBtn">
-                            🔓 解密图片
-                        </button>
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button class="btn btn-success" id="saveBtn" data-i18n="saveBtn">
-                            💾 保存图片
-                        </button>
-                        <button class="btn btn-warning" id="resetBtn" data-i18n="resetBtn">
-                            🔄 重置
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="advanced-settings">
-                    <h2 class="card-title" data-i18n="advancedTitle">⚙️ 高级设置</h2>
-                    <div class="settings-grid">
-                        <div class="control-group">
-                            <label class="control-label" for="compression" data-i18n="compressionLabel">压缩级别</label>
-                            <select id="compression">
-                                <option value="0" data-i18n="noCompression">无压缩</option>
-                                <option value="1" selected data-i18n="lightCompression">轻度压缩</option>
-                                <option value="2" data-i18n="mediumCompression">中度压缩</option>
-                                <option value="3" data-i18n="heavyCompression">重度压缩</option>
-                            </select>
-                        </div>
-                        
-                        <div class="control-group">
-                            <label class="control-label" for="format" data-i18n="formatLabel">输出格式</label>
-                            <select id="format">
-                                <option value="original" data-i18n="originalFormat">保持原格式</option>
-                                <option value="png" data-i18n="pngFormat">PNG</option>
-                                <option value="jpeg" data-i18n="jpegFormat">JPEG</option>
-                                <option value="webp" data-i18n="webpFormat">WebP</option>
-                            </select>
-                        </div>
-                        
-                        <div class="control-group">
-                            <label class="control-label" for="autoSave" data-i18n="autoSaveLabel">自动保存</label>
-                            <select id="autoSave">
-                                <option value="false" data-i18n="disabled">关闭</option>
-                                <option value="true" data-i18n="enabled">开启</option>
-                            </select>
-                        </div>
-                        
-                        <div class="control-group">
-                            <label class="control-label" for="historySize" data-i18n="historySizeLabel">历史记录数量</label>
-                            <select id="historySize">
-                                <option value="5" data-i18n="fiveItems">5条</option>
-                                <option value="10" selected data-i18n="tenItems">10条</option>
-                                <option value="20" data-i18n="twentyItems">20条</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="settings-grid">
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="addWatermark" checked>
-                            <label for="addWatermark" data-i18n="watermarkLabel">为加密图片添加水印</label>
-                        </div>
-                        
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="preserveMetadata">
-                            <label for="preserveMetadata" data-i18n="metadataLabel">保留图片元数据</label>
-                        </div>
-                        
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="autoOptimize" checked>
-                            <label for="autoOptimize" data-i18n="optimizeLabel">自动优化图片大小</label>
-                        </div>
-                        
-                        <div class="custom-checkbox">
-                            <input type="checkbox" id="enableLogging">
-                            <label for="enableLogging" data-i18n="loggingLabel">启用详细日志记录</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <h2 class="card-title" style="margin-top: 20px;" data-i18n="historyTitle">📋 处理历史</h2>
-                <div class="history-panel" id="historyPanel">
-                    <div class="history-item">
-                        <div class="history-name" data-i18n="noHistory">暂无历史记录</div>
-                    </div>
+                <div class="box-body">
+                    <div class="ribbon-horizontal"></div>
+                    <div class="ribbon-vertical"></div>
                 </div>
             </div>
         </div>
-        
-        <footer>
-            <p data-i18n="footerText">图片加密解密工具 &copy; 2023 | 安全可靠 | 体积友好 | 响应式设计</p>
-        </footer>
-    </div>
-    
-    <div class="notification" id="notification"></div>
-    
-    <div class="theme-selector">
-        <i>🎨</i>
+        <p class="hint-text">点击礼盒，收获温暖 🎁</p>
     </div>
 
     <script>
-        // Language resources
-        const resources = {
-            zh: {
-                // Header
-                "title": "🔐 图片加密解密工具",
-                "subtitle": "安全、高效、体积友好的图片加密解决方案",
-                
-                // Upload section
-                "uploadTitle": "📁 图片上传与预览",
-                "uploadHint": "点击或拖拽图片到此处上传",
-                "uploadFormats": "支持 JPG, PNG, GIF, BMP, WEBP 等所有图片格式",
-                "originalPreview": "原图预览",
-                "originalPlaceholder": "原图将在此显示",
-                "processedPreview": "处理后预览",
-                "processedPlaceholder": "处理后图片将在此显示",
-                "fileName": "文件名称",
-                "imageSize": "图片尺寸",
-                "fileSize": "文件大小",
-                "encryptionLevel": "加密强度:",
-                "processStatus": "处理状态:",
-                "ready": "准备就绪",
-                "encryptionStatus": "加密状态:",
-                "notEncrypted": "未加密",
-                "encrypted": "已加密",
-                
-                // Controls section
-                "controlsTitle": "🔧 加密解密控制",
-                "passwordLabel": "加密密码",
-                "passwordPlaceholder": "输入加密密码",
-                "algorithmLabel": "加密算法",
-                "xorAlgorithm": "XOR加密 (轻量级)",
-                "aesAlgorithm": "AES加密 (安全级)",
-                "rc4Algorithm": "RC4流加密",
-                "chaosAlgorithm": "混沌加密",
-                "customAlgorithm": "自定义算法",
-                "strengthLabel": "加密强度",
-                
-                // Custom algorithm panel
-                "encryptTab": "加密函数",
-                "decryptTab": "解密函数",
-                "exampleTab": "算法示例",
-                "customEncryptLabel": "自定义加密函数:",
-                "customEncryptPlaceholder": "输入自定义加密函数，格式: function encrypt(data, password, strength) { ... }",
-                "customEncryptInfo": "函数参数说明:\n    <ul>\n        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>\n        <li><code>password</code>: 字符串，用户输入的密码</li>\n        <li><code>strength</code>: 数字，加密强度(1-10)</li>\n    </ul>\n    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。",
-                "customDecryptLabel": "自定义解密函数:",
-                "customDecryptPlaceholder": "输入自定义解密函数，格式: function decrypt(data, password, strength) { ... }",
-                "customDecryptInfo": "函数参数说明:\n    <ul>\n        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>\n        <li><code>password</code>: 字符串，用户输入的密码</li>\n        <li><code>strength</code>: 数字，加密强度(1-10)</li>\n    </ul>\n    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。",
-                "exampleLabel": "算法示例:",
-                "algorithmExample": "// XOR加密算法示例\nfunction encrypt(data, password, strength) {\n    const passwordLength = password.length;\n    const keyMultiplier = strength * 10;\n    \n    for (let i = 0; i < data.data.length; i += 4) {\n        const charIndex = (i / 4) % passwordLength;\n        const key = password.charCodeAt(charIndex) * keyMultiplier;\n        \n        data.data[i] = data.data[i] ^ key;     // R\n        data.data[i+1] = data.data[i+1] ^ key; // G\n        data.data[i+2] = data.data[i+2] ^ key; // B\n    }\n}\n\n// XOR解密算法示例\nfunction decrypt(data, password, strength) {\n    // XOR加密和解密使用相同的算法\n    encrypt(data, password, strength);\n}",
-                
-                // Buttons
-                "encryptBtn": "🔒 加密图片",
-                "decryptBtn": "🔓 解密图片",
-                "saveBtn": "💾 保存图片",
-                "resetBtn": "🔄 重置",
-                
-                // Advanced settings
-                "advancedTitle": "⚙️ 高级设置",
-                "compressionLabel": "压缩级别",
-                "noCompression": "无压缩",
-                "lightCompression": "轻度压缩",
-                "mediumCompression": "中度压缩",
-                "heavyCompression": "重度压缩",
-                "formatLabel": "输出格式",
-                "originalFormat": "保持原格式",
-                "pngFormat": "PNG",
-                "jpegFormat": "JPEG",
-                "webpFormat": "WebP",
-                "autoSaveLabel": "自动保存",
-                "disabled": "关闭",
-                "enabled": "开启",
-                "historySizeLabel": "历史记录数量",
-                "fiveItems": "5条",
-                "tenItems": "10条",
-                "twentyItems": "20条",
-                "watermarkLabel": "为加密图片添加水印",
-                "metadataLabel": "保留图片元数据",
-                "optimizeLabel": "自动优化图片大小",
-                "loggingLabel": "启用详细日志记录",
-                
-                // History
-                "historyTitle": "📋 处理历史",
-                "noHistory": "暂无历史记录",
-                
-                // Footer
-                "footerText": "图片加密解密工具 &copy; 2023 | 安全可靠 | 体积友好 | 响应式设计",
-                
-                // Notifications
-                "uploadSuccess": "图片上传成功！",
-                "uploadError": "请选择图片文件",
-                "passwordError": "请输入加密密码",
-                "encryptSuccess": "图片加密成功！",
-                "decryptSuccess": "图片解密成功！",
-                "saveSuccess": "图片保存成功！",
-                "resetSuccess": "工具重置成功",
-                "encrypting": "正在加密图片...",
-                "decrypting": "正在解密图片..."
-            },
-            en: {
-                // Header
-                "title": "🔐 Image Encryption Tool",
-                "subtitle": "Secure, efficient, and size-friendly image encryption solution",
-                
-                // Upload section
-                "uploadTitle": "📁 Image Upload & Preview",
-                "uploadHint": "Click or drag & drop image here",
-                "uploadFormats": "Supports JPG, PNG, GIF, BMP, WEBP and all image formats",
-                "originalPreview": "Original Image",
-                "originalPlaceholder": "Original image will appear here",
-                "processedPreview": "Processed Image",
-                "processedPlaceholder": "Processed image will appear here",
-                "fileName": "File Name",
-                "imageSize": "Dimensions",
-                "fileSize": "File Size",
-                "encryptionLevel": "Encryption Level:",
-                "processStatus": "Processing Status:",
-                "ready": "Ready",
-                "encryptionStatus": "Encryption Status:",
-                "notEncrypted": "Not Encrypted",
-                "encrypted": "Encrypted",
-                
-                // Controls section
-                "controlsTitle": "🔧 Encryption & Decryption Controls",
-                "passwordLabel": "Encryption Password",
-                "passwordPlaceholder": "Enter encryption password",
-                "algorithmLabel": "Encryption Algorithm",
-                "xorAlgorithm": "XOR (Lightweight)",
-                "aesAlgorithm": "AES (Secure)",
-                "rc4Algorithm": "RC4 Stream Cipher",
-                "chaosAlgorithm": "Chaos Encryption",
-                "customAlgorithm": "Custom Algorithm",
-                "strengthLabel": "Encryption Strength",
-                
-                // Custom algorithm panel
-                "encryptTab": "Encryption Function",
-                "decryptTab": "Decryption Function",
-                "exampleTab": "Algorithm Example",
-                "customEncryptLabel": "Custom Encryption Function:",
-                "customEncryptPlaceholder": "Enter custom encryption function: function encrypt(data, password, strength) { ... }",
-                "customEncryptInfo": "Function Parameters:\n    <ul>\n        <li><code>data</code>: ImageData object containing pixel data</li>\n        <li><code>password</code>: String, user-entered password</li>\n        <li><code>strength</code>: Number, encryption strength (1-10)</li>\n    </ul>\n    The function should directly modify the <code>data</code> object's pixel data, no return value needed.",
-                "customDecryptLabel": "Custom Decryption Function:",
-                "customDecryptPlaceholder": "Enter custom decryption function: function decrypt(data, password, strength) { ... }",
-                "customDecryptInfo": "Function Parameters:\n    <ul>\n        <li><code>data</code>: ImageData object containing pixel data</li>\n        <li><code>password</code>: String, user-entered password</li>\n        <li><code>strength</code>: Number, encryption strength (1-10)</li>\n    </ul>\n    The function should directly modify the <code>data</code> object's pixel data, no return value needed.",
-                "exampleLabel": "Algorithm Example:",
-                "algorithmExample": "// XOR Encryption Algorithm Example\nfunction encrypt(data, password, strength) {\n    const passwordLength = password.length;\n    const keyMultiplier = strength * 10;\n    \n    for (let i = 0; i < data.data.length; i += 4) {\n        const charIndex = (i / 4) % passwordLength;\n        const key = password.charCodeAt(charIndex) * keyMultiplier;\n        \n        data.data[i] = data.data[i] ^ key;     // R\n        data.data[i+1] = data.data[i+1] ^ key; // G\n        data.data[i+2] = data.data[i+2] ^ key; // B\n    }\n}\n\n// XOR Decryption Algorithm Example\nfunction decrypt(data, password, strength) {\n    // XOR encryption and decryption use the same algorithm\n    encrypt(data, password, strength);\n}",
-                
-                // Buttons
-                "encryptBtn": "🔒 Encrypt Image",
-                "decryptBtn": "🔓 Decrypt Image",
-                "saveBtn": "💾 Save Image",
-                "resetBtn": "🔄 Reset",
-                
-                // Advanced settings
-                "advancedTitle": "⚙️ Advanced Settings",
-                "compressionLabel": "Compression Level",
-                "noCompression": "No Compression",
-                "lightCompression": "Light Compression",
-                "mediumCompression": "Medium Compression",
-                "heavyCompression": "Heavy Compression",
-                "formatLabel": "Output Format",
-                "originalFormat": "Keep Original",
-                "pngFormat": "PNG",
-                "jpegFormat": "JPEG",
-                "webpFormat": "WebP",
-                "autoSaveLabel": "Auto Save",
-                "disabled": "Disabled",
-                "enabled": "Enabled",
-                "historySizeLabel": "History Size",
-                "fiveItems": "5 items",
-                "tenItems": "10 items",
-                "twentyItems": "20 items",
-                "watermarkLabel": "Add Watermark to Encrypted Images",
-                "metadataLabel": "Preserve Image Metadata",
-                "optimizeLabel": "Auto Optimize Image Size",
-                "loggingLabel": "Enable Detailed Logging",
-                
-                // History
-                "historyTitle": "📋 Processing History",
-                "noHistory": "No history available",
-                
-                // Footer
-                "footerText": "Image Encryption Tool &copy; 2023 | Secure | Efficient | Responsive Design",
-                
-                // Notifications
-                "uploadSuccess": "Image uploaded successfully!",
-                "uploadError": "Please select an image file",
-                "passwordError": "Please enter an encryption password",
-                "encryptSuccess": "Image encrypted successfully!",
-                "decryptSuccess": "Image decrypted successfully!",
-                "saveSuccess": "Image saved successfully!",
-                "resetSuccess": "Tool reset successfully",
-                "encrypting": "Encrypting image...",
-                "decrypting": "Decrypting image..."
-            }
-        };
+        // 温暖的话语集合
+        const warmMessages = [
+            "愿你温暖如春 🌸",
+            "每一天都充满希望 ✨",
+            "你比自己想象的更强大 💪",
+            "慢慢来，一切都会好的 🌈",
+            "今天也要开心哦 😊",
+            "你值得所有美好 🌟",
+            "保持微笑，拥抱阳光 ☀️",
+            "相信自己，你很棒 👏",
+            "温柔的你，值得被温柔对待 💕",
+            "每个瞬间都是新的开始 🌅",
+            "愿你被世界温柔以待 🤗",
+            "你的笑容是最美的风景 😄",
+            "保持热爱，奔赴山海 🌊",
+            "星光不问赶路人 ⭐",
+            "愿所有美好如期而至 🎊",
+            "你是独一无二的存在 🦋",
+            "慢慢变好，是给自己最好的礼物 🎁",
+            "做自己的小太阳 🌞",
+            "温暖常伴，幸福常在 💝",
+            "每一步都算数 👣",
+            "你的善良会被看见 👀",
+            "保持好奇，保持热情 🔥",
+            "愿你眼中有光，心中有梦 💫",
+            "慢下来，感受生活 🍃",
+            "你已经做得很好了 👍",
+            "勇敢做自己 🦁",
+            "温柔且坚定地前行 🚀",
+            "世界因你而更美好 🌍",
+            "保持初心，不忘梦想 💭",
+            "每一天都值得期待 📅"
+        ];
 
-        // Core functionality implementation
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const fileInput = document.getElementById('fileInput');
-            const uploadArea = document.getElementById('uploadArea');
-            const originalPreview = document.getElementById('originalPreview');
-            const processedPreview = document.getElementById('processedPreview');
-            const encryptBtn = document.getElementById('encryptBtn');
-            const decryptBtn = document.getElementById('decryptBtn');
-            const saveBtn = document.getElementById('saveBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const notification = document.getElementById('notification');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            const encryptionStrength = document.getElementById('encryptionStrength');
-            const strengthIndicator = document.getElementById('strengthIndicator');
-            const encryptionLevel = document.getElementById('encryptionLevel');
-            const algorithmSelect = document.getElementById('algorithm');
-            const customAlgorithmPanel = document.getElementById('customAlgorithmPanel');
-            const customEncrypt = document.getElementById('customEncrypt');
-            const customDecrypt = document.getElementById('customDecrypt');
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const encryptionStatus = document.getElementById('encryptionStatus');
-            const fileName = document.getElementById('fileName');
-            const imageSize = document.getElementById('imageSize');
-            const fileSize = document.getElementById('fileSize');
-            const processStatus = document.getElementById('processStatus');
-            const langButtons = document.querySelectorAll('.lang-btn');
-            
-            // State variables
-            let originalImage = null;
-            let processedImage = null;
-            let currentFile = null;
-            let encryptionHistory = JSON.parse(localStorage.getItem('encryptionHistory')) || [];
-            let encryptionCanvas = document.createElement('canvas');
-            let encryptionCtx = encryptionCanvas.getContext('2d');
-            let isImageEncrypted = false;
-            let currentLanguage = 'zh'; // Default language
-            
-            // Initialize
-            updateHistoryPanel();
-            updateLanguage(currentLanguage);
-            
-            // Language switcher
-            langButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const lang = this.getAttribute('data-lang');
-                    currentLanguage = lang;
-                    updateLanguage(lang);
-                    
-                    // Update active button
-                    langButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
-            // Update language function
-            function updateLanguage(lang) {
-                // Update all elements with data-i18n attribute
-                document.querySelectorAll('[data-i18n]').forEach(element => {
-                    const key = element.getAttribute('data-i18n');
-                    if (resources[lang][key]) {
-                        element.innerHTML = resources[lang][key];
-                    }
-                });
-                
-                // Update placeholder texts
-                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-                    const key = element.getAttribute('data-i18n-placeholder');
-                    if (resources[lang][key]) {
-                        element.setAttribute('placeholder', resources[lang][key]);
-                    }
-                });
-                
-                // Update select options
-                document.querySelectorAll('select option').forEach(option => {
-                    if (option.getAttribute('data-i18n')) {
-                        const key = option.getAttribute('data-i18n');
-                        if (resources[lang][key]) {
-                            option.textContent = resources[lang][key];
-                        }
-                    }
-                });
-                
-                // Update encryption status
-                updateEncryptionStatus(isImageEncrypted);
-            }
-            
-            // Upload area events
-            uploadArea.addEventListener('click', () => fileInput.click());
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                
-                if (e.dataTransfer.files.length) {
-                    handleFileSelect(e.dataTransfer.files[0]);
-                }
-            });
-            
-            // File selection event
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-            
-            // Algorithm selection event
-            algorithmSelect.addEventListener('change', function() {
-                if (this.value === 'custom') {
-                    customAlgorithmPanel.style.display = 'block';
-                } else {
-                    customAlgorithmPanel.style.display = 'none';
-                }
-            });
-            
-            // Tab switching events
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // Remove active class from all tabs
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(tc => tc.classList.remove('active'));
-                    
-                    // Add active class to current tab
-                    this.classList.add('active');
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
-                });
-            });
-            
-            // Button events
-            encryptBtn.addEventListener('click', encryptImage);
-            decryptBtn.addEventListener('click', decryptImage);
-            saveBtn.addEventListener('click', saveImage);
-            resetBtn.addEventListener('click', resetTool);
-            
-            // Encryption strength slider event
-            encryptionStrength.addEventListener('input', function() {
-                const value = this.value;
-                strengthIndicator.style.width = `${value * 10}%`;
-            });
-            
-            // Handle file selection
-            function handleFileSelect(file) {
-                if (!file.type.match('image.*')) {
-                    showNotification(resources[currentLanguage]['uploadError'], 'error');
-                    return;
-                }
-                
-                currentFile = file;
-                updateFileInfo(file);
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    originalImage = new Image();
-                    originalImage.onload = () => {
-                        // Clear preview area and add image
-                        originalPreview.innerHTML = '';
-                        originalPreview.appendChild(originalImage);
-                        
-                        // Reset processed preview
-                        processedPreview.innerHTML = `<span>${resources[currentLanguage]['processedPlaceholder']}</span>`;
-                        processedImage = null;
-                        
-                        processStatus.textContent = resources[currentLanguage]['ready'];
-                        updateEncryptionStatus(false);
-                        
-                        // Enable encrypt button
-                        encryptBtn.disabled = false;
-                        
-                        showNotification(resources[currentLanguage]['uploadSuccess'], 'success');
-                    };
-                    originalImage.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-            
-            // Update file information
-            function updateFileInfo(file) {
-                fileName.textContent = file.name;
-                fileSize.textContent = formatFileSize(file.size);
-                
-                // Get image dimensions
-                const img = new Image();
-                img.onload = function() {
-                    imageSize.textContent = `${this.width} × ${this.height}`;
-                };
-                img.src = URL.createObjectURL(file);
-            }
-            
-            // Update encryption status display
-            function updateEncryptionStatus(encrypted) {
-                isImageEncrypted = encrypted;
-                if (encrypted) {
-                    encryptionStatus.textContent = resources[currentLanguage]['encrypted'];
-                    encryptionStatus.className = 'encryption-status encrypted';
-                    decryptBtn.disabled = false;
-                } else {
-                    encryptionStatus.textContent = resources[currentLanguage]['notEncrypted'];
-                    encryptionStatus.className = 'encryption-status not-encrypted';
-                    decryptBtn.disabled = true;
-                }
-            }
-            
-            // Encrypt image
-            function encryptImage() {
-                if (!originalImage) {
-                    showNotification(resources[currentLanguage]['uploadError'], 'error');
-                    return;
-                }
-                
-                const password = document.getElementById('password').value;
-                if (!password) {
-                    showNotification(resources[currentLanguage]['passwordError'], 'error');
-                    return;
-                }
-                
-                // Show progress bar
-                progressBar.style.display = 'block';
-                progressFill.style.width = '0%';
-                
-                // Show encryption in progress
-                showNotification(resources[currentLanguage]['encrypting'], 'success');
-                processStatus.textContent = resources[currentLanguage]['encrypting'];
-                
-                // Get encryption strength
-                const strength = parseInt(encryptionStrength.value);
-                
-                // Simulate processing progress
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 5;
-                    progressFill.style.width = `${progress}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(progressInterval);
-                        
-                        // Perform actual encryption
-                        performEncryption(password, strength);
-                        
-                        processStatus.textContent = resources[currentLanguage]['encrypted'];
-                        encryptionLevel.style.width = `${strength * 10}%`;
-                        updateEncryptionStatus(true);
-                        
-                        // Add to history
-                        addToHistory(currentFile.name, 'Encryption');
-                        
-                        showNotification(resources[currentLanguage]['encryptSuccess'], 'success');
-                        
-                        // Hide progress bar
-                        setTimeout(() => {
-                            progressBar.style.display = 'none';
-                        }, 1000);
-                    }
-                }, 100);
-            }
-            
-            // Perform actual encryption
-            function performEncryption(password, strength) {
-                // Set canvas dimensions
-                encryptionCanvas.width = originalImage.width;
-                encryptionCanvas.height = originalImage.height;
-                
-                // Draw original image to canvas
-                encryptionCtx.drawImage(originalImage, 0, 0);
-                
-                // Get image data
-                const imageData = encryptionCtx.getImageData(0, 0, encryptionCanvas.width, encryptionCanvas.height);
-                
-                // Perform encryption based on selected algorithm
-                const algorithm = document.getElementById('algorithm').value;
-                
-                switch(algorithm) {
-                    case 'xor':
-                        xorEncrypt(imageData, password, strength);
-                        break;
-                    case 'aes':
-                        simulateAESEncrypt(imageData, password, strength);
-                        break;
-                    case 'rc4':
-                        rc4Encrypt(imageData, password, strength);
-                        break;
-                    case 'chaos':
-                        chaosEncrypt(imageData, password, strength);
-                        break;
-                    case 'custom':
-                        // Use custom algorithm
-                        try {
-                            const customEncryptFunc = new Function('data', 'password', 'strength', customEncrypt.value);
-                            customEncryptFunc(imageData, password, strength);
-                        } catch (e) {
-                            showNotification('Custom encryption function error: ' + e.message, 'error');
-                            return;
-                        }
-                        break;
-                    default:
-                        // Default to XOR encryption
-                        xorEncrypt(imageData, password, strength);
-                }
-                
-                // Put processed data back to canvas
-                encryptionCtx.putImageData(imageData, 0, 0);
-                
-                // Add watermark if enabled
-                if (document.getElementById('addWatermark').checked) {
-                    addWatermark();
-                }
-                
-                // Create new image to display result
-                processedImage = new Image();
-                processedImage.src = encryptionCanvas.toDataURL();
-                
-                // Update preview
-                processedPreview.innerHTML = '';
-                processedPreview.appendChild(processedImage);
-            }
-            
-            // XOR encryption algorithm
-            function xorEncrypt(imageData, password, strength) {
-                const data = imageData.data;
-                const passwordLength = password.length;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    // Apply XOR operation to each pixel's RGB channels
-                    const charIndex = (i / 4) % passwordLength;
-                    const key = password.charCodeAt(charIndex) * strength;
-                    
-                    data[i] = data[i] ^ key;     // R
-                    data[i+1] = data[i+1] ^ key; // G
-                    data[i+2] = data[i+2] ^ key; // B
-                    // Don't modify Alpha channel
-                }
-            }
-            
-            // Simulated AES encryption
-            function simulateAESEncrypt(imageData, password, strength) {
-                const data = imageData.data;
-                const passwordLength = password.length;
-                const blockSize = 16; // Simulate AES block size
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    // Apply more complex transformations to each pixel
-                    const blockIndex = Math.floor((i / 4) / blockSize);
-                    const charIndex = blockIndex % passwordLength;
-                    const key = password.charCodeAt(charIndex) * strength;
-                    
-                    // Apply different transformations to each color channel
-                    data[i] = (data[i] + key) % 256;     // R
-                    data[i+1] = (data[i+1] - key + 256) % 256; // G
-                    data[i+2] = (data[i+2] ^ key);       // B
-                    
-                    // Add additional obfuscation
-                    if (i % 3 === 0) {
-                        const temp = data[i];
-                        data[i] = data[i+1];
-                        data[i+1] = temp;
-                    }
-                }
-            }
-            
-            // RC4 stream encryption
-            function rc4Encrypt(imageData, password, strength) {
-                const data = imageData.data;
-                
-                // RC4 key scheduling algorithm
-                const s = [];
-                for (let i = 0; i < 256; i++) {
-                    s[i] = i;
-                }
-                
-                let j = 0;
-                for (let i = 0; i < 256; i++) {
-                    j = (j + s[i] + password.charCodeAt(i % password.length)) % 256;
-                    [s[i], s[j]] = [s[j], s[i]];
-                }
-                
-                // RC4 pseudo-random generation algorithm
-                let i = 0;
-                j = 0;
-                for (let k = 0; k < data.length; k++) {
-                    i = (i + 1) % 256;
-                    j = (j + s[i]) % 256;
-                    [s[i], s[j]] = [s[j], s[i]];
-                    const key = s[(s[i] + s[j]) % 256];
-                    
-                    // Apply XOR operation to each byte
-                    data[k] = data[k] ^ key;
-                }
-            }
-            
-            // Chaos encryption
-            function chaosEncrypt(imageData, password, strength) {
-                const data = imageData.data;
-                
-                // Use Logistic chaotic mapping to generate key stream
-                let x = password.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) / (password.length * 256);
-                const r = 3.9; // Chaos parameter
-                
-                for (let i = 0; i < data.length; i++) {
-                    // Generate chaotic sequence
-                    x = r * x * (1 - x);
-                    const key = Math.floor(x * 256);
-                    
-                    // Apply XOR operation to each byte
-                    data[i] = data[i] ^ key;
-                }
-            }
-            
-            // Add watermark to encrypted image
-            function addWatermark() {
-                encryptionCtx.font = 'bold 20px Arial';
-                encryptionCtx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                encryptionCtx.textAlign = 'center';
-                encryptionCtx.textBaseline = 'middle';
-                encryptionCtx.save();
-                encryptionCtx.translate(encryptionCanvas.width / 2, encryptionCanvas.height / 2);
-                encryptionCtx.rotate(-Math.PI / 6);
-                encryptionCtx.fillText('ENCRYPTED', 0, 0);
-                encryptionCtx.restore();
-            }
-            
-            // Decrypt image
-            function decryptImage() {
-                if (!processedImage && !isImageEncrypted) {
-                    showNotification('Please encrypt an image first', 'error');
-                    return;
-                }
-                
-                const password = document.getElementById('password').value;
-                if (!password) {
-                    showNotification(resources[currentLanguage]['passwordError'], 'error');
-                    return;
-                }
-                
-                // Show progress bar
-                progressBar.style.display = 'block';
-                progressFill.style.width = '0%';
-                
-                // Show decryption in progress
-                showNotification(resources[currentLanguage]['decrypting'], 'success');
-                processStatus.textContent = resources[currentLanguage]['decrypting'];
-                
-                // Simulate processing progress
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += 5;
-                    progressFill.style.width = `${progress}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(progressInterval);
-                        
-                        // Perform actual decryption
-                        performDecryption(password);
-                        
-                        processStatus.textContent = resources[currentLanguage]['ready'];
-                        updateEncryptionStatus(false);
-                        
-                        // Add to history
-                        addToHistory(currentFile.name, 'Decryption');
-                        
-                        showNotification(resources[currentLanguage]['decryptSuccess'], 'success');
-                        
-                        // Hide progress bar
-                        setTimeout(() => {
-                            progressBar.style.display = 'none';
-                        }, 1000);
-                    }
-                }, 100);
-            }
-            
-            // Perform actual decryption
-            function performDecryption(password) {
-                // Set canvas dimensions
-                const imgToDecrypt = processedImage || originalImage;
-                encryptionCanvas.width = imgToDecrypt.width;
-                encryptionCanvas.height = imgToDecrypt.height;
-                
-                // Draw image to decrypt to canvas
-                encryptionCtx.drawImage(imgToDecrypt, 0, 0);
-                
-                // Get image data
-                const imageData = encryptionCtx.getImageData(0, 0, encryptionCanvas.width, encryptionCanvas.height);
-                
-                // Perform decryption based on selected algorithm
-                const algorithm = document.getElementById('algorithm').value;
-                const strength = parseInt(encryptionStrength.value);
-                
-                switch(algorithm) {
-                    case 'xor':
-                        // XOR decryption - same as encryption
-                        xorEncrypt(imageData, password, strength);
-                        break;
-                    case 'aes':
-                        // Simulated AES decryption
-                        simulateAESDecrypt(imageData, password, strength);
-                        break;
-                    case 'rc4':
-                        // RC4 encryption and decryption use same algorithm
-                        rc4Encrypt(imageData, password, strength);
-                        break;
-                    case 'chaos':
-                        // Chaos encryption and decryption use same algorithm
-                        chaosEncrypt(imageData, password, strength);
-                        break;
-                    case 'custom':
-                        // Use custom algorithm
-                        try {
-                            const customDecryptFunc = new Function('data', 'password', 'strength', customDecrypt.value);
-                            customDecryptFunc(imageData, password, strength);
-                        } catch (e) {
-                            showNotification('Custom decryption function error: ' + e.message, 'error');
-                            return;
-                        }
-                        break;
-                    default:
-                        // Default to XOR decryption
-                        xorEncrypt(imageData, password, strength);
-                }
-                
-                // Put processed data back to canvas
-                encryptionCtx.putImageData(imageData, 0, 0);
-                
-                // Create new image to display result
-                processedImage = new Image();
-                processedImage.src = encryptionCanvas.toDataURL();
-                
-                // Update preview
-                processedPreview.innerHTML = '';
-                processedPreview.appendChild(processedImage);
-            }
-            
-            // Simulated AES decryption
-            function simulateAESDecrypt(imageData, password, strength) {
-                const data = imageData.data;
-                const passwordLength = password.length;
-                const blockSize = 16;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    const blockIndex = Math.floor((i / 4) / blockSize);
-                    const charIndex = blockIndex % passwordLength;
-                    const key = password.charCodeAt(charIndex) * strength;
-                    
-                    // Reverse operations to restore original image
-                    if (i % 3 === 0) {
-                        const temp = data[i];
-                        data[i] = data[i+1];
-                        data[i+1] = temp;
-                    }
-                    
-                    data[i+2] = (data[i+2] ^ key);
-                    data[i+1] = (data[i+1] + key) % 256;
-                    data[i] = (data[i] - key + 256) % 256;
-                }
-            }
-            
-            // Save image
-            function saveImage() {
-                if (!processedImage) {
-                    showNotification('No image to save', 'error');
-                    return;
-                }
-                
-                // Create virtual link for download
-                const canvas = document.createElement('canvas');
-                canvas.width = processedImage.width;
-                canvas.height = processedImage.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(processedImage, 0, 0);
-                
-                canvas.toBlob((blob) => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `processed_${currentFile.name}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    
-                    showNotification(resources[currentLanguage]['saveSuccess'], 'success');
-                });
-            }
-            
-            // Reset tool
-            function resetTool() {
-                fileInput.value = '';
-                originalPreview.innerHTML = `<span>${resources[currentLanguage]['originalPlaceholder']}</span>`;
-                processedPreview.innerHTML = `<span>${resources[currentLanguage]['processedPlaceholder']}</span>`;
-                document.getElementById('password').value = '';
-                processStatus.textContent = resources[currentLanguage]['ready'];
-                fileName.textContent = '-';
-                imageSize.textContent = '-';
-                fileSize.textContent = '-';
-                encryptionLevel.style.width = '0%';
-                strengthIndicator.style.width = '50%';
-                encryptionStrength.value = 5;
-                algorithmSelect.value = 'xor';
-                customAlgorithmPanel.style.display = 'none';
-                customEncrypt.value = '';
-                customDecrypt.value = '';
-                originalImage = null;
-                processedImage = null;
-                currentFile = null;
-                progressBar.style.display = 'none';
-                updateEncryptionStatus(false);
-                
-                showNotification(resources[currentLanguage]['resetSuccess'], 'success');
-            }
-            
-            // Add to history
-            function addToHistory(fileName, operation) {
-                const historyItem = {
-                    id: Date.now(),
-                    name: fileName,
-                    operation: operation,
-                    date: new Date().toLocaleString()
-                };
-                
-                encryptionHistory.unshift(historyItem);
-                
-                // Limit history size
-                const historySize = parseInt(document.getElementById('historySize').value);
-                if (encryptionHistory.length > historySize) {
-                    encryptionHistory = encryptionHistory.slice(0, historySize);
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('encryptionHistory', JSON.stringify(encryptionHistory));
-                
-                // Update display
-                updateHistoryPanel();
-            }
-            
-            // Update history panel
-            function updateHistoryPanel() {
-                const historyPanel = document.getElementById('historyPanel');
-                historyPanel.innerHTML = '';
-                
-                if (encryptionHistory.length === 0) {
-                    historyPanel.innerHTML = `<div class="history-item"><div class="history-name">${resources[currentLanguage]['noHistory']}</div></div>`;
-                    return;
-                }
-                
-                encryptionHistory.forEach(item => {
-                    const historyItem = document.createElement('div');
-                    historyItem.className = 'history-item';
-                    historyItem.innerHTML = `
-                        <div class="history-name">${item.operation}: ${item.name}</div>
-                        <div class="history-date">${item.date}</div>
-                    `;
-                    historyItem.addEventListener('click', () => {
-                        showNotification(`Selected history: ${item.name}`, 'success');
-                    });
-                    historyPanel.appendChild(historyItem);
-                });
-            }
-            
-            // Show notification
-            function showNotification(message, type) {
-                notification.textContent = message;
-                notification.className = `notification ${type} show`;
-                
+        // 创建雪花
+        function createSnowflakes() {
+            for (let i = 0; i < 30; i++) {
                 setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
+                    const snowflake = document.createElement('div');
+                    snowflake.className = 'snowflake';
+                    snowflake.style.left = Math.random() * 100 + '%';
+                    snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                    snowflake.style.animationDelay = Math.random() * 5 + 's';
+                    snowflake.style.width = snowflake.style.height = (Math.random() * 8 + 4) + 'px';
+                    document.body.appendChild(snowflake);
+
+                    setTimeout(() => snowflake.remove(), 10000);
+                }, i * 200);
             }
+        }
+
+        // 初始化雪花
+        createSnowflakes();
+        setInterval(createSnowflakes, 6000);
+
+        // 礼盒点击事件
+        const giftBox = document.getElementById('giftBox');
+        let clickCount = 0;
+
+        giftBox.addEventListener('click', function(e) {
+            // 添加打开动画
+            this.classList.add('opened');
+            setTimeout(() => this.classList.remove('opened'), 600);
+
+            // 创建多个温暖话语
+            const messageCount = Math.floor(Math.random() * 5) + 8; // 8-12条消息
             
-            // Format file size
-            function formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            for (let i = 0; i < messageCount; i++) {
+                setTimeout(() => {
+                    createWarmMessage(e);
+                }, i * 150);
             }
+
+            clickCount++;
+        });
+
+        function createWarmMessage(e) {
+            const message = document.createElement('div');
+            message.className = 'warm-message';
             
-            // Theme switcher
-            document.querySelector('.theme-selector').addEventListener('click', function() {
-                document.body.classList.toggle('dark-theme');
-                showNotification('Theme switched', 'success');
-            });
+            // 随机选择一条温暖的话
+            const randomMessage = warmMessages[Math.floor(Math.random() * warmMessages.length)];
+            message.textContent = randomMessage;
+
+            // 随机位置偏移
+            const offsetX = (Math.random() - 0.5) * 300;
+            const offsetY = (Math.random() - 0.5) * 100;
+            const rect = giftBox.getBoundingClientRect();
+            
+            message.style.left = (rect.left + rect.width / 2 + offsetX) + 'px';
+            message.style.top = (rect.top + rect.height / 2 + offsetY) + 'px';
+
+            // 随机旋转角度
+            const rotateEnd = (Math.random() - 0.5) * 60;
+            message.style.setProperty('--rotate-end', rotateEnd + 'deg');
+
+            // 随机颜色
+            const colors = [
+                '#FFD700', '#FF69B4', '#87CEEB', '#98FB98', 
+                '#FFA07A', '#DDA0DD', '#F0E68C', '#AFEEEE'
+            ];
+            message.style.color = colors[Math.floor(Math.random() * colors.length)];
+
+            document.body.appendChild(message);
+
+            // 4秒后移除
+            setTimeout(() => message.remove(), 4000);
+        }
+
+        // 添加键盘空格键支持
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                giftBox.click();
+            }
         });
     </script>
 </body>
