@@ -18,50 +18,52 @@
       padding:20px;
     }
     .container {
-      max-width:480px;
+      max-width:900px;
       width:100%;
       background:#fff;
-      box-shadow:0 4px 24px rgba(6,122,253,0.12);
-      border-radius:16px;
-      padding:36px 32px;
+      box-shadow:0 8px 32px rgba(6,122,253,0.15);
+      border-radius:20px;
+      padding:40px 36px;
     }
     h1 {
       text-align:center;
       color:#067afd;
-      font-size:1.8em;
+      font-size:2em;
       margin:0 0 8px 0;
       letter-spacing:0.5px;
     }
     .subtitle {
       text-align:center;
       color:#5a8cc7;
-      font-size:0.9em;
-      margin:0 0 28px 0;
+      font-size:0.95em;
+      margin:0 0 32px 0;
     }
     .tab-buttons {
       display:flex;
-      gap:8px;
-      margin-bottom:24px;
+      gap:10px;
+      margin-bottom:28px;
     }
     .tab-btn {
       flex:1;
-      padding:12px;
+      padding:14px;
       border:none;
       background:#e3f2fd;
       color:#067afd;
       font-weight:600;
-      border-radius:8px;
+      border-radius:10px;
       cursor:pointer;
-      transition:all 0.2s;
-      font-size:0.95em;
+      transition:all 0.3s;
+      font-size:1em;
     }
     .tab-btn.active {
-      background:#067afd;
+      background:linear-gradient(135deg, #067afd 0%, #0561d4 100%);
       color:#fff;
-      box-shadow:0 2px 8px rgba(6,122,253,0.3);
+      box-shadow:0 4px 12px rgba(6,122,253,0.4);
+      transform:translateY(-2px);
     }
     .tab-btn:hover:not(.active) {
       background:#cce7ff;
+      transform:translateY(-1px);
     }
     .tab-content {
       display:none;
@@ -69,60 +71,186 @@
     .tab-content.active {
       display:block;
     }
+    
+    /* 双栏布局 */
+    .content-wrapper {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:24px;
+      margin-bottom:20px;
+    }
+    
+    /* 左侧表单区域 */
+    .form-section {
+      display:flex;
+      flex-direction:column;
+    }
+    
     .form-group {
-      margin-bottom:16px;
+      margin-bottom:18px;
     }
     label {
       display:block;
-      margin-bottom:6px;
+      margin-bottom:8px;
       color:#0d3879;
-      font-weight:500;
-      font-size:0.92em;
+      font-weight:600;
+      font-size:0.95em;
     }
     input[type="file"], input[type="password"], input[type="text"] {
       width:100%;
-      padding:12px 14px;
+      padding:13px 16px;
       border:2px solid #d7e8ff;
-      border-radius:8px;
+      border-radius:10px;
       font-size:0.95em;
       background:#f9fcff;
-      transition:all 0.2s;
+      transition:all 0.3s;
       color:#0d3879;
     }
     input[type="file"]:focus, input[type="password"]:focus, input[type="text"]:focus {
       outline:none;
       border-color:#067afd;
       background:#fff;
+      box-shadow:0 0 0 3px rgba(6,122,253,0.1);
     }
     input[type="password"]::placeholder, input[type="text"]::placeholder {
       color:#9ec5ed;
     }
+    
+    /* 右侧预览区域 */
+    .preview-section {
+      display:flex;
+      flex-direction:column;
+    }
+    .preview-label {
+      margin-bottom:8px;
+      color:#0d3879;
+      font-weight:600;
+      font-size:0.95em;
+    }
+    .preview-container {
+      flex:1;
+      border:2px dashed #d7e8ff;
+      border-radius:10px;
+      background:#f9fcff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:280px;
+      position:relative;
+      overflow:hidden;
+      transition:all 0.3s;
+    }
+    .preview-container.has-image {
+      border-style:solid;
+      border-color:#067afd;
+      background:#fff;
+    }
+    .preview-placeholder {
+      text-align:center;
+      color:#9ec5ed;
+      font-size:0.9em;
+      padding:20px;
+    }
+    .preview-placeholder svg {
+      width:64px;
+      height:64px;
+      margin-bottom:12px;
+      opacity:0.3;
+    }
+    .preview-image {
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      display:none;
+    }
+    .preview-image.show {
+      display:block;
+    }
+    
+    /* 加密状态标记 */
+    .encrypted-badge {
+      position:absolute;
+      top:12px;
+      right:12px;
+      background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color:#fff;
+      padding:6px 14px;
+      border-radius:20px;
+      font-size:0.8em;
+      font-weight:700;
+      box-shadow:0 2px 8px rgba(255,107,107,0.4);
+      display:none;
+      animation:pulse 2s infinite;
+    }
+    .encrypted-badge.show {
+      display:block;
+    }
+    @keyframes pulse {
+      0%, 100% { transform:scale(1); }
+      50% { transform:scale(1.05); }
+    }
+    
+    /* 加密状态遮罩 */
+    .encrypted-overlay {
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      color:#fff;
+    }
+    .encrypted-overlay.show {
+      display:flex;
+    }
+    .encrypted-overlay svg {
+      width:80px;
+      height:80px;
+      margin-bottom:16px;
+      animation:float 3s ease-in-out infinite;
+    }
+    .encrypted-overlay p {
+      font-size:1.1em;
+      font-weight:600;
+      margin:0;
+    }
+    @keyframes float {
+      0%, 100% { transform:translateY(0); }
+      50% { transform:translateY(-10px); }
+    }
+    
     .btn {
       width:100%;
-      padding:14px;
+      padding:16px;
       border:none;
       background:linear-gradient(135deg, #067afd 0%, #0561d4 100%);
       color:#fff;
       font-weight:700;
-      font-size:1em;
-      border-radius:8px;
+      font-size:1.05em;
+      border-radius:10px;
       cursor:pointer;
-      transition:all 0.2s;
-      margin-top:8px;
-      letter-spacing:0.3px;
+      transition:all 0.3s;
+      margin-top:auto;
+      letter-spacing:0.5px;
+      box-shadow:0 4px 12px rgba(6,122,253,0.3);
     }
     .btn:hover {
-      transform:translateY(-1px);
-      box-shadow:0 4px 16px rgba(6,122,253,0.35);
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(6,122,253,0.4);
     }
     .btn:active {
       transform:translateY(0);
     }
     .msg {
-      margin-top:18px;
-      padding:14px;
-      border-radius:8px;
-      font-size:0.9em;
+      margin-top:20px;
+      padding:16px;
+      border-radius:10px;
+      font-size:0.95em;
       display:none;
       animation:slideIn 0.3s ease;
     }
@@ -150,16 +278,22 @@
     }
     .footer {
       text-align:center;
-      margin-top:24px;
+      margin-top:28px;
       color:#7ba3d1;
-      font-size:0.85em;
+      font-size:0.9em;
+      padding-top:20px;
+      border-top:1px solid #e3f2fd;
     }
-    @media (max-width:520px){
+    
+    @media (max-width:768px){
+      .content-wrapper {
+        grid-template-columns:1fr;
+      }
       .container {
-        padding:28px 20px;
+        padding:32px 24px;
       }
       h1 {
-        font-size:1.5em;
+        font-size:1.6em;
       }
     }
   </style>
@@ -167,43 +301,82 @@
 <body>
 <div class="container">
   <h1>🔐 图片加密工具</h1>
-  <p class="subtitle">基于XChaCha20-Poly1305加密算法</p>
+  <p class="subtitle">基于XChaCha20-Poly1305加密算法 · 本地加密 · 安全可靠</p>
 
   <div class="tab-buttons">
-    <button class="tab-btn active" onclick="switchTab('encrypt')">加密</button>
-    <button class="tab-btn" onclick="switchTab('decrypt')">解密</button>
+    <button class="tab-btn active" onclick="switchTab('encrypt')">🔒 加密图片</button>
+    <button class="tab-btn" onclick="switchTab('decrypt')">🔓 解密图片</button>
   </div>
 
   <!-- 加密标签页 -->
   <div id="encrypt-tab" class="tab-content active">
-    <div class="form-group">
-      <label>选择图片文件</label>
-      <input type="file" id="encFile" accept="image/*">
+    <div class="content-wrapper">
+      <!-- 左侧表单 -->
+      <div class="form-section">
+        <div class="form-group">
+          <label>📁 选择图片文件</label>
+          <input type="file" id="encFile" accept="image/*" onchange="previewEncryptImage(this)">
+        </div>
+        <div class="form-group">
+          <label>🔑 设置密码</label>
+          <input type="password" id="encPass" placeholder="请输入强密码(至少6位)">
+        </div>
+        <button class="btn" onclick="encryptFile()">🔒 加密并下载</button>
+      </div>
+      
+      <!-- 右侧预览 -->
+      <div class="preview-section">
+        <div class="preview-label">📷 原图预览</div>
+        <div class="preview-container" id="encPreview">
+          <div class="preview-placeholder">
+            <svg fill="#9ec5ed" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            <p>选择图片后将显示预览</p>
+          </div>
+          <img id="encPreviewImg" class="preview-image" alt="原图预览">
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-      <label>设置密码</label>
-      <input type="password" id="encPass" placeholder="请输入强密码">
-    </div>
-    <button class="btn" onclick="encryptFile()">🔒 加密并下载</button>
   </div>
 
   <!-- 解密标签页 -->
   <div id="decrypt-tab" class="tab-content">
-    <div class="form-group">
-      <label>选择加密文件</label>
-      <input type="file" id="decFile">
+    <div class="content-wrapper">
+      <!-- 左侧表单 -->
+      <div class="form-section">
+        <div class="form-group">
+          <label>📁 选择加密文件</label>
+          <input type="file" id="decFile" onchange="previewDecryptFile(this)">
+        </div>
+        <div class="form-group">
+          <label>🔑 输入密码</label>
+          <input type="password" id="decPass" placeholder="请输入加密时的密码">
+        </div>
+        <button class="btn" onclick="decryptFile()">🔓 解密并下载</button>
+      </div>
+      
+      <!-- 右侧预览 -->
+      <div class="preview-section">
+        <div class="preview-label">🔒 文件预览</div>
+        <div class="preview-container" id="decPreview">
+          <div class="preview-placeholder">
+            <svg fill="#9ec5ed" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <p>选择文件后将显示状态</p>
+          </div>
+          <div class="encrypted-overlay" id="encryptedOverlay">
+            <svg fill="#fff" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <p>🔐 加密文件</p>
+            <p style="font-size:0.85em;margin-top:8px;opacity:0.8;">输入密码后可解密查看</p>
+          </div>
+          <div class="encrypted-badge" id="encryptedBadge">🔐 已加密</div>
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-      <label>输入密码</label>
-      <input type="password" id="decPass" placeholder="请输入加密时的密码">
-    </div>
-    <button class="btn" onclick="decryptFile()">🔓 解密并下载</button>
   </div>
 
   <div id="msg" class="msg"></div>
 
   <div class="footer">
-    安全 · 简洁 · 本地加密 · 数据不上传
+    🛡️ 安全加密 · 💻 本地处理 · 🚫 数据不上传 · ⚡ 快速便捷
   </div>
 </div>
 
@@ -231,6 +404,71 @@ function switchTab(tab) {
     document.getElementById('decrypt-tab').classList.add('active');
   }
   hideMsg();
+  resetPreviews();
+}
+
+function resetPreviews() {
+  // 重置加密预览
+  document.getElementById('encPreview').classList.remove('has-image');
+  document.getElementById('encPreviewImg').classList.remove('show');
+  document.getElementById('encPreviewImg').src = '';
+  
+  // 重置解密预览
+  document.getElementById('decPreview').classList.remove('has-image');
+  document.getElementById('encryptedOverlay').classList.remove('show');
+  document.getElementById('encryptedBadge').classList.remove('show');
+}
+
+function previewEncryptImage(input) {
+  const file = input.files[0];
+  if(file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('encPreviewImg');
+      const container = document.getElementById('encPreview');
+      img.src = e.target.result;
+      img.classList.add('show');
+      container.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function previewDecryptFile(input) {
+  const file = input.files[0];
+  if(file) {
+    const container = document.getElementById('decPreview');
+    const overlay = document.getElementById('encryptedOverlay');
+    const badge = document.getElementById('encryptedBadge');
+    
+    // 检查是否是加密文件（通常以.encrypted结尾）
+    if(file.name.endsWith('.encrypted')) {
+      container.classList.add('has-image');
+      overlay.classList.add('show');
+      badge.classList.add('show');
+    } else {
+      // 如果不是标准加密文件，尝试读取检查
+      checkIfEncrypted(file).then(isEncrypted => {
+        if(isEncrypted) {
+          container.classList.add('has-image');
+          overlay.classList.add('show');
+          badge.classList.add('show');
+        }
+      });
+    }
+  }
+}
+
+async function checkIfEncrypted(file) {
+  // 简单检查文件是否可能是加密文件
+  try {
+    const data = await file.slice(0, 100).arrayBuffer();
+    const dataArray = new Uint8Array(data);
+    // 检查文件长度和基本结构
+    return file.size >= 56 && dataArray.length >= 56;
+  } catch(e) {
+    return false;
+  }
 }
 
 function showMsg(text, type) {
@@ -274,21 +512,21 @@ async function encryptFile() {
   hideMsg();
 
   if(!file) {
-    showMsg('请选择要加密的图片文件', 'error');
+    showMsg('❌ 请选择要加密的图片文件', 'error');
     return;
   }
 
   if(!password || password.length < 6) {
-    showMsg('密码至少需要6个字符', 'error');
+    showMsg('❌ 密码至少需要6个字符', 'error');
     return;
   }
 
   if(!window.cryptoLoaded) {
-    showMsg('加密库加载中，请稍候重试...', 'error');
+    showMsg('⏳ 加密库加载中，请稍候重试...', 'error');
     return;
   }
 
-  showMsg('正在加密，请稍候...', 'info');
+  showMsg('⏳ 正在加密，请稍候...', 'info');
 
   try {
     const data = await file.arrayBuffer();
@@ -312,9 +550,9 @@ async function encryptFile() {
     a.click();
     URL.revokeObjectURL(url);
 
-    showMsg('✓ 加密成功！文件已下载', 'success');
+    showMsg('✅ 加密成功！文件已下载', 'success');
   } catch(err) {
-    showMsg('加密失败: ' + err.message, 'error');
+    showMsg('❌ 加密失败: ' + err.message, 'error');
     console.error(err);
   }
 }
@@ -326,21 +564,21 @@ async function decryptFile() {
   hideMsg();
 
   if(!file) {
-    showMsg('请选择要解密的文件', 'error');
+    showMsg('❌ 请选择要解密的文件', 'error');
     return;
   }
 
   if(!password) {
-    showMsg('请输入密码', 'error');
+    showMsg('❌ 请输入密码', 'error');
     return;
   }
 
   if(!window.cryptoLoaded) {
-    showMsg('加密库加载中，请稍候重试...', 'error');
+    showMsg('⏳ 加密库加载中，请稍候重试...', 'error');
     return;
   }
 
-  showMsg('正在解密，请稍候...', 'info');
+  showMsg('⏳ 正在解密，请稍候...', 'info');
 
   try {
     const data = await file.arrayBuffer();
@@ -378,12 +616,19 @@ async function decryptFile() {
     a.click();
     URL.revokeObjectURL(url);
 
-    showMsg('✓ 解密成功！文件已下载', 'success');
+    showMsg('✅ 解密成功！文件已下载', 'success');
   } catch(err) {
-    showMsg('解密失败: ' + err.message, 'error');
+    showMsg('❌ 解密失败: ' + err.message, 'error');
     console.error(err);
   }
 }
+
+// 暴露函数到全局
+window.switchTab = switchTab;
+window.encryptFile = encryptFile;
+window.decryptFile = decryptFile;
+window.previewEncryptImage = previewEncryptImage;
+window.previewDecryptFile = previewDecryptFile;
 </script>
 </body>
 </html>
