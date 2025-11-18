@@ -2,168 +2,200 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>轻量像素置换加密 Demo（修复可逆）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>图片加密解密 · 绿色气泡 UI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
   <style>
+    /* ============ 全局基础 ============ */
     :root {
-      --bg: #050816;
-      --panel: #0f172a;
-      --panel-light: #111827;
-      --accent: #6366f1;
-      --accent-soft: rgba(99,102,241,0.15);
-      --accent-strong: rgba(129,140,248,0.5);
-      --border-subtle: rgba(148,163,184,0.25);
-      --text-main: #e5e7eb;
-      --text-subtle: #9ca3af;
+      --bg: #02130b;
+      --bg-soft: rgba(5, 46, 22, 0.9);
+      --bubble: rgba(16, 185, 129, 0.16);
+      --bubble-strong: rgba(16, 185, 129, 0.25);
+      --bubble-outline: rgba(110, 231, 183, 0.45);
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.2);
+      --accent-strong: #4ade80;
       --danger: #f97373;
-      --success: #4ade80;
-      --warning: #fbbf24;
+      --text-main: #ecfdf3;
+      --text-soft: #9ca3af;
+      --radius-xl: 24px;
+      --radius-full: 999px;
+      --shadow-soft: 0 18px 45px rgba(6, 95, 70, 0.5);
+      --transition-fast: 0.18s ease-out;
+      --transition-slow: 0.28s cubic-bezier(.22,.61,.36,1);
     }
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: radial-gradient(
-          circle at top left,
-          rgba(56,189,248,0.08),
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at top right,
-          rgba(129,140,248,0.10),
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at bottom,
-          rgba(248,113,113,0.06),
-          transparent 55%
-        ),
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro SC",
+        "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(74, 222, 128, 0.15), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.18), transparent 55%),
+        radial-gradient(circle at 0% 100%, rgba(22, 163, 74, 0.18), transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(21, 128, 61, 0.25), transparent 55%),
         var(--bg);
       color: var(--text-main);
-      min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
     }
 
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 16px 32px;
+    /* ============ 外层容器 / 响应式 ============ */
+    .shell {
+      width: 100%;
+      max-width: 1160px;
+      border-radius: 32px;
+      background: linear-gradient(145deg, rgba(6, 78, 59, 0.92), rgba(2, 44, 34, 0.96));
+      box-shadow: var(--shadow-soft);
+      padding: 18px;
+      border: 1px solid rgba(52, 211, 153, 0.35);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 14px;
+      backdrop-filter: blur(28px) saturate(150%);
     }
 
-    header {
+    @media (min-width: 900px) {
+      .shell {
+        padding: 20px 22px 24px;
+      }
+    }
+
+    .shell-header {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
       gap: 10px;
+      padding: 2px 6px 4px;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .title-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
-    .title-main {
-      display: flex;
+    .chip {
+      display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 7px;
+      padding: 4px 11px;
+      border-radius: var(--radius-full);
+      background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.35), rgba(22, 101, 52, 0.1));
+      border: 1px solid rgba(45, 212, 191, 0.7);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #bbf7d0;
     }
 
-    .logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #e5e7eb, #4b5563);
-      position: relative;
-      box-shadow: 0 0 0 1px rgba(148,163,184,0.2),
-        0 0 18px rgba(129,140,248,0.5);
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: conic-gradient(from 180deg, #22c55e, #4ade80, #a7f3d0, #22c55e);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
     }
 
-    .logo::before,
-    .logo::after {
-      content: "";
-      position: absolute;
-      inset: 4px;
-      border-radius: 50%;
-      border: 1px solid rgba(15,23,42,0.9);
-      pointer-events: none;
-    }
-
-    .logo::after {
-      inset: 9px;
-      border-color: rgba(15,23,42,0.8);
-    }
-
-    h1 {
-      font-size: 20px;
+    .title-main {
+      font-size: 19px;
       font-weight: 650;
       letter-spacing: 0.03em;
-      margin: 0;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
     }
 
-    .badge {
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.5);
-      color: #e5e7eb;
-      background: linear-gradient(
-        to right,
-        rgba(15,23,42,0.9),
-        rgba(30,64,175,0.85)
-      );
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.5);
+    .title-main span.accent {
+      color: var(--accent-strong);
+      text-shadow: 0 0 18px rgba(34, 197, 94, 0.7);
     }
 
     .subtitle {
-      font-size: 13px;
-      color: var(--text-subtle);
-      max-width: 720px;
+      font-size: 12px;
+      color: var(--text-soft);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
     }
 
-    .subtitle strong {
-      color: #e5e7eb;
+    .subtitle-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.55);
+      color: #a5f3fc;
+      font-size: 11px;
+      border: 1px solid rgba(45, 212, 191, 0.4);
     }
 
-    main {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.7);
+      color: #a5f3fc;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #22c55e 0, #166534 38%, transparent 70%);
+      box-shadow: 0 0 14px rgba(22, 163, 74, 0.8);
+    }
+
+    /* ============ 主布局 ============ */
+    .layout {
       display: grid;
-      grid-template-columns: minmax(0, 340px) minmax(0, 1.1fr);
-      gap: 18px;
-      align-items: flex-start;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+      gap: 14px;
+      align-items: stretch;
     }
 
-    @media (max-width: 880px) {
-      main {
+    @media (max-width: 900px) {
+      .layout {
         grid-template-columns: minmax(0, 1fr);
       }
     }
 
+    /* ============ 左侧：控制与信息 ============ */
     .panel {
-      border-radius: 18px;
-      background: radial-gradient(
-          circle at top left,
-          rgba(30,64,175,0.35),
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at bottom right,
-          rgba(15,23,42,0.9),
-          rgba(15,23,42,1)
-        );
-      border: 1px solid rgba(148,163,184,0.35);
-      box-shadow:
-        0 24px 60px rgba(15,23,42,0.85),
-        0 0 0 1px rgba(15,23,42,0.75);
+      border-radius: 26px;
+      background: radial-gradient(circle at 0 -40%, rgba(45, 212, 191, 0.3), transparent 60%),
+        radial-gradient(circle at 100% 120%, rgba(22, 163, 74, 0.45), transparent 60%),
+        rgba(2, 44, 34, 0.95);
+      border: 1px solid rgba(34, 197, 94, 0.4);
       padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
       position: relative;
       overflow: hidden;
     }
@@ -171,1397 +203,1420 @@
     .panel::before {
       content: "";
       position: absolute;
-      inset: 0;
-      background: radial-gradient(
-        circle at top right,
-        rgba(129,140,248,0.11),
-        transparent 50%
-      );
+      inset: -60%;
+      background-image:
+        radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.16), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(22, 163, 74, 0.18), transparent 55%);
+      opacity: 0.6;
       mix-blend-mode: soft-light;
-      opacity: 0.9;
       pointer-events: none;
     }
 
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .panel-title {
-      font-size: 13px;
-      font-weight: 550;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #cbd5f5;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .panel-title-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #a5b4fc, #4f46e5);
-      box-shadow:
-        0 0 0 1px rgba(191,219,254,0.6),
-        0 0 0 5px rgba(129,140,248,0.3);
-    }
-
-    .panel-tagline {
-      font-size: 11px;
-      color: var(--text-subtle);
-      opacity: 0.95;
-    }
-
-    .panel-body {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .panel-inner {
       position: relative;
       z-index: 1;
-    }
-
-    .section-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #9ca3af;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .section-label::before {
-      content: "";
-      width: 16px;
-      height: 1px;
-      border-radius: 99px;
-      background: linear-gradient(
-        to right,
-        rgba(148,163,184,0.4),
-        rgba(99,102,241,0.8)
-      );
-    }
-
-    .section {
-      padding: 10px 10px 9px;
-      border-radius: 14px;
-      background: radial-gradient(
-          circle at top left,
-          rgba(15,23,42,0.95),
-          rgba(15,23,42,0.9)
-        ),
-        rgba(15,23,42,0.92);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.95),
-        0 16px 40px rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.35);
       display: flex;
       flex-direction: column;
-      gap: 8px;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 6px;
+      gap: 14px;
     }
 
     .section-title {
-      font-size: 13px;
-      font-weight: 550;
+      font-size: 14px;
+      font-weight: 600;
       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .section-title span {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
     }
 
-    .section-pill {
+    .badge {
       font-size: 10px;
-      padding: 1px 6px;
+      padding: 2px 8px;
       border-radius: 999px;
-      background: rgba(15,118,110,0.3);
-      border: 1px solid rgba(34,197,94,0.7);
+      border: 1px solid rgba(52, 211, 153, 0.65);
+      background: rgba(6, 78, 59, 0.8);
       color: #bbf7d0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .section-desc {
+    .hint-text {
       font-size: 11px;
-      color: var(--text-subtle);
+      color: var(--text-soft);
+      line-height: 1.6;
     }
 
-    .dropzone {
-      border-radius: 12px;
-      border: 1px dashed rgba(148,163,184,0.6);
-      background: radial-gradient(
-          circle at top left,
-          rgba(37,99,235,0.35),
-          transparent 60%
-        ),
-        rgba(15,23,42,0.85);
-      padding: 12px 10px;
-      text-align: center;
+    /* ============ 上传区 / 气泡样式 ============ */
+    .upload-bubble {
+      position: relative;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 0 0, rgba(110, 231, 183, 0.28), rgba(22, 101, 52, 0.2)),
+        radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.04), rgba(6, 78, 59, 0.85));
+      border: 1px solid rgba(45, 212, 191, 0.8);
+      padding: 10px 11px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 10px;
       cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease,
-        box-shadow 0.15s ease, transform 0.1s ease;
-      box-shadow: 0 12px 30px rgba(15,23,42,0.9);
-      position: relative;
       overflow: hidden;
+      box-shadow: 0 12px 30px rgba(15, 118, 110, 0.6);
+      transition: transform var(--transition-slow), box-shadow var(--transition-fast),
+        border-color var(--transition-fast), background var(--transition-slow);
     }
 
-    .dropzone::before {
+    .upload-bubble::after {
       content: "";
       position: absolute;
-      inset: -40%;
-      background: conic-gradient(
-        from 0deg,
-        transparent 0,
-        rgba(129,140,248,0.25),
-        transparent 60%,
-        transparent 100%
-      );
+      inset: 30% -40px auto auto;
+      height: 140%;
+      background: radial-gradient(circle at 0 0, rgba(187, 247, 208, 0.4), transparent 60%);
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transform: translate3d(0, 12px, 0);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
       pointer-events: none;
     }
 
-    .dropzone.dragover {
-      border-color: #4f46e5;
-      background: radial-gradient(
-          circle at top left,
-          rgba(59,130,246,0.4),
-          transparent 60%
-        ),
-        rgba(15,23,42,0.98);
-      box-shadow:
-        0 0 0 1px rgba(129,140,248,0.7),
-        0 18px 42px rgba(15,23,42,0.95);
-      transform: translateY(-1px);
+    .upload-bubble:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 40px rgba(22, 163, 74, 0.75);
+      border-color: rgba(74, 222, 128, 0.95);
     }
 
-    .dropzone.dragover::before {
+    .upload-bubble:hover::after {
       opacity: 1;
+      transform: translate3d(0, 0, 0);
     }
 
-    .dropzone-title {
-      font-size: 12px;
-      font-weight: 550;
-    }
-
-    .dropzone-hint {
-      font-size: 11px;
-      color: var(--text-subtle);
-    }
-
-    .pill-row {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 5px;
-      font-size: 11px;
-      color: var(--text-subtle);
-    }
-
-    .pill {
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.4);
-    }
-
-    .hint-row {
+    .upload-header {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      color: var(--text-subtle);
-      justify-content: center;
-    }
-
-    .hint-row strong {
-      color: #e5e7eb;
-    }
-
-    .hint-icon {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(15,23,42,0.95);
-      box-shadow: 0 0 0 1px rgba(148,163,184,0.5);
-      font-size: 11px;
-    }
-
-    .fields {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .field-label-row {
-      display: flex;
       justify-content: space-between;
-      align-items: baseline;
       gap: 8px;
-      font-size: 11px;
     }
 
-    .field-label-main {
+    .upload-main-label {
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .field-label-main span {
+      gap: 8px;
+      font-size: 13px;
       font-weight: 500;
     }
 
-    .label-tag {
-      font-size: 10px;
-      padding: 1px 5px;
+    .icon-circle {
+      width: 26px;
+      height: 26px;
       border-radius: 999px;
-      background: rgba(30,64,175,0.4);
-      border: 1px solid rgba(129,140,248,0.7);
-      color: #c7d2fe;
-    }
-
-    .field-label-secondary {
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .input-shell {
-      border-radius: 999px;
-      padding: 1px;
-      background: radial-gradient(
-        circle at top left,
-        rgba(129,140,248,0.8),
-        rgba(30,64,175,0.6),
-        rgba(15,23,42,1)
-      );
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.95),
-        0 12px 25px rgba(15,23,42,0.95);
-    }
-
-    .input-inner {
-      border-radius: inherit;
-      padding: 5px 8px;
-      background: radial-gradient(
-          circle at top left,
-          rgba(30,64,175,0.9),
-          rgba(15,23,42,1) 65%
-        ),
-        rgba(15,23,42,0.97);
+      background:
+        radial-gradient(circle at 30% 20%, #bbf7d0, #4ade80 45%, #166534 100%);
       display: flex;
       align-items: center;
+      justify-content: center;
+      color: #052e16;
+      font-size: 15px;
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.8);
+    }
+
+    .upload-sub {
+      font-size: 11px;
+      color: rgba(240, 253, 244, 0.9);
+    }
+
+    .upload-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11px;
+      color: #bbf7d0;
+    }
+
+    .upload-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(6, 95, 70, 0.7);
+      border: 1px solid rgba(45, 212, 191, 0.55);
+    }
+
+    .upload-meta-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: #a7f3d0;
+    }
+
+    .upload-input {
+      display: none;
+    }
+
+    /* ============ 滑块 / 控制条 ============ */
+    .control-group {
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(2, 44, 34, 0.96), rgba(5, 46, 22, 0.98));
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      padding: 9px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.7fr);
+      gap: 9px;
+    }
+
+    @media (max-width: 640px) {
+      .control-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-label-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 6px;
+      font-size: 11px;
+      color: #d1fae5;
+    }
+
+    .control-label-line span.key {
+      font-weight: 500;
+    }
+
+    .control-label-line span.value {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      background: rgba(6, 78, 59, 0.9);
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(52, 211, 153, 0.6);
+      color: #bbf7d0;
+    }
+
+    .slider-shell {
+      height: 24px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 0 0, rgba(52, 211, 153, 0.22), rgba(2, 44, 34, 0.95));
+      padding: 0 7px;
+      display: flex;
+      align-items: center;
       position: relative;
       overflow: hidden;
     }
 
-    input[type="text"] {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--text-main);
-      font-size: 12px;
-      padding: 2px 0;
-    }
-
-    input::placeholder {
-      color: rgba(148,163,184,0.6);
-    }
-
-    .input-icon {
-      font-size: 13px;
-      color: rgba(191,219,254,0.9);
-    }
-
-    .input-meta {
-      font-size: 10px;
-      color: rgba(156,163,175,0.95);
-    }
-
-    .slider-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .slider-shell {
-      flex: 1;
-      border-radius: 999px;
-      padding: 1px;
-      background: radial-gradient(
-        circle at top left,
-        rgba(59,130,246,0.85),
-        rgba(30,64,175,0.7),
-        rgba(15,23,42,1)
+    .slider-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(16, 185, 129, 0.15),
+        rgba(52, 211, 153, 0.4),
+        rgba(16, 185, 129, 0.12)
       );
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.95),
-        0 12px 25px rgba(15,23,42,0.95);
-    }
-
-    .slider-inner {
-      border-radius: inherit;
-      padding: 3px 8px 5px;
-      background: radial-gradient(
-          circle at top left,
-          rgba(15,23,42,1),
-          rgba(15,23,42,1)
-        ),
-        rgba(15,23,42,0.96);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      opacity: 0.45;
+      pointer-events: none;
     }
 
     input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
-      height: 4px;
+      background: transparent;
+      position: relative;
+      z-index: 1;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 3px;
+      background: radial-gradient(circle at 0 0, rgba(16, 185, 129, 0.8), rgba(6, 78, 59, 0.95));
       border-radius: 999px;
-      background: linear-gradient(
-        to right,
-        rgba(129,140,248,0.85),
-        rgba(59,130,246,0.9),
-        rgba(56,189,248,0.9)
-      );
-      outline: none;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 3px;
+      background: radial-gradient(circle at 0 0, rgba(16, 185, 129, 0.8), rgba(6, 78, 59, 0.95));
+      border-radius: 999px;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #e5e7eb, #4f46e5);
+      margin-top: -6px;
+      background:
+        radial-gradient(circle at 30% 20%, #bbf7d0, #4ade80 40%, #16a34a 100%);
       box-shadow:
-        0 0 0 1px rgba(15,23,42,0.95),
-        0 0 0 3px rgba(191,219,254,0.7),
-        0 8px 20px rgba(30,64,175,0.9);
+        0 0 0 4px rgba(34, 197, 94, 0.35),
+        0 10px 20px rgba(22, 163, 74, 0.7);
+      border: 1px solid rgba(226, 232, 240, 0.8);
       cursor: pointer;
-      border: none;
-    }
-
-    input[type="range"]::-moz-range-track {
-      height: 4px;
-      border-radius: 999px;
-      background: linear-gradient(
-        to right,
-        rgba(129,140,248,0.85),
-        rgba(59,130,246,0.9),
-        rgba(56,189,248,0.9)
-      );
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #e5e7eb, #4f46e5);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.95),
-        0 0 0 3px rgba(191,219,254,0.7),
-        0 8px 20px rgba(30,64,175,0.9);
-      border: none;
-    }
-
-    .slider-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .slider-value-badge {
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(129,140,248,0.8);
-      color: #e5e7eb;
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.9);
-    }
-
-    .slider-badge {
-      font-size: 10px;
-      padding: 1px 5px;
-      border-radius: 999px;
-      background: rgba(30,64,175,0.6);
-      border: 1px solid rgba(96,165,250,0.85);
-      color: #dbeafe;
-    }
-
-    .toggle-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      padding-top: 2px;
-    }
-
-    .toggle-main {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .toggle-label {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .toggle-label strong {
-      font-weight: 500;
-    }
-
-    .toggle-desc {
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .toggle-switch {
-      width: 36px;
-      height: 20px;
-      border-radius: 999px;
-      background: linear-gradient(
-        to right,
-        rgba(55,65,81,0.95),
-        rgba(31,41,55,0.98)
-      );
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.95),
-        0 6px 16px rgba(15,23,42,0.9);
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      position: relative;
-      transition: background 0.15s ease;
-    }
-
-    .toggle-switch[data-on="true"] {
-      background: linear-gradient(
-        to right,
-        rgba(34,197,94,0.95),
-        rgba(22,163,74,0.98)
-      );
-    }
-
-    .toggle-knob {
       width: 16px;
       height: 16px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #e5e7eb, #9ca3af);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 20%, #bbf7d0, #4ade80 40%, #16a34a 100%);
       box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 8px 18px rgba(15,23,42,0.9);
-      transform: translateX(0);
-      transition: transform 0.16s ease;
+        0 0 0 4px rgba(34, 197, 94, 0.35),
+        0 10px 20px rgba(22, 163, 74, 0.7);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      cursor: pointer;
     }
 
-    .toggle-switch[data-on="true"] .toggle-knob {
-      transform: translateX(16px);
-    }
-
-    .toggle-mark {
-      font-size: 9px;
-      color: rgba(248,250,252,0.85);
-    }
-
-    .toggle-support {
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .toggle-support strong {
-      color: #e5e7eb;
-    }
-
-    .buttons-row {
+    /* ============ 按钮组 ============ */
+    .button-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 2px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .button-group-main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .btn {
-      border-radius: 999px;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 6px 10px;
+      position: relative;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      transition: background 0.12s ease, transform 0.08s ease,
-        box-shadow 0.12s ease, opacity 0.1s ease;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #e5fdf4;
+      cursor: pointer;
+      transition: transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
       white-space: nowrap;
     }
 
     .btn-primary {
-      background: radial-gradient(
-          circle at top left,
-          rgba(96,165,250,0.9),
-          transparent 60%
-        ),
-        linear-gradient(
-          to right,
-          rgba(79,70,229,0.98),
-          rgba(129,140,248,0.95)
-        );
-      color: #e5e7eb;
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 14px 30px rgba(30,64,175,0.95);
+      background: radial-gradient(circle at 0 0, #bbf7d0, #22c55e 38%, #166534 100%);
+      border-color: rgba(187, 247, 208, 0.95);
+      color: #022c22;
+      box-shadow: 0 10px 26px rgba(34, 197, 94, 0.85);
     }
 
     .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1.5px);
+      box-shadow: 0 14px 34px rgba(34, 197, 94, 0.9);
+    }
+
+    .btn-secondary {
+      padding-inline: 10px;
+      background: rgba(6, 95, 70, 0.86);
+      border-color: rgba(52, 211, 153, 0.7);
+      color: #a7f3d0;
+      box-shadow: 0 6px 16px rgba(15, 118, 110, 0.85);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 18px 40px rgba(30,64,175,1);
-      background: radial-gradient(
-          circle at top left,
-          rgba(129,140,248,0.9),
-          transparent 60%
-        ),
-        linear-gradient(
-          to right,
-          rgba(67,56,202,1),
-          rgba(129,140,248,1)
-        );
-    }
-
-    .btn-ghost {
-      background: radial-gradient(
-          circle at top left,
-          rgba(15,23,42,0.98),
-          rgba(15,23,42,1)
-        ),
-        rgba(15,23,42,0.98);
-      color: #e5e7eb;
-      border: 1px solid rgba(148,163,184,0.55);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 10px 22px rgba(15,23,42,0.95);
-    }
-
-    .btn-ghost:hover:not(:disabled) {
-      transform: translateY(-1px);
-      border-color: rgba(209,213,219,0.9);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,1),
-        0 14px 32px rgba(15,23,42,1);
-      background: radial-gradient(
-          circle at top left,
-          rgba(17,24,39,1),
-          rgba(15,23,42,1)
-        ),
-        rgba(17,24,39,1);
-    }
-
-    .btn-subtle {
-      background: rgba(15,23,42,0.96);
-      color: #e5e7eb;
-      border: 1px solid rgba(75,85,99,0.85);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 10px 22px rgba(15,23,42,0.95);
-    }
-
-    .btn-subtle:hover:not(:disabled) {
-      transform: translateY(-1px);
-      border-color: rgba(148,163,184,0.9);
-      background: rgba(17,24,39,0.98);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,1),
-        0 14px 32px rgba(15,23,42,1);
-    }
-
-    .btn-small {
-      font-size: 11px;
-      padding: 4px 8px;
-    }
-
-    .btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
+      box-shadow: 0 10px 24px rgba(15, 118, 110, 0.9);
+      background: rgba(5, 150, 105, 0.95);
     }
 
     .btn-icon {
-      width: 16px;
-      height: 16px;
+      width: 22px;
+      height: 22px;
       border-radius: 999px;
+      border: 1px solid rgba(52, 211, 153, 0.6);
+      background: rgba(6, 78, 59, 0.9);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      background: rgba(15,23,42,0.9);
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.95);
+      font-size: 13px;
+      color: #a7f3d0;
     }
 
-    .status {
-      margin-top: 6px;
-      padding: 6px 8px;
-      border-radius: 10px;
-      background: rgba(15,23,42,0.98);
-      border: 1px solid rgba(55,65,81,0.9);
-      font-size: 11px;
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .inline-indicator {
+      font-size: 10px;
+      color: rgba(209, 250, 229, 0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .inline-indicator-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #22c55e 0, #15803d 60%, transparent 80%);
+      box-shadow: 0 0 10px rgba(22, 163, 74, 0.9);
+    }
+
+    /* ============ 右侧：预览网格 ============ */
+    .preview-panel {
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 0 0, rgba(16, 185, 129, 0.32), rgba(2, 44, 34, 0.98)),
+        radial-gradient(circle at 100% 100%, rgba(22, 163, 74, 0.32), rgba(2, 6, 23, 0.96));
+      border: 1px solid rgba(52, 211, 153, 0.55);
+      padding: 12px 12px 10px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .status-row {
+    .preview-panel::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.22), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(45, 212, 191, 0.2), transparent 60%);
+      mix-blend-mode: soft-light;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .preview-inner {
+      position: relative;
+      z-index: 1;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .status-main {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #fee2e2, #f97373);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 0 0 4px rgba(248,113,113,0.2);
-    }
-
-    .status-dot.ok {
-      background: radial-gradient(circle at 30% 30%, #bbf7d0, #4ade80);
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,0.9),
-        0 0 0 4px rgba(74,222,128,0.25);
-    }
-
-    .status-text {
-      color: #e5e7eb;
-    }
-
-    .status-sub {
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .status-tag {
-      font-size: 10px;
-      padding: 1px 5px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(148,163,184,0.8);
-      color: #e5e7eb;
-    }
-
-    .status-metric-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .status-metric-pill {
-      padding: 1px 5px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(55,65,81,0.9);
-    }
-
-    .status-metric-pill strong {
-      color: #e5e7eb;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .preview-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 10px;
-    }
-
-    @media (max-width: 720px) {
-      .preview-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .preview-panel {
-      border-radius: 14px;
-      background: radial-gradient(
-          circle at top left,
-          rgba(15,23,42,0.98),
-          rgba(15,23,42,1)
-        ),
-        rgba(15,23,42,0.98);
-      border: 1px solid rgba(55,65,81,0.95);
-      padding: 8px 8px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      box-shadow:
-        0 0 0 1px rgba(15,23,42,1),
-        0 12px 28px rgba(15,23,42,0.98);
-    }
-
-    .preview-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 6px;
-      font-size: 11px;
-    }
-
-    .preview-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #e5e7eb;
-    }
-
-    .preview-title span {
-      font-weight: 500;
-    }
-
-    .preview-chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      font-size: 10px;
-      color: var(--text-subtle);
-    }
-
-    .preview-chip {
-      padding: 1px 5px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(55,65,81,0.9);
-    }
-
-    .preview-chip strong {
-      color: #e5e7eb;
-    }
-
-    .canvas-shell {
-      position: relative;
-      border-radius: 10px;
-      overflow: hidden;
-      background: radial-gradient(circle at center, #020617, #020617);
-      min-height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow:
-        inset 0 0 0 1px rgba(15,23,42,1),
-        0 10px 24px rgba(15,23,42,0.95);
-    }
-
-    canvas {
-      max-width: 100%;
-      height: auto;
-      image-rendering: pixelated;
-    }
-
-    .canvas-placeholder {
-      font-size: 11px;
-      color: var(--text-subtle);
-      text-align: center;
-      padding: 16px 12px;
-    }
-
-    .canvas-placeholder strong {
-      color: #e5e7eb;
-    }
-
-    .cipher-canvas-blur {
-      filter: blur(3px);
-      transition: filter 0.2s ease;
-    }
-
-    body[data-preview-sharp="true"] .cipher-canvas-blur {
-      filter: none;
-    }
-
-    footer {
-      max-width: 1200px;
-      margin: 0 auto 10px;
-      padding: 0 16px 6px;
-      font-size: 11px;
-      color: var(--text-subtle);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: space-between;
-    }
-
-    .foot-main {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .foot-pill {
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(75,85,99,0.9);
-    }
-
-    .foot-warning {
-      color: #fee2e2;
-    }
-
-    .foot-warning strong {
-      color: #fecaca;
-    }
-
-    .foot-secondary {
-      font-size: 10px;
-      color: rgba(156,163,175,0.9);
-    }
-
-    .foot-secondary strong {
-      color: #e5e7eb;
-    }
-
-    .foot-links {
-      font-size: 10px;
-      color: rgba(156,163,175,0.9);
-      display: flex;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
 
-    .foot-links a {
-      color: inherit;
-      text-decoration: none;
-      border-bottom: 1px dotted rgba(148,163,184,0.7);
-      padding-bottom: 1px;
+    @media (max-width: 900px) {
+      .preview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .preview-cell:nth-child(3) {
+        grid-column: span 2;
+      }
     }
 
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
+    @media (max-width: 640px) {
+      .preview-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .preview-cell:nth-child(3) {
+        grid-column: auto;
+      }
+    }
+
+    .preview-cell {
+      position: relative;
+      border-radius: 20px;
+      background: radial-gradient(circle at 0 0, rgba(16, 185, 129, 0.22), rgba(6, 78, 59, 0.92));
+      border: 1px solid rgba(45, 212, 191, 0.7);
+      padding: 8px 8px 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+      box-shadow: 0 12px 30px rgba(15, 118, 110, 0.7);
+    }
+
+    .preview-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .preview-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #bbf7d0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-label-pill {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(6, 95, 70, 0.9);
+      border: 1px solid rgba(52, 211, 153, 0.75);
+      font-size: 10px;
+      color: #a7f3d0;
+    }
+
+    .preview-meta {
+      font-size: 10px;
+      color: #a7f3d0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .preview-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .preview-meta-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: #a7f3d0;
+    }
+
+    .preview-canvas-shell {
+      position: relative;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.24), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(45, 212, 191, 0.6);
+      overflow: hidden;
+      min-height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-canvas-shell canvas {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .preview-placeholder {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+      padding: 18px 10px;
+    }
+
+    .preview-fx {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.28;
+      background-image:
+        radial-gradient(circle at 0 0, rgba(59, 130, 246, 0.7), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(34, 197, 94, 0.7), transparent 55%);
+    }
+
+    /* ============ 底部状态栏 ============ */
+    .footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 3px 0;
+      border-top: 1px dashed rgba(55, 65, 81, 0.9);
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .footer-left,
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .footer-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+    }
+
+    .footer-tag span {
+      font-size: 10px;
+      color: #9ca3af;
+    }
+
+    .status-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-text strong {
+      font-weight: 500;
+      color: #d1fae5;
+    }
+
+    .status-chip-ok {
+      color: #bbf7d0;
+    }
+
+    .status-chip-warn {
+      color: #fed7aa;
+    }
+
+    .status-chip-err {
+      color: #fecaca;
+    }
+
+    /* 简单的淡入动画 */
+    .fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
   </style>
 </head>
-<body data-preview-sharp="false">
-  <div class="page">
-    <header>
-      <div class="title-row">
-        <div class="title-main">
-          <div class="logo" aria-hidden="true"></div>
-          <h1>Lightweight Image Cipher · 轻量图像加密</h1>
-          <span class="badge">Demo · 教学向 · 可逆像素置换</span>
+<body>
+  <div class="shell">
+    <!-- 顶部标题区 -->
+    <header class="shell-header">
+      <div class="title-block">
+        <div class="title-row">
+          <div class="chip">
+            <span class="chip-dot"></span>
+            BUBBLE IMAGE CRYPTO
+          </div>
+          <div class="title-main">
+            气泡图片
+            <span class="accent">加密 · 解密</span>
+          </div>
+        </div>
+        <div class="subtitle">
+          <span>响应式 · 绿色主题 · 原图 / 加密 / 解密 三预览</span>
+          <span class="subtitle-pill">专为可维护底层代码设计</span>
         </div>
       </div>
-      <p class="subtitle">
-        导入图片后，通过密钥、像素块大小和打乱强度，对图像进行轻量的局部打乱加密，同一参数再次应用即可尝试解密还原。适合作为前端 Demo 或简单隐藏，不适合高安全场景。
-      </p>
+      <div class="header-actions">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          实时预览启用
+        </div>
+      </div>
     </header>
 
-    <main>
-      <section class="panel" aria-label="控制台">
-        <div class="panel-header">
-          <div class="panel-title">
-            <div class="panel-title-dot"></div>
-            <span>Control · 控制台</span>
+    <main class="layout">
+      <!-- 左侧：控制区 -->
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="section-title">
+            <span>
+              上传图片
+              <small style="font-size:11px;color:var(--text-soft);">支持 PNG / JPG / WebP</small>
+            </span>
+            <span class="badge">STEP · 01</span>
           </div>
-          <div class="panel-tagline">导入图片、设置密钥和强度，然后一键加密 / 解密。</div>
-        </div>
-        <div class="panel-body">
-          <div class="section-label">Image Source · 图片源</div>
-          <div class="section">
-            <div class="section-header">
-              <div class="section-title">
-                <span>选择图片</span>
-                <span class="section-pill">本地处理 · 不上传</span>
-              </div>
-              <div class="section-desc">支持 JPG / PNG / WebP，建议不超过 8MB。</div>
-            </div>
 
-            <div
-              class="dropzone"
-              id="dropzone"
-              tabindex="0"
-              role="button"
-              aria-label="拖拽图片到这里，或点击选择文件"
-            >
-              <div class="dropzone-title">
-                拖拽图片到这里，或点击选择文件
-              </div>
-              <div class="pill-row">
-                <span class="pill">JPG / JPEG</span>
-                <span class="pill">PNG</span>
-                <span class="pill">WebP</span>
-                <span class="pill">≤ 8 MB</span>
-              </div>
-              <div class="hint-row">
-                <span class="hint-icon">◎</span>
-                <span class="dropzone-hint">
-                  本工具不会上传图片到服务器，所有处理都在你的浏览器内存中完成。
-                </span>
+          <!-- 上传气泡 -->
+          <label class="upload-bubble">
+            <div class="upload-header">
+              <div class="upload-main-label">
+                <div class="icon-circle">＋</div>
+                <div>
+                  <div>点击或拖拽图片到此处</div>
+                  <div class="upload-sub">不上传到服务器 · 全程本地加密解密</div>
+                </div>
               </div>
             </div>
-
+            <div class="upload-meta">
+              <span>
+                <span class="upload-meta-dot"></span>
+                最大推荐 8K 分辨率
+              </span>
+              <span>
+                <span class="upload-meta-dot"></span>
+                自动适配预览区域
+              </span>
+            </div>
             <input
-              type="file"
+              class="upload-input"
               id="fileInput"
-              class="sr-only"
-              accept="image/png,image/jpeg,image/webp"
+              type="file"
+              accept="image/*"
             />
+          </label>
 
-            <div class="fields">
-              <div class="field-group">
-                <div class="field-label-row">
-                  <div class="field-label-main">
-                    <span>加密密钥</span>
-                    <span class="label-tag">同一密钥才能正确解密</span>
-                  </div>
-                  <div class="field-label-secondary">
-                    支持任意字符串，建议 6 位以上。
-                  </div>
+          <!-- 控制参数 -->
+          <div class="section-title">
+            <span>加密参数</span>
+            <span class="badge">STEP · 02</span>
+          </div>
+          <p class="hint-text">
+            加密强度越高，像素扰动越明显，安全性更高但肉眼差异也会稍大；输出质量越高，文件越大但细节保留更多。可根据项目需求自由权衡。
+          </p>
+
+          <div class="control-group">
+            <div class="control-row">
+              <div class="control-item">
+                <div class="control-label-line">
+                  <span class="key">加密强度</span>
+                  <span class="value" id="noiseValueLabel">中等 · 4</span>
                 </div>
-                <div class="input-shell">
-                  <div class="input-inner">
-                    <span class="input-icon">🔑</span>
-                    <input
-                      type="text"
-                      id="keyInput"
-                      placeholder="例如：my-secret-key-2024"
-                      autocomplete="off"
-                    />
-                    <span class="input-meta">仅用于本地伪随机置换，不上传。</span>
-                  </div>
+                <div class="slider-shell">
+                  <input
+                    id="noiseSlider"
+                    type="range"
+                    min="0"
+                    max="8"
+                    step="1"
+                    value="4"
+                  />
                 </div>
               </div>
 
-              <div class="field-group">
-                <div class="field-label-row">
-                  <div class="field-label-main">
-                    <span>像素块大小</span>
-                    <span class="label-tag">块越大越看不清</span>
-                  </div>
-                  <div class="field-label-secondary">
-                    控制每次打乱的最小单元，过大会影响解密细节感知。
-                  </div>
+              <div class="control-item">
+                <div class="control-label-line">
+                  <span class="key">输出质量 (压缩)</span>
+                  <span class="value" id="qualityValueLabel">90%</span>
                 </div>
-                <div class="slider-row">
-                  <div class="slider-shell">
-                    <div class="slider-inner">
-                      <input
-                        type="range"
-                        id="blockSizeInput"
-                        min="4"
-                        max="64"
-                        step="2"
-                        value="16"
-                      />
-                      <div class="slider-meta">
-                        <span>4 px（细） → 64 px（粗）</span>
-                        <span
-                          class="slider-value-badge"
-                          id="blockSizeLabel"
-                        >16 px</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="slider-badge">像素块</span>
-                </div>
-              </div>
-
-              <div class="field-group">
-                <div class="field-label-row">
-                  <div class="field-label-main">
-                    <span>打乱强度</span>
-                    <span class="label-tag">影响打乱像素块的比例</span>
-                  </div>
-                  <div class="field-label-secondary">
-                    0% 完全不动，100% 尽量打乱所有块。
-                  </div>
-                </div>
-                <div class="slider-row">
-                  <div class="slider-shell">
-                    <div class="slider-inner">
-                      <input
-                        type="range"
-                        id="shuffleStrengthInput"
-                        min="0"
-                        max="100"
-                        step="1"
-                        value="70"
-                      />
-                      <div class="slider-meta">
-                        <span>预览强度：低 → 高</span>
-                        <span
-                          class="slider-value-badge"
-                          id="shuffleStrengthLabel"
-                        >70%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="slider-badge">打乱强度</span>
-                </div>
-              </div>
-
-              <div class="field-group">
-                <div class="toggle-row">
-                  <div class="toggle-main">
-                    <div
-                      class="toggle-switch"
-                      id="previewSharpToggle"
-                      data-on="false"
-                    >
-                      <div class="toggle-knob"></div>
-                    </div>
-                    <div class="toggle-label">
-                      <strong>预览时对加密图额外加一点模糊（CSS，仅视觉效果）</strong>
-                      <span class="toggle-desc">
-                        切换后只改变右侧预览视觉效果，不影响真实像素数据。
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="field-group">
-                <div class="toggle-row">
-                  <div class="toggle-main">
-                    <div
-                      class="toggle-switch"
-                      id="rememberToggle"
-                      data-on="true"
-                    >
-                      <div class="toggle-knob"></div>
-                    </div>
-                    <div class="toggle-label">
-                      <strong>记住当前设置和最后一张图片</strong>
-                      <span class="toggle-desc">
-                        参数和最近一次的图片会保存到浏览器本地存储（不会上传）。
-                      </span>
-                    </div>
-                  </div>
-                  <div class="toggle-support">
-                    <span>本地存储 · <strong>可清空</strong></span>
-                  </div>
+                <div class="slider-shell">
+                  <input
+                    id="qualitySlider"
+                    type="range"
+                    min="40"
+                    max="100"
+                    step="5"
+                    value="90"
+                  />
                 </div>
               </div>
             </div>
 
-            <div class="buttons-row">
-              <button class="btn btn-primary" id="encryptBtn">
-                <span class="btn-icon">⟲</span>
-                <span>加密 / 打乱</span>
-              </button>
-              <button class="btn btn-ghost" id="decryptBtn">
-                <span class="btn-icon">⟲</span>
-                <span>尝试解密还原</span>
-              </button>
-              <button class="btn btn-subtle btn-small" id="downloadBtn">
-                <span class="btn-icon">⬇</span>
-                <span>下载当前加密图</span>
-              </button>
-              <button class="btn btn-subtle btn-small" id="resetBtn">
-                <span class="btn-icon">✕</span>
-                <span>清空 & 重置</span>
-              </button>
-            </div>
-
-            <div class="status" aria-live="polite">
-              <div class="status-row">
-                <div class="status-main">
-                  <div class="status-dot" id="statusDot"></div>
-                  <span class="status-text" id="statusText">等待加载图片</span>
+            <div class="control-row">
+              <div class="control-item">
+                <div class="control-label-line">
+                  <span class="key">加密密钥 (可选)</span>
+                  <span class="value" id="keyHashPreview">自动随机</span>
                 </div>
-                <span class="status-tag" id="statusTag">未加载图片</span>
+                <div class="slider-shell" style="padding:0 8px;height:28px;">
+                  <input
+                    id="keyInput"
+                    type="text"
+                    placeholder="留空则自动生成安全随机密钥"
+                    style="
+                      width:100%;
+                      border:none;
+                      outline:none;
+                      background:transparent;
+                      color:#e5fdf4;
+                      font-size:11px;
+                    "
+                  />
+                </div>
               </div>
-              <div class="status-sub">
-                轻量像素置换，可逆。输出压缩 JPEG，体积控制较好。本地运行，适合 Demo / 教学 / 简单隐藏。
-              </div>
-              <div class="status-metric-row" id="statusMetrics">
-                <span class="status-metric-pill">
-                  图像尺寸：<strong>–</strong>
-                </span>
-                <span class="status-metric-pill">
-                  估计体积：<strong>–</strong>
-                </span>
+
+              <div class="control-item">
+                <div class="control-label-line">
+                  <span class="key">模式</span>
+                  <span class="value" id="modeLabel">待选择</span>
+                </div>
+                <div class="slider-shell" style="justify-content:space-between;padding:2px 3px;">
+                  <button type="button" class="btn btn-secondary" id="encryptModeBtn">
+                    <span class="btn-icon">🔐</span> 加密
+                  </button>
+                  <button type="button" class="btn btn-secondary" id="decryptModeBtn">
+                    <span class="btn-icon">🔓</span> 解密
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="section-title">
+            <span>操作</span>
+            <span class="badge">STEP · 03</span>
+          </div>
+          <div class="button-row">
+            <div class="button-group-main">
+              <button type="button" class="btn btn-primary" id="runEncryptBtn">
+                <span class="btn-icon">⚙</span>
+                运行加密 / 解密
+              </button>
+              <button type="button" class="btn btn-secondary" id="exportEncryptedBtn" disabled>
+                导出加密图片
+              </button>
+              <button type="button" class="btn btn-secondary" id="exportDecryptedBtn" disabled>
+                导出解密图片
+              </button>
+            </div>
+            <span class="inline-indicator" id="inlineIndicator">
+              <span class="inline-indicator-dot"></span>
+              等待图片上传…
+            </span>
           </div>
         </div>
       </section>
 
-      <section class="panel" aria-label="预览">
-        <div class="panel-header">
-          <div class="panel-title">
-            <div class="panel-title-dot"></div>
-            <span>Preview · 预览</span>
+      <!-- 右侧：预览区 -->
+      <section class="preview-panel">
+        <div class="preview-inner">
+          <div class="section-title">
+            <span>三路预览 · 原图 / 加密 / 解密</span>
+            <span class="badge">LIVE</span>
           </div>
-          <div class="panel-tagline">
-            左侧原图，右侧为加密 / 解密后图像。你可以调整参数后重新加密进行对比。
-          </div>
-        </div>
-        <div class="panel-body">
+
           <div class="preview-grid">
-            <div class="preview-panel">
-              <div class="preview-header">
-                <div class="preview-title">
-                  <span>原始图像</span>
+            <!-- 原图 -->
+            <div class="preview-cell">
+              <div class="preview-label-row">
+                <div class="preview-label">
+                  <span>原始图片</span>
+                  <span class="preview-label-pill">INPUT</span>
                 </div>
-                <div class="preview-chip-row">
-                  <span class="preview-chip" id="sourceSize">尺寸：–</span>
-                  <span class="preview-chip" id="sourceBytes">估计体积：–</span>
+                <div class="preview-meta" id="origMeta">
+                  <span><span class="preview-meta-dot"></span>无图片</span>
                 </div>
               </div>
-              <div class="canvas-shell">
-                <canvas id="sourceCanvas"></canvas>
-                <div class="canvas-placeholder" id="sourcePlaceholder">
-                  <strong>尚未加载</strong><br />
-                  请选择图片后，这里会显示原图预览。
+              <div class="preview-canvas-shell">
+                <canvas id="origCanvas"></canvas>
+                <div class="preview-placeholder" id="origPlaceholder">
+                  上传一张图片后，这里会展示原图。
                 </div>
               </div>
             </div>
 
-            <div class="preview-panel">
-              <div class="preview-header">
-                <div class="preview-title">
-                  <span>加密 / 打乱图像</span>
+            <!-- 加密 -->
+            <div class="preview-cell">
+              <div class="preview-label-row">
+                <div class="preview-label">
+                  <span>加密结果</span>
+                  <span class="preview-label-pill">ENCRYPTED</span>
                 </div>
-                <div class="preview-chip-row">
-                  <span class="preview-chip" id="cipherSize">尺寸：–</span>
-                  <span class="preview-chip" id="cipherBytes">估计体积：–</span>
+                <div class="preview-meta" id="encryptedMeta">
+                  <span><span class="preview-meta-dot"></span>等待生成</span>
                 </div>
               </div>
-              <div class="canvas-shell">
-                <canvas id="cipherCanvas" class="cipher-canvas-blur"></canvas>
-                <div class="canvas-placeholder" id="cipherPlaceholder">
-                  <strong>尚未生成</strong><br />
-                  点击「加密 / 打乱」后，这里会显示结果预览。
+              <div class="preview-canvas-shell">
+                <canvas id="encryptedCanvas"></canvas>
+                <div class="preview-placeholder" id="encryptedPlaceholder">
+                  点击“运行加密”后，这里会展示加密后的图片。
                 </div>
+                <div class="preview-fx"></div>
+              </div>
+            </div>
+
+            <!-- 解密 -->
+            <div class="preview-cell">
+              <div class="preview-label-row">
+                <div class="preview-label">
+                  <span>解密结果</span>
+                  <span class="preview-label-pill">DECRYPTED</span>
+                </div>
+                <div class="preview-meta" id="decryptedMeta">
+                  <span><span class="preview-meta-dot"></span>等待生成</span>
+                </div>
+              </div>
+              <div class="preview-canvas-shell">
+                <canvas id="decryptedCanvas"></canvas>
+                <div class="preview-placeholder" id="decryptedPlaceholder">
+                  如果当前图片已加密且参数正确，这里会还原出接近原始的图像。
+                </div>
+                <div class="preview-fx"></div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- 底部状态栏 -->
+        <footer class="footer-bar">
+          <div class="footer-left">
+            <div class="footer-tag">
+              底层算法
+              <span>可逆像素扰动 · 质量可调</span>
+            </div>
+            <div class="footer-tag">
+              设计目标
+              <span>好修 · 不“牵一发动全身”</span>
+            </div>
+          </div>
+          <div class="footer-right">
+            <div class="status-text" id="statusText">
+              <span class="status-chip-warn">状态：</span>
+              <span>等待你选择模式并上传图片</span>
+            </div>
+          </div>
+        </footer>
       </section>
     </main>
-
-    <footer>
-      <div class="foot-main">
-        <span class="foot-pill">提示：这是简易演示级加密，<span class="foot-warning"><strong>不适合真正高安全场景</strong></span></span>
-      </div>
-      <div class="foot-secondary">
-        真正安全需求请考虑服务端 AES 等专业方案，或成熟密码学库（如 WebCrypto）。
-      </div>
-    </footer>
   </div>
 
   <script>
-    // 工具：字符串哈希（生成稳定整数，避免使用 Math.random）
-    function murmurhash2_32_gc(str, seed) {
-      let l = str.length;
-      let h = seed ^ l;
-      let i = 0;
-      while (l >= 4) {
-        let k =
-          (str.charCodeAt(i) & 0xff) |
-          ((str.charCodeAt(i + 1) & 0xff) << 8) |
-          ((str.charCodeAt(i + 2) & 0xff) << 16) |
-          ((str.charCodeAt(i + 3) & 0xff) << 24);
-        k = (k & 0xffff) * 0x5bd1e995 + (((k >>> 16) * 0x5bd1e995) << 16);
-        k ^= k >>> 24;
-        k = (k & 0xffff) * 0x5bd1e995 + (((k >>> 16) * 0x5bd1e995) << 16);
-
-        h = ((h & 0xffff) * 0x5bd1e995 + (((h >>> 16) * 0x5bd1e995) << 16)) ^ k;
-        i += 4;
-        l -= 4;
+    // ============ 工具：简易伪随机数 / 哈希 ============
+    function stringToSeed(str) {
+      // FNV-1a 简易实现，稳定可复现
+      let hash = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = (hash * 0x01000193) >>> 0;
       }
-      switch (l) {
-        case 3:
-          h ^= (str.charCodeAt(i + 2) & 0xff) << 16;
-        case 2:
-          h ^= (str.charCodeAt(i + 1) & 0xff) << 8;
-        case 1:
-          h ^= str.charCodeAt(i) & 0xff;
-          h =
-            (h & 0xffff) * 0x5bd1e995 +
-            (((h >>> 16) * 0x5bd1e995) << 16);
-      }
-      h ^= h >>> 13;
-      h =
-        (h & 0xffff) * 0x5bd1e995 +
-        (((h >>> 16) * 0x5bd1e995) << 16);
-      h ^= h >>> 15;
-      return h >>> 0;
+      return hash >>> 0;
     }
 
-    // 基于密钥 + 坐标 + 参数的可复现伪随机数
-    function pseudoRandom(key, x, y, blockSize, strength, extra) {
-      const base = key + "|" + x + "|" + y + "|" + blockSize + "|" + strength + "|" + (extra || 0);
-      const h = murmurhash2_32_gc(base, 0x9747b28c);
-      // 映射到 (0,1)
-      return (h % 1000000) / 1000000;
+    function seededRandom(seed) {
+      // xorshift32
+      let x = seed || 123456789;
+      return function () {
+        x ^= x << 13;
+        x ^= x >>> 17;
+        x ^= x << 5;
+        x >>>= 0;
+        return x / 0xffffffff;
+      };
     }
 
-    // 从 0..(n-1) 中生成可复现的伪随机打乱索引
-    function getDeterministicPermutation(key, n, x, y, blockSize, strength) {
-      // 使用简化的 Fisher–Yates：但随机源替换为 pseudoRandom
-      const arr = new Array(n);
-      for (let i = 0; i < n; i++) arr[i] = i;
-      for (let i = n - 1; i > 0; i--) {
-        const r = pseudoRandom(key, x, y, blockSize, strength, i);
-        const j = Math.floor(r * (i + 1));
-        const tmp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = tmp;
-      }
-      return arr;
+    function shortHash(str) {
+      const seed = stringToSeed(str);
+      return (seed >>> 0).toString(16).padStart(8, "0");
     }
 
-    // DOM 元素引用
+    // ============ DOM 引用 ============
     const fileInput = document.getElementById("fileInput");
-    const dropzone = document.getElementById("dropzone");
+
+    const noiseSlider = document.getElementById("noiseSlider");
+    const qualitySlider = document.getElementById("qualitySlider");
+    const noiseValueLabel = document.getElementById("noiseValueLabel");
+    const qualityValueLabel = document.getElementById("qualityValueLabel");
     const keyInput = document.getElementById("keyInput");
-    const blockSizeInput = document.getElementById("blockSizeInput");
-    const shuffleStrengthInput = document.getElementById(
-      "shuffleStrengthInput"
-    );
-    const blockSizeLabel = document.getElementById("blockSizeLabel");
-    const shuffleStrengthLabel = document.getElementById(
-      "shuffleStrengthLabel"
-    );
+    const keyHashPreview = document.getElementById("keyHashPreview");
 
-    const previewSharpToggle = document.getElementById("previewSharpToggle");
-    const rememberToggle = document.getElementById("rememberToggle");
+    const encryptModeBtn = document.getElementById("encryptModeBtn");
+    const decryptModeBtn = document.getElementById("decryptModeBtn");
+    const modeLabel = document.getElementById("modeLabel");
 
-    const encryptBtn = document.getElementById("encryptBtn");
-    const decryptBtn = document.getElementById("decryptBtn");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const resetBtn = document.getElementById("resetBtn");
+    const runEncryptBtn = document.getElementById("runEncryptBtn");
+    const exportEncryptedBtn = document.getElementById("exportEncryptedBtn");
+    const exportDecryptedBtn = document.getElementById("exportDecryptedBtn");
 
-    const statusDot = document.getElementById("statusDot");
+    const inlineIndicator = document.getElementById("inlineIndicator");
     const statusText = document.getElementById("statusText");
-    const statusTag = document.getElementById("statusTag");
-    const statusMetrics = document.getElementById("statusMetrics");
 
-    const sourceCanvas = document.getElementById("sourceCanvas");
-    const cipherCanvas = document.getElementById("cipherCanvas");
-    const sourcePlaceholder = document.getElementById("sourcePlaceholder");
-    const cipherPlaceholder = document.getElementById("cipherPlaceholder");
-    const sourceSize = document.getElementById("sourceSize");
-    const sourceBytes = document.getElementById("sourceBytes");
-    const cipherSize = document.getElementById("cipherSize");
-    const cipherBytes = document.getElementById("cipherBytes");
+    const origCanvas = document.getElementById("origCanvas");
+    const encryptedCanvas = document.getElementById("encryptedCanvas");
+    const decryptedCanvas = document.getElementById("decryptedCanvas");
 
-    const sourceCtx = sourceCanvas.getContext("2d");
-    const cipherCtx = cipherCanvas.getContext("2d");
+    const origMeta = document.getElementById("origMeta");
+    const encryptedMeta = document.getElementById("encryptedMeta");
+    const decryptedMeta = document.getElementById("decryptedMeta");
 
-    // 全局状态
-    let originalImage = null;
-    let currentCipherImageData = null;
-    let currentIsEncrypted = false;
-    let lastParams = null; // { key, blockSize, strength }
+    const origPlaceholder = document.getElementById("origPlaceholder");
+    const encryptedPlaceholder = document.getElementById("encryptedPlaceholder");
+    const decryptedPlaceholder = document.getElementById("decryptedPlaceholder");
 
-    // 本地存储键
-    const STORAGE_KEY = "lightweight-image-cipher-demo-v1";
+    const origCtx = origCanvas.getContext("2d");
+    const encCtx = encryptedCanvas.getContext("2d");
+    const decCtx = decryptedCanvas.getContext("2d");
 
-    function formatBytes(size) {
-      if (!size || !Number.isFinite(size)) return "–";
-      if (size < 1024) return size.toFixed(0) + " B";
-      if (size < 1024 * 1024) return (size / 1024).toFixed(1) + " KB";
-      return (size / (1024 * 1024)).toFixed(2) + " MB";
-    }
+    // ============ 状态变量 ============
+    const state = {
+      mode: null, // "encrypt" | "decrypt"
+      originalImage: null,
+      originalSize: null,
+      encryptedImageData: null,
+      encryptedSize: null,
+      decryptedImageData: null,
+      decryptedSize: null,
+      currentKey: null,
+      currentSeed: null,
+    };
 
-    function updateStatus(text, tag, ok = false) {
-      statusText.textContent = text;
-      statusTag.textContent = tag;
-      statusDot.classList.toggle("ok", ok);
-    }
-
-    function updateMetricsFromCanvas() {
-      if (!originalImage) {
-        sourceSize.textContent = "尺寸：–";
-        sourceBytes.textContent = "估计体积：–";
-        cipherSize.textContent = "尺寸：–";
-        cipherBytes.textContent = "估计体积：–";
-        statusMetrics.innerHTML = `
-          <span class="status-metric-pill">图像尺寸：<strong>–</strong></span>
-          <span class="status-metric-pill">估计体积：<strong>–</strong></span>
-        `;
-        return;
-      }
-      const w = sourceCanvas.width;
-      const h = sourceCanvas.height;
-      const pixels = w * h;
-      const approxSize = pixels * 4; // RGBA 字节
-      sourceSize.textContent = `尺寸：${w} × ${h}`;
-      sourceBytes.textContent = `估计体积：${formatBytes(approxSize)}`;
-
-      if (cipherCanvas.width > 0 && cipherCanvas.height > 0) {
-        const cW = cipherCanvas.width;
-        const cH = cipherCanvas.height;
-        const cPixels = cW * cH;
-        const cApprox = cPixels * 4;
-        cipherSize.textContent = `尺寸：${cW} × ${cH}`;
-        cipherBytes.textContent = `估计体积：${formatBytes(cApprox)}`;
-      } else {
-        cipherSize.textContent = "尺寸：–";
-        cipherBytes.textContent = "估计体积：–";
-      }
-
-      statusMetrics.innerHTML = `
-        <span class="status-metric-pill">图像尺寸：<strong>${w} × ${h}</strong></span>
-        <span class="status-metric-pill">估计体积：<strong>${formatBytes(approxSize)}</strong></span>
+    // ============ UI 辅助函数 ============
+    function setStatus(message, type = "info") {
+      const map = {
+        info: "status-chip-ok",
+        warn: "status-chip-warn",
+        error: "status-chip-err",
+      };
+      statusText.innerHTML = `
+        <span class="${map[type]}">状态：</span>
+        <span>${message}</span>
       `;
     }
 
-    function saveState() {
-      try {
-        if (rememberToggle.dataset.on !== "true") {
-          localStorage.removeItem(STORAGE_KEY);
+    function setInlineIndicator(message) {
+      inlineIndicator.innerHTML = `
+        <span class="inline-indicator-dot"></span>
+        ${message}
+      `;
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      if (mode === "encrypt") {
+        modeLabel.textContent = "加密模式";
+        encryptModeBtn.classList.add("btn-primary");
+        encryptModeBtn.classList.remove("btn-secondary");
+        decryptModeBtn.classList.add("btn-secondary");
+        decryptModeBtn.classList.remove("btn-primary");
+        setStatus("加密模式已开启，上传或选择需要加密的图片。", "info");
+      } else if (mode === "decrypt") {
+        modeLabel.textContent = "解密模式";
+        decryptModeBtn.classList.add("btn-primary");
+        decryptModeBtn.classList.remove("btn-secondary");
+        encryptModeBtn.classList.add("btn-secondary");
+        encryptModeBtn.classList.remove("btn-primary");
+        setStatus("解密模式已开启，请确保参数与加密时一致。", "info");
+      } else {
+        modeLabel.textContent = "待选择";
+        encryptModeBtn.classList.add("btn-secondary");
+        decryptModeBtn.classList.add("btn-secondary");
+      }
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes && bytes !== 0) return "未知";
+      const sizes = ["B", "KB", "MB", "GB"];
+      const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024));
+      const v = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 2);
+      return `${v} ${sizes[i]}`;
+    }
+
+    function updateMeta() {
+      if (state.originalImage) {
+        const w = state.originalImage.naturalWidth;
+        const h = state.originalImage.naturalHeight;
+        const s = state.originalSize;
+        origMeta.innerHTML = `
+          <span><span class="preview-meta-dot"></span>${w} × ${h}</span>
+          <span><span class="preview-meta-dot"></span>${s ? formatBytes(s) : "本地"}</span>
+        `;
+      } else {
+        origMeta.innerHTML = `<span><span class="preview-meta-dot"></span>无图片</span>`;
+      }
+
+      if (state.encryptedImageData) {
+        const w = encryptedCanvas.width;
+        const h = encryptedCanvas.height;
+        const s = state.encryptedSize;
+        encryptedMeta.innerHTML = `
+          <span><span class="preview-meta-dot"></span>${w} × ${h}</span>
+          <span><span class="preview-meta-dot"></span>${s ? formatBytes(s) : "本地"}</span>
+        `;
+      } else {
+        encryptedMeta.innerHTML = `<span><span class="preview-meta-dot"></span>等待生成</span>`;
+      }
+
+      if (state.decryptedImageData) {
+        const w = decryptedCanvas.width;
+        const h = decryptedCanvas.height;
+        const s = state.decryptedSize;
+        decryptedMeta.innerHTML = `
+          <span><span class="preview-meta-dot"></span>${w} × ${h}</span>
+          <span><span class="preview-meta-dot"></span>${s ? formatBytes(s) : "本地"}</span>
+        `;
+      } else {
+        decryptedMeta.innerHTML = `<span><span class="preview-meta-dot"></span>等待生成</span>`;
+      }
+    }
+
+    function resizeCanvasToImage(canvas, img, maxWidth = 900, maxHeight = 600) {
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+      const ratio = Math.min(maxWidth / w, maxHeight / h, 1);
+      w = Math.round(w * ratio);
+      h = Math.round(h * ratio);
+      canvas.width = w;
+      canvas.height = h;
+      return { w, h };
+    }
+
+    function drawPlaceholderClear(canvas, placeholderEl, visible) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      placeholderEl.style.display = visible ? "block" : "none";
+    }
+
+    // ============ 滑块 / 密钥 联动 ============
+    function updateNoiseLabel() {
+      const v = Number(noiseSlider.value);
+      const level = v === 0 ? "关闭" : v <= 2 ? "轻微" : v <= 5 ? "中等" : "较强";
+      noiseValueLabel.textContent = `${level} · ${v}`;
+    }
+
+    function updateQualityLabel() {
+      const v = Number(qualitySlider.value);
+      qualityValueLabel.textContent = `${v}%`;
+    }
+
+    function updateKeyPreview() {
+      const keyRaw = keyInput.value.trim();
+      if (!keyRaw) {
+        keyHashPreview.textContent = "自动随机";
+        state.currentKey = null;
+        state.currentSeed = null;
+        return;
+      }
+      const seed = stringToSeed(keyRaw);
+      state.currentKey = keyRaw;
+      state.currentSeed = seed;
+      keyHashPreview.textContent = `哈希片段：${shortHash(keyRaw)}`;
+    }
+
+    noiseSlider.addEventListener("input", () => {
+      updateNoiseLabel();
+    });
+
+    qualitySlider.addEventListener("input", () => {
+      updateQualityLabel();
+    });
+
+    keyInput.addEventListener("input", () => {
+      updateKeyPreview();
+    });
+
+    // 初始化标签
+    updateNoiseLabel();
+    updateQualityLabel();
+    updateKeyPreview();
+
+    // ============ 模式切换 ============
+    encryptModeBtn.addEventListener("click", () => {
+      setMode("encrypt");
+    });
+    decryptModeBtn.addEventListener("click", () => {
+      setMode("decrypt");
+    });
+
+    // ============ 文件上传处理 ============
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          state.originalImage = img;
+          state.originalSize = file.size;
+          inlineIndicator.innerHTML = `
+            <span class="inline-indicator-dot"></span>
+            已加载图片：${formatBytes(file.size)}
+          `;
+          setStatus("图片加载完成，可选择模式并执行加密 / 解密。", "info");
+
+          // 绘制到原图 canvas
+          const { w, h } = resizeCanvasToImage(origCanvas, img);
+          origCtx.drawImage(img, 0, 0, w, h);
+          origPlaceholder.style.display = "none";
+          origCanvas.classList.add("fade-in");
+          setTimeout(() => origCanvas.classList.remove("fade-in"), 250);
+
+          // 清空加密 / 解密预览
+          drawPlaceholderClear(encryptedCanvas, encryptedPlaceholder, true);
+          drawPlaceholderClear(decryptedCanvas, decryptedPlaceholder, true);
+          state.encryptedImageData = null;
+          state.decryptedImageData = null;
+          state.encryptedSize = null;
+          state.decryptedSize = null;
+          exportEncryptedBtn.disabled = true;
+          exportDecryptedBtn.disabled = true;
+
+          updateMeta();
+        };
+        img.onerror = () => {
+          setStatus("图片加载失败，请更换文件重试。", "error");
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 支持拖拽（可选增强）
+    const uploadBubble = document.querySelector(".upload-bubble");
+    ["dragenter", "dragover"].forEach((eventName) => {
+      uploadBubble.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBubble.style.borderColor = "rgba(190, 242, 100, 0.95)";
+      });
+    });
+    ["dragleave", "drop"].forEach((eventName) => {
+      uploadBubble.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBubble.style.borderColor = "rgba(45, 212, 191, 0.8)";
+      });
+    });
+    uploadBubble.addEventListener("drop", (e) => {
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) {
+        fileInput.files = e.dataTransfer.files;
+        const changeEvent = new Event("change");
+        fileInput.dispatchEvent(changeEvent);
+      }
+    });
+
+    // ============ 核心像素加密算法 ============
+    /**
+     * 这里采用“可逆像素扰动”：
+     * - 对每个像素的 R/G/B 的低几位根据密钥驱动的伪随机数做可逆操作；
+     * - 并写入一个简易头标记（在图像左上角几像素内），用于识别“已经加密过”；
+     * - 解密时根据密钥和同样逻辑反向恢复；
+     * - 不再出现“识别不出来说没有加密”这种模糊提示：如果密钥错误，就解不回原图，但仍然会输出结果。
+     */
+    const MAGIC = [137, 80, 78, 71, 13, 10, 26, 10]; // 一段 PNG 头字节，用来“伪装”标记
+
+    function applyEncryptionToImageData(imageData, strength, seed) {
+      const data = imageData.data;
+      const len = data.length;
+      const rand = seededRandom(seed);
+
+      // 记录原始低位，用于反向恢复时校验（可以裁剪/扩展）
+      // 这里简单实现：对 R/G/B 低 3 位做异或扰动，可逆。
+      const mask = (1 << Math.max(1, Math.min(3, strength))) - 1;
+
+      // 在前若干像素写“魔数 + 配置片段”，用于调试和识别。
+      const headerPixels = Math.min(8, len / 4);
+      for (let i = 0; i < headerPixels; i++) {
+        const base = i * 4;
+        const flag = MAGIC[i];
+        // 保留 alpha 不变，把 R 写成魔数的低 8 位，G 写 strength，B 写 header index
+        data[base] = flag;
+        data[base + 1] = strength & 0xff;
+        data[base + 2] = i;
+      }
+
+      for (let i = headerPixels * 4; i < len; i += 4) {
+        // R,G,B 分别做扰动；A 保持不变
+        for (let c = 0; c < 3; c++) {
+          const idx = i + c;
+          const orig = data[idx];
+          const low = orig & mask;
+          const r = Math.floor(rand() * (mask + 1)); // 0..mask
+          const toggled = (orig & ~mask) | (low ^ r);
+          data[idx] = toggled;
+        }
+      }
+      return imageData;
+    }
+
+    function applyDecryptionToImageData(imageData, strength, seed) {
+      // 注意：这里使用和加密时同样的伪随机序列与操作，因为是 XOR，可逆。
+      const data = imageData.data;
+      const len = data.length;
+      const rand = seededRandom(seed);
+      const mask = (1 << Math.max(1, Math.min(3, strength))) - 1;
+
+      const headerPixels = Math.min(8, len / 4);
+      // 不清除 header，方便调试；如需可以去掉
+      for (let i = headerPixels * 4; i < len; i += 4) {
+        for (let c = 0; c < 3; c++) {
+          const idx = i + c;
+          const enc = data[idx];
+          const low = enc & mask;
+          const r = Math.floor(rand() * (mask + 1));
+          const origLow = low ^ r;
+          const restored = (enc & ~mask) | origLow;
+          data[idx] = restored;
+        }
+      }
+      return imageData;
+    }
+
+    // ============ 执行加密 / 解密 ============
+    runEncryptBtn.addEventListener("click", () => {
+      if (!state.originalImage) {
+        setStatus("请先上传一张图片。", "warn");
+        setInlineIndicator("还没有图片，请先上传。");
+        return;
+      }
+      if (!state.mode) {
+        setStatus("请先选择“加密”或“解密”模式。", "warn");
+        return;
+      }
+
+      const strength = Number(noiseSlider.value);
+      const quality = Number(qualitySlider.value) / 100;
+
+      // 如果未手动填写密钥，就自动生成一个固定在本次会话内的
+      if (!state.currentSeed) {
+        if (!state.currentKey) {
+          state.currentKey = "AUTO-" + Math.random().toString(36).slice(2);
+        }
+        state.currentSeed = stringToSeed(state.currentKey);
+        keyHashPreview.textContent = `自动密钥：${shortHash(state.currentKey)}`;
+      }
+      const seed = state.currentSeed;
+
+      setInlineIndicator("处理中… 不会上传到服务器。");
+      setStatus(
+        state.mode === "encrypt"
+          ? "正在执行加密并生成预览…"
+          : "正在尝试解密当前图片…",
+        "info"
+      );
+
+      // 尽量避免卡顿：用 requestAnimationFrame 包一层
+      window.requestAnimationFrame(() => {
+        const baseCanvas =
+          state.mode === "encrypt" ? origCanvas : encryptedCanvas.width ? encryptedCanvas : origCanvas;
+
+        const baseCtx =
+          state.mode === "encrypt" ? origCtx : encryptedCanvas.width ? encCtx : origCtx;
+
+        const w = baseCanvas.width;
+        const h = baseCanvas.height;
+        if (!w || !h) {
+          setStatus("没有可处理的像素数据，请确认预览中有图片。", "warn");
           return;
         }
-        const data = {
-          key: keyInput.value || "",
-          blockSize: Number(blockSizeInput.value),
-          strength: Number(shuffleStrengthInput.value),
-          previewSharp: document.body.dataset.previewSharp === "true",
-        };
-        if (originalImage && typeof originalImage.src === "string") {
-          data.lastImageDataUrl = sourceCanvas.toDataURL("image/jpeg", 0.
+
+        let imgData = baseCtx.getImageData(0, 0, w, h);
+
+        if (state.mode === "encrypt") {
+          imgData = applyEncryptionToImageData(imgData, strength, seed);
+          encryptedCanvas.width = w;
+          encryptedCanvas.height = h;
+          encCtx.putImageData(imgData, 0, 0);
+          state.encryptedImageData = imgData;
+          encryptedPlaceholder.style.display = "none";
+          encryptedCanvas.classList.add("fade-in");
+          setTimeout(() => encryptedCanvas.classList.remove("fade-in"), 250);
+
+          // 同时做一次“解密预演”，用来展示“确认可逆”，但不改变密钥逻辑
+          let previewDec = new ImageData(
+            new Uint8ClampedArray(imgData.data),
+            imgData.width,
+            imgData.height
+          );
+          previewDec = applyDecryptionToImageData(previewDec, strength, seed);
+          decryptedCanvas.width = w;
+          decryptedCanvas.height = h;
+          decCtx.putImageData(previewDec, 0, 0);
+          state.decryptedImageData = previewDec;
+          decryptedPlaceholder.style.display = "none";
+
+          // 导出尺寸估算
+          const encDataUrl = encryptedCanvas.toDataURL("image/jpeg", quality);
+          // 粗略估算 byte 长度
+          const encBytes = Math.ceil((encDataUrl.length * 3) / 4);
+          state.encryptedSize = encBytes;
+
+          const decDataUrl = decryptedCanvas.toDataURL("image/jpeg", quality);
+          const decBytes = Math.ceil((decDataUrl.length * 3) / 4);
+          state.decryptedSize = decBytes;
+
+          exportEncryptedBtn.disabled = false;
+          exportDecryptedBtn.disabled = false;
+
+          setInlineIndicator("加密完成，可导出加密与解密结果。");
+          setStatus("加密完成，如需还原请确保使用同一密钥与参数。", "info");
+        } else {
+          // 解密模式
+          imgData = applyDecryptionToImageData(imgData, strength, seed);
+          decryptedCanvas.width = w;
+          decryptedCanvas.height = h;
+          decCtx.putImageData(imgData, 0, 0);
+          state.decryptedImageData = imgData;
+          decryptedPlaceholder.style.display = "none";
+          decryptedCanvas.classList.add("fade-in");
+          setTimeout(() => decryptedCanvas.classList.remove("fade-in"), 250);
+
+          const decDataUrl = decryptedCanvas.toDataURL("image/jpeg", quality);
+          const decBytes = Math.ceil((decDataUrl.length * 3) / 4);
+          state.decryptedSize = decBytes;
+
+          exportDecryptedBtn.disabled = false;
+
+          setInlineIndicator("解密执行完成，可比对原图与解密结果。");
+          setStatus(
+            "解密执行完毕。如果密钥或参数不一致，图像可能与原图有差异，但不会出现“未加密”的误判提示。",
+            "info"
+          );
+        }
+
+        updateMeta();
+      });
+    });
+
+    // ============ 导出按钮 ============
+    function downloadCanvas(canvas, filename, quality) {
+      if (!canvas.width || !canvas.height) return;
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = canvas.toDataURL("image/jpeg", quality);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    exportEncryptedBtn.addEventListener("click", () => {
+      if (!state.encryptedImageData) return;
+      const quality = Number(qualitySlider.value) / 100;
+      const name = `encrypted_${shortHash(
+        (state.currentKey || "") + Date.now().toString()
+      )}.jpg`;
+      downloadCanvas(encryptedCanvas, name, quality);
+    });
+
+    exportDecryptedBtn.addEventListener("click", () => {
+      if (!state.decryptedImageData) return;
+      const quality = Number(qualitySlider.value) / 100;
+      const name = `decrypted_${shortHash(
+        (state.currentKey || "") + Date.now().toString()
+      )}.jpg`;
+      downloadCanvas(decryptedCanvas, name, quality);
+    });
+
+    // ============ 初始状态文案 ============
+    setStatus("准备就绪：先上传图片，再选择模式并执行操作。", "info");
+    setInlineIndicator("等待图片上传…");
+  </script>
+</body>
+</html>
