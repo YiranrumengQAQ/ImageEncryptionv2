@@ -1,52 +1,27 @@
-# SecureImage - 图片安全加密工具 🔒
+# ❄️ 冬日温暖礼盒 (Winter Warm Gift Box)
 
-![SecureImage](https://img.shields.io/badge/SecureImage-图片加密工具-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-1.0.0-orange)
+一个充满温暖与惊喜的交互式网页项目，点击礼盒会飘出温暖的话语，带给用户心灵的慰藉。
 
-一个美观、高效、安全的图片加密与解密工具，采用现代Web技术构建，保护您的图片隐私。
+![项目预览](https://img.shields.io/badge/状态-完成-brightgreen) ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
-## ✨ 项目特色
+## ✨ 项目简介
 
-- 🎨 **美观界面** - 采用现代化UI设计，气泡元素和主题色彩
-- 🔒 **安全加密** - 先进的加密算法，保护图片内容不被窥视
-- ⚡ **极致性能** - 优化算法，操作流畅无卡顿
-- 📱 **响应式设计** - 完美适配PC和移动设备
-- 👀 **实时预览** - 加密前后图片对比预览
-- 💾 **原图保真** - 加密解密过程不损失图片质量
+这是一个纯前端项目，采用冬日主题设计，通过流畅的CSS动画和温暖的交互体验，为用户带来惊喜与感动。每次点击礼盒，都会随机生成多条温暖话语，以优雅的动画效果飘向天空并逐渐消失。
 
-## 🚀 功能特性
+## 🎯 核心特性
 
-### 核心功能
-- **图片加密** - 将普通图片转换为安全的加密格式
-- **图片解密** - 使用密钥恢复原始图片
-- **实时预览** - 同时显示原图和加密效果
-- **安全水印** - 自动添加加密标识水印
-- **批量处理** - 支持多张图片快速处理
+- **🎁 精美礼盒设计**：3D立体礼盒，配有金色丝带和蝴蝶结装饰
+- **❄️ 冬日氛围**：持续飘落的雪花效果，渐变紫粉色背景
+- **💬 温暖话语**：包含30+条精心挑选的温暖祝福语
+- **🎨 流畅动画**：礼盒开启动画、话语飘飞效果、雪花飘落等多重动画
+- **📱 响应式设计**：完美适配PC、平板、手机等各种设备
+- **⚡ 高性能**：使用CSS动画，保证60fps流畅运行
+- **⌨️ 键盘支持**：支持空格键快捷触发
 
-### 安全特性
-- **抗暴力破解** - 采用强加密算法，防止未授权访问
-- **密钥保护** - 只有正确密钥才能解密
-- **视觉隐藏** - 加密后图片无法识别原内容
-- **体积优化** - 加密后图片体积不会显著增大
+## 🚀 快速开始
 
-## 🛠️ 技术栈
+### 在线预览
 
-**前端技术**
-- HTML5 + CSS3 + 纯JavaScript
-- Canvas API 图片处理
-- CSS Grid & Flexbox 布局
-- 响应式设计原则
+直接用浏览器打开 `index.html` 文件即可体验。
 
-**加密技术**
-- 自定义像素加密算法
-- 伪随机数生成器
-- 色块转换技术
-- 数字水印系统
-
-## 📦 安装使用
-
-### 直接使用
-1. 克隆项目到本地
-```bash
-git clone https://github.com/yiranrumengqaq/ImageEncryptionv2.git
+### 本地运行
