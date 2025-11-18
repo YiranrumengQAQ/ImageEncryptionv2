@@ -1,27 +1,47 @@
-# ❄️ 冬日温暖礼盒 (Winter Warm Gift Box)
+# 🔐 图片加密解密工具 Pro
 
-一个充满温暖与惊喜的交互式网页项目，点击礼盒会飘出温暖的话语，带给用户心灵的慰藉。
+<div align="center">
 
-![项目预览](https://img.shields.io/badge/状态-完成-brightgreen) ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+![Web Crypto API](https://img.shields.io/badge/Web%20Crypto%20API-Enabled-green)
+![QRCode.js](https://img.shields.io/badge/QRCode.js-1.0.0-orange)
 
-## ✨ 项目简介
+**一款安全、美观、易用的纯前端图片加密解密工具**
 
-这是一个纯前端项目，采用冬日主题设计，通过流畅的CSS动画和温暖的交互体验，为用户带来惊喜与感动。每次点击礼盒，都会随机生成多条温暖话语，以优雅的动画效果飘向天空并逐渐消失。
+支持 AES-GCM-256 加密 | PBKDF2 密钥派生 | 二维码生成 | 响应式 PEPC 布局
 
-## 🎯 核心特性
+[在线演示](#) | [快速开始](#-快速开始) | [功能特性](#-功能特性) | [技术架构](#-技术架构)
 
-- **🎁 精美礼盒设计**：3D立体礼盒，配有金色丝带和蝴蝶结装饰
-- **❄️ 冬日氛围**：持续飘落的雪花效果，渐变紫粉色背景
-- **💬 温暖话语**：包含30+条精心挑选的温暖祝福语
-- **🎨 流畅动画**：礼盒开启动画、话语飘飞效果、雪花飘落等多重动画
-- **📱 响应式设计**：完美适配PC、平板、手机等各种设备
-- **⚡ 高性能**：使用CSS动画，保证60fps流畅运行
-- **⌨️ 键盘支持**：支持空格键快捷触发
+</div>
 
-## 🚀 快速开始
+---
 
-### 在线预览
+## 📖 项目简介
 
-直接用浏览器打开 `index.html` 文件即可体验。
+**图片加密解密工具 Pro** 是一款基于现代 Web 技术开发的纯前端图片加密解密应用。本工具采用军用级 **AES-GCM-256** 加密算法，结合 **PBKDF2** 密钥派生函数（120,000 次迭代），为您的图片提供银行级安全保护。
 
-### 本地运行
+### 🎯 核心特色
+
+本项目基于原始的 **Text to QR Code Converter**（文本转二维码工具）进行深度开发和功能扩展，将简单的二维码生成器升级为功能完整的图片加密解密系统。
+
+**原始功能**：
+- 文本输入 → 二维码生成
+
+**升级后功能**：
+- 图片上传 → AES-GCM 加密 → Base64 文本 → 二维码生成
+- 加密文本/二维码 → 输入密钥 → 解密还原图片
+- 完整的加密解密生态系统
+
+### ✨ 为什么选择本工具？
+
+| 特性 | 说明 | 优势 |
+|------|------|------|
+| 🔒 **军用级加密** | AES-GCM-256 算法 | 与银行、军队使用的加密标准相同 |
+| 🛡️ **防暴力破解** | PBKDF2(120K 迭代) + 随机盐值 | 即使密码泄露，暴力破解需数年时间 |
+| 📱 **二维码分享** | 加密文本转二维码 | 方便手机扫码传输加密数据 |
+| 💻 **完全离线** | 无服务器依赖 | 下载后可在无网环境使用 |
+| 🎨 **现代设计** | 渐变+玻璃态+动画 | 流畅的用户体验和视觉享受 |
+| 📐 **响应式布局** | PEPC 自适应设计 | 手机/平板/电脑完美显示 |
