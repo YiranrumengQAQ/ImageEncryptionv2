@@ -1,388 +1,131 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>给你的浪漫表白 ❤️</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            transition: background 1s ease;
-        }
-
-        .container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .love-title {
-            font-size: clamp(2rem, 8vw, 5rem);
-            color: white;
-            text-shadow: 0 0 20px rgba(255,255,255,0.5);
-            margin-bottom: 30px;
-            animation: fadeInDown 1s ease;
-            text-align: center;
-        }
-
-        .love-message {
-            font-size: clamp(1rem, 4vw, 1.8rem);
-            color: white;
-            text-align: center;
-            max-width: 800px;
-            line-height: 1.8;
-            padding: 30px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 1s ease 0.5s both;
-            margin-bottom: 40px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: fadeIn 1s ease 1s both;
-        }
-
-        .love-button {
-            padding: 15px 40px;
-            font-size: clamp(1rem, 3vw, 1.3rem);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .yes-button {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .yes-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(245,87,108,0.5);
-        }
-
-        /* 背景动画 */
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* 漂浮的心形 */
-        .heart {
-            position: absolute;
-            font-size: clamp(20px, 5vw, 40px);
-            animation: float linear infinite;
-            opacity: 0.7;
-        }
-
-        /* 星星效果 */
-        .star {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 2s infinite;
-        }
-
-        /* 粒子效果 */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            animation: particle-float linear infinite;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.7;
-            }
-            90% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-        @keyframes particle-float {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) translateX(var(--drift));
-                opacity: 0;
-            }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .love-message {
-                padding: 20px;
-                margin-bottom: 30px;
-            }
-            
-            .button-group {
-                gap: 15px;
-            }
-            
-            .love-button {
-                padding: 12px 30px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .love-message {
-                padding: 15px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>图片加密 · Picocrypt样式</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      margin:0;
+      font-family:'Segoe UI',Arial,sans-serif;
+      background: #f6faff;
+      color: #0d3879;
+    }
+    .container {
+      max-width:420px;
+      margin:40px auto 0 auto;
+      background:#fff;
+      box-shadow:0 2px 16px #d7e8ff55;
+      border-radius:24px;
+      padding:32px 18px 28px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    h2 {
+      text-align:center;
+      color:#065ada;
+      letter-spacing:1.2px;
+    }
+    input,button {
+      outline:none;
+      box-sizing:border-box;
+      border-radius:5px;
+      border:1px solid #d7e8ff;
+      padding:12px;
+      font-size:1rem;
+      width:100%;
+      margin-bottom:10px;
+      background:#eef6ff;
+      transition:.2s;
+    }
+    input:focus,button:active {
+      border-color:#067afd;
+    }
+    button {
+      background:#067afd;
+      color:#fff;
+      font-weight: bold;
+      cursor:pointer;
+      margin-bottom:0;
+    }
+    .result {
+      background:#eef6ff;
+      word-break:break-all;
+      font-size:0.96em;
+      padding:14px;
+      border-radius:7px;
+      min-height:48px;
+      color:#0d3879;
+      margin:6px 0;
+    }
+    @media (max-width:480px){
+      .container {width:96vw;padding:22px 6vw;}
+    }
+  </style>
 </head>
 <body>
-    <div class="background-animation" id="bgAnimation"></div>
-    
-    <div class="container">
-        <h1 class="love-title" id="title">💖</h1>
-        <div class="love-message" id="message"></div>
-        <div class="button-group">
-            <button class="love-button yes-button" onclick="handleYes()">我愿意 ❤️</button>
-        </div>
-    </div>
-
-    <script>
-        // 随机背景渐变色组合
-        const gradients = [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-            'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)'
-        ];
-
-        // 随机标题组合
-        const titles = [
-            '遇见你是最美的意外 💕',
-            '你是我心中的星光 ✨',
-            '想和你一起看日落 🌅',
-            '余生都想和你在一起 💑',
-            '你是我的小确幸 🌸',
-            '因为是你，所以心动 💗',
-            '你笑起来真好看 😊',
-            '想把世界的温柔都给你 🌹',
-            '喜欢你，是一件很认真的事 💝',
-            '你是我的例外和偏爱 🎀'
-        ];
-
-        // 随机表白文案
-        const messages = [
-            '从看到你的第一眼开始，我就知道，你是那个让我愿意用一生去守护的人。每一次心跳，都在为你跳动。',
-            '世界上有千万种相遇，而遇见你，是我这辈子最幸运的事情。我想和你一起，走过春夏秋冬，看遍世间繁华。',
-            '你知道吗？在我心里，你比任何风景都要美丽。你的笑容，就是我最大的幸福。',
-            '如果可以，我想变成你手中的那杯奶茶，这样就可以每天陪伴在你身边，给你温暖。',
-            '你是我的日月星辰，是我的山川湖海，是我想要用余生去珍惜的人。让我牵着你的手，一直走下去好吗？',
-            '在茫茫人海中，我只想牵着你的手。因为有你，所有的平凡日子都变得浪漫而美好。',
-            '你是清晨的第一缕阳光，是夜空中最亮的星星，是我生命中最美的风景。我想和你一起，创造属于我们的故事。',
-            '喜欢你不是三分钟热度，而是蓄谋已久后的深思熟虑。我想给你最长情的告白，和最真挚的陪伴。',
-            '你就像是上天送给我的礼物，让我的世界充满了色彩。我愿意用我的全部，换你一世的欢颜。',
-            '时光荏苒，岁月如梭，唯一不变的，是我对你的心意。我想和你一起慢慢变老，一起看世界的美好。'
-        ];
-
-        // 随机动画效果类型
-        const animationTypes = ['hearts', 'stars', 'particles', 'mixed'];
-
-        // 随机选择函数
-        function getRandomItem(array) {
-            return array[Math.floor(Math.random() * array.length)];
-        }
-
-        // 初始化页面
-        function initPage() {
-            // 设置随机背景
-            document.body.style.background = getRandomItem(gradients);
-            
-            // 设置随机标题和文案
-            document.getElementById('title').textContent = getRandomItem(titles);
-            document.getElementById('message').textContent = getRandomItem(messages);
-            
-            // 设置随机动画效果
-            const animationType = getRandomItem(animationTypes);
-            createAnimation(animationType);
-        }
-
-        // 创建动画效果
-        function createAnimation(type) {
-            const container = document.getElementById('bgAnimation');
-            
-            if (type === 'hearts' || type === 'mixed') {
-                createHearts(container, type === 'mixed' ? 15 : 30);
-            }
-            
-            if (type === 'stars' || type === 'mixed') {
-                createStars(container, type === 'mixed' ? 30 : 60);
-            }
-            
-            if (type === 'particles' || type === 'mixed') {
-                createParticles(container, type === 'mixed' ? 20 : 40);
-            }
-        }
-
-        // 创建漂浮的心形
-        function createHearts(container, count) {
-            const heartSymbols = ['❤️', '💕', '💖', '💗', '💓', '💝', '💘'];
-            
-            for (let i = 0; i < count; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.textContent = getRandomItem(heartSymbols);
-                heart.style.left = Math.random() * 100 + '%';
-                heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                heart.style.animationDelay = Math.random() * 5 + 's';
-                container.appendChild(heart);
-            }
-        }
-
-        // 创建星星
-        function createStars(container, count) {
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 2 + 's';
-                container.appendChild(star);
-            }
-        }
-
-        // 创建粒子效果
-        function createParticles(container, count) {
-            const colors = ['#ff9a9e', '#fecfef', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
-            
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.width = (Math.random() * 8 + 3) + 'px';
-                particle.style.height = particle.style.width;
-                particle.style.background = getRandomItem(colors);
-                particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                particle.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
-                container.appendChild(particle);
-            }
-        }
-
-        // 点击"我愿意"按钮
-        function handleYes() {
-            const responses = [
-                '太好了！你让我成为了世界上最幸福的人！💕',
-                '我就知道你也喜欢我！让我们一起创造美好回忆吧！✨',
-                '谢谢你愿意给我这个机会，我会好好珍惜你的！🌹',
-                '耶！从今天开始，让我们一起走向幸福的未来！💖',
-                '你答应了！我要把这个瞬间永远记在心里！🎉'
-            ];
-            
-            alert(getRandomItem(responses));
-            
-            // 创建烟花特效
-            createFireworks();
-        }
-
-        // 烟花特效
-        function createFireworks() {
-            const container = document.getElementById('bgAnimation');
-            const colors = ['#ff0000', '#ff69b4', '#ffd700', '#00ff00', '#00ffff', '#ff1493'];
-            
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const firework = document.createElement('div');
-                    firework.style.position = 'absolute';
-                    firework.style.left = Math.random() * 100 + '%';
-                    firework.style.top = Math.random() * 100 + '%';
-                    firework.style.width = '10px';
-                    firework.style.height = '10px';
-                    firework.style.borderRadius = '50%';
-                    firework.style.background = getRandomItem(colors);
-                    firework.style.boxShadow = `0 0 20px ${getRandomItem(colors)}`;
-                    firework.style.animation = 'fadeIn 0.5s ease, fadeOut 1s ease 0.5s';
-                    container.appendChild(firework);
-                    
-                    setTimeout(() => firework.remove(), 1500);
-                }, i * 50);
-            }
-        }
-
-        // 页面加载时初始化
-        window.onload = initPage;
-    </script>
+<div class="container">
+  <h2>图片加密工具</h2>
+  <input type="file" id="imgFile" accept="image/*">
+  <input type="password" id="pass" placeholder="输入加密密码">
+  <button onclick="encryptImage()">加密并下载</button>
+  <div id="msg" class="result"></div>
+</div>
+<script>
+function str2ab(str){
+  let buf=new ArrayBuffer(str.length),bufView=new Uint8Array(buf);
+  for(let i=0;i<str.length;i++)bufView[i]=str.charCodeAt(i);
+  return buf;
+}
+async function encryptData(buffer, password){
+  const enc=new TextEncoder();
+  const keyMaterial=await window.crypto.subtle.importKey(
+    "raw",enc.encode(password),"PBKDF2",false,["deriveKey"]
+  );
+  const salt=window.crypto.getRandomValues(new Uint8Array(16));
+  const key=await window.crypto.subtle.deriveKey(
+    {name:"PBKDF2",salt:salt,iterations:2048,hash:"SHA-256"},
+    keyMaterial,{name:"AES-GCM",length:256},false,["encrypt"]
+  );
+  const iv=window.crypto.getRandomValues(new Uint8Array(12));
+  const encrypted=await window.crypto.subtle.encrypt(
+    {name:"AES-GCM",iv:iv},
+    key,buffer
+  );
+  let total=new Uint8Array(salt.length+iv.length+encrypted.byteLength);
+  total.set(salt,0);
+  total.set(iv,salt.length);
+  total.set(new Uint8Array(encrypted),salt.length+iv.length);
+  return total;
+}
+function encryptImage(){
+  let file=document.getElementById('imgFile').files[0];
+  let password=document.getElementById('pass').value;
+  let msg=document.getElementById('msg');
+  msg.textContent='';
+  if(!file){msg.textContent="请选择图片";return;}
+  if(!password){msg.textContent="请填写密码";return;}
+  let reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      let buf=e.target.result;
+      let enc=await encryptData(buf,password);
+      let blob=new Blob([enc],{type:"application/octet-stream"});
+      let a=document.createElement('a');
+      a.download=file.name+'.enc.txt';
+      a.href=URL.createObjectURL(blob);
+      a.style.display="none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      msg.textContent="加密完成，已下载。";
+    }catch(err){
+      msg.textContent="加密失败："+err;
+    }
+  }
+  reader.readAsArrayBuffer(file);
+}
+</script>
 </body>
 </html>
