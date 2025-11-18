@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>现代视频播放器</title>
+    <title>给你的浪漫表白 ❤️</title>
     <style>
         * {
             margin: 0;
@@ -12,30 +12,114 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            transition: background 1s ease;
         }
 
         .container {
-            width: 100%;
-            max-width: 1200px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.6s ease-out;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
-        @keyframes fadeIn {
+        .love-title {
+            font-size: clamp(2rem, 8vw, 5rem);
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease;
+            text-align: center;
+        }
+
+        .love-message {
+            font-size: clamp(1rem, 4vw, 1.8rem);
+            color: white;
+            text-align: center;
+            max-width: 800px;
+            line-height: 1.8;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease 0.5s both;
+            margin-bottom: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeIn 1s ease 1s both;
+        }
+
+        .love-button {
+            padding: 15px 40px;
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .yes-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .yes-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(245,87,108,0.5);
+        }
+
+        /* 背景动画 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 漂浮的心形 */
+        .heart {
+            position: absolute;
+            font-size: clamp(20px, 5vw, 40px);
+            animation: float linear infinite;
+            opacity: 0.7;
+        }
+
+        /* 星星效果 */
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: particle-float linear infinite;
+        }
+
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(-50px);
             }
             to {
                 opacity: 1;
@@ -43,634 +127,262 @@
             }
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px 30px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .input-section {
-            padding: 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            min-width: 250px;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .file-upload-label {
-            padding: 12px 24px;
-            background: #28a745;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-        }
-
-        .file-upload-label:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%;
-            background: #000;
-            overflow: hidden;
-        }
-
-        .video-container video,
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .placeholder {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #666;
-        }
-
-        .placeholder svg {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .controls {
-            padding: 25px 30px;
-        }
-
-        .control-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            width: 45px;
-            height: 45px;
-            border: none;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 18px;
-        }
-
-        .control-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .progress-container {
-            flex: 1;
-            min-width: 200px;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.1s linear;
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 14px;
-            height: 14px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .time-display {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
-            min-width: 100px;
-        }
-
-        .volume-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .volume-slider {
-            width: 100px;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #e0e0e0;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #667eea;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .volume-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        .volume-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: #667eea;
-            cursor: pointer;
-            border-radius: 50%;
-            border: none;
-        }
-
-        .speed-control {
-            display: flex;
-            gap: 8px;
-        }
-
-        .speed-btn {
-            padding: 8px 12px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .speed-btn.active,
-        .speed-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 22px;
-            }
-
-            .input-section {
-                padding: 20px;
-            }
-
-            .input-wrapper {
-                flex-direction: column;
-            }
-
-            input[type="text"] {
-                min-width: 100%;
-            }
-
-            .controls {
-                padding: 20px;
-            }
-
-            .control-row {
-                justify-content: center;
-            }
-
-            .volume-slider {
-                width: 80px;
-            }
-        }
-
-        @media (orientation: landscape) and (max-width: 900px) {
-            body {
-                padding: 0;
-            }
-
-            .container {
-                max-width: 100%;
-                border-radius: 0;
-            }
-
-            .header,
-            .input-section {
-                display: none;
-            }
-
-            .video-container {
-                padding-top: 100vh;
-            }
-
-            .controls {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-                padding: 15px;
-                z-index: 10;
-            }
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: none;
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
-        }
-
-        @keyframes slideIn {
+        @keyframes fadeInUp {
             from {
-                transform: translateX(400px);
                 opacity: 0;
+                transform: translateY(50px);
             }
             to {
-                transform: translateX(0);
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        .notification.show {
-            display: block;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .notification.success {
-            border-left: 4px solid #28a745;
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
         }
 
-        .notification.error {
-            border-left: 4px solid #dc3545;
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(var(--drift));
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .love-message {
+                padding: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .button-group {
+                gap: 15px;
+            }
+            
+            .love-button {
+                padding: 12px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .love-message {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="background-animation" id="bgAnimation"></div>
+    
     <div class="container">
-        <div class="header">
-            <h1>🎬 现代视频播放器</h1>
-            <p>支持本地视频和YouTube链接播放</p>
-        </div>
-
-        <div class="input-section">
-            <div class="input-group">
-                <label>📹 上传本地视频</label>
-                <div class="input-wrapper">
-                    <input type="file" id="videoFile" accept="video/*">
-                    <label for="videoFile" class="file-upload-label">
-                        <span>📁</span>
-                        <span>选择视频文件</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>🔗 YouTube链接</label>
-                <div class="input-wrapper">
-                    <input type="text" id="youtubeUrl" placeholder="粘贴YouTube视频链接 (例: https://www.youtube.com/watch?v=...)">
-                    <button class="btn btn-primary" onclick="loadYouTube()">
-                        <span>▶️</span>
-                        <span>加载</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="clearVideo()">
-                        <span>🗑️</span>
-                        <span>清除</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="video-container" id="videoContainer">
-            <div class="placeholder" id="placeholder">
-                <svg fill="#ccc" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                </svg>
-                <p>请上传视频或输入YouTube链接</p>
-            </div>
-            <video id="videoPlayer" style="display:none;" controls></video>
-            <div id="youtubeContainer" style="display:none;"></div>
-        </div>
-
-        <div class="controls" id="controls" style="display:none;">
-            <div class="control-row">
-                <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">▶️</button>
-                <button class="control-btn" onclick="skipTime(-10)">⏪</button>
-                <button class="control-btn" onclick="skipTime(10)">⏩</button>
-                <div class="progress-container" id="progressContainer" onclick="seek(event)">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
-            </div>
-
-            <div class="control-row">
-                <div class="volume-container">
-                    <button class="control-btn" onclick="toggleMute()">🔊</button>
-                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" oninput="changeVolume(this.value)">
-                </div>
-
-                <div class="speed-control">
-                    <span style="color: #666; font-weight: 600; font-size: 14px;">速度:</span>
-                    <button class="speed-btn" onclick="changeSpeed(0.5)">0.5x</button>
-                    <button class="speed-btn active" onclick="changeSpeed(1)">1x</button>
-                    <button class="speed-btn" onclick="changeSpeed(1.5)">1.5x</button>
-                    <button class="speed-btn" onclick="changeSpeed(2)">2x</button>
-                </div>
-
-                <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
-            </div>
+        <h1 class="love-title" id="title">💖</h1>
+        <div class="love-message" id="message"></div>
+        <div class="button-group">
+            <button class="love-button yes-button" onclick="handleYes()">我愿意 ❤️</button>
         </div>
     </div>
 
-    <div class="notification" id="notification"></div>
-
     <script>
-        const videoPlayer = document.getElementById('videoPlayer');
-        const youtubeContainer = document.getElementById('youtubeContainer');
-        const placeholder = document.getElementById('placeholder');
-        const controls = document.getElementById('controls');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const progressBar = document.getElementById('progressBar');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const videoFile = document.getElementById('videoFile');
-        let isYouTube = false;
+        // 随机背景渐变色组合
+        const gradients = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+            'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)'
+        ];
 
-        // 文件上传处理
-        videoFile.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const url = URL.createObjectURL(file);
-                loadLocalVideo(url);
-                showNotification('视频加载成功！', 'success');
-            }
-        });
+        // 随机标题组合
+        const titles = [
+            '遇见你是最美的意外 💕',
+            '你是我心中的星光 ✨',
+            '想和你一起看日落 🌅',
+            '余生都想和你在一起 💑',
+            '你是我的小确幸 🌸',
+            '因为是你，所以心动 💗',
+            '你笑起来真好看 😊',
+            '想把世界的温柔都给你 🌹',
+            '喜欢你，是一件很认真的事 💝',
+            '你是我的例外和偏爱 🎀'
+        ];
 
-        // 加载本地视频
-        function loadLocalVideo(url) {
-            isYouTube = false;
-            youtubeContainer.style.display = 'none';
-            youtubeContainer.innerHTML = '';
-            placeholder.style.display = 'none';
-            videoPlayer.style.display = 'block';
-            videoPlayer.src = url;
-            controls.style.display = 'block';
-            videoPlayer.load();
+        // 随机表白文案
+        const messages = [
+            '从看到你的第一眼开始，我就知道，你是那个让我愿意用一生去守护的人。每一次心跳，都在为你跳动。',
+            '世界上有千万种相遇，而遇见你，是我这辈子最幸运的事情。我想和你一起，走过春夏秋冬，看遍世间繁华。',
+            '你知道吗？在我心里，你比任何风景都要美丽。你的笑容，就是我最大的幸福。',
+            '如果可以，我想变成你手中的那杯奶茶，这样就可以每天陪伴在你身边，给你温暖。',
+            '你是我的日月星辰，是我的山川湖海，是我想要用余生去珍惜的人。让我牵着你的手，一直走下去好吗？',
+            '在茫茫人海中，我只想牵着你的手。因为有你，所有的平凡日子都变得浪漫而美好。',
+            '你是清晨的第一缕阳光，是夜空中最亮的星星，是我生命中最美的风景。我想和你一起，创造属于我们的故事。',
+            '喜欢你不是三分钟热度，而是蓄谋已久后的深思熟虑。我想给你最长情的告白，和最真挚的陪伴。',
+            '你就像是上天送给我的礼物，让我的世界充满了色彩。我愿意用我的全部，换你一世的欢颜。',
+            '时光荏苒，岁月如梭，唯一不变的，是我对你的心意。我想和你一起慢慢变老，一起看世界的美好。'
+        ];
+
+        // 随机动画效果类型
+        const animationTypes = ['hearts', 'stars', 'particles', 'mixed'];
+
+        // 随机选择函数
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
         }
 
-        // 加载YouTube视频
-        function loadYouTube() {
-            const url = document.getElementById('youtubeUrl').value.trim();
-            if (!url) {
-                showNotification('请输入YouTube链接', 'error');
-                return;
-            }
-
-            const videoId = extractYouTubeID(url);
-            if (!videoId) {
-                showNotification('无效的YouTube链接', 'error');
-                return;
-            }
-
-            isYouTube = true;
-            videoPlayer.style.display = 'none';
-            placeholder.style.display = 'none';
-            youtubeContainer.style.display = 'block';
-            youtubeContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0" allowfullscreen></iframe>`;
-            controls.style.display = 'none';
-            showNotification('YouTube视频加载成功！', 'success');
-        }
-
-        // 提取YouTube视频ID
-        function extractYouTubeID(url) {
-            const regExp = /^.*((youtu.be/)|(v/)|(/u/w/)|(embed/)|(watch?))??v?=?([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[7].length === 11) ? match[7] : null;
-        }
-
-        // 清除视频
-        function clearVideo() {
-            videoPlayer.pause();
-            videoPlayer.src = '';
-            youtubeContainer.innerHTML = '';
-            videoPlayer.style.display = 'none';
-            youtubeContainer.style.display = 'none';
-            placeholder.style.display = 'block';
-            controls.style.display = 'none';
-            document.getElementById('youtubeUrl').value = '';
-            videoFile.value = '';
-            showNotification('视频已清除', 'success');
-        }
-
-        // 播放/暂停
-        function togglePlayPause() {
-            if (videoPlayer.paused) {
-                videoPlayer.play();
-                playPauseBtn.textContent = '⏸️';
-            } else {
-                videoPlayer.pause();
-                playPauseBtn.textContent = '▶️';
-            }
-        }
-
-        // 快进/快退
-        function skipTime(seconds) {
-            videoPlayer.currentTime += seconds;
-        }
-
-        // 进度条点击
-        function seek(e) {
-            const percent = e.offsetX / progressContainer.offsetWidth;
-            videoPlayer.currentTime = percent * videoPlayer.duration;
-        }
-
-        // 更新进度
-        videoPlayer.addEventListener('timeupdate', function() {
-            const percent = (videoPlayer.currentTime / videoPlayer.duration) * 100;
-            progressBar.style.width = percent + '%';
-            timeDisplay.textContent = formatTime(videoPlayer.currentTime) + ' / ' + formatTime(videoPlayer.duration);
-        });
-
-        // 格式化时间
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return mins + ':' + (secs < 10 ? '0' : '') + secs;
-        }
-
-        // 音量控制
-        function changeVolume(value) {
-            videoPlayer.volume = value / 100;
-        }
-
-        // 静音切换
-        function toggleMute() {
-            videoPlayer.muted = !videoPlayer.muted;
-        }
-
-        // 改变播放速度
-        function changeSpeed(speed) {
-            videoPlayer.playbackRate = speed;
-            document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        // 全屏切换
-        function toggleFullscreen() {
-            const container = document.querySelector('.container');
-            if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => {
-                    showNotification('全屏模式失败', 'error');
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        // 通知提示
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = 'notification ' + type + ' show';
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // 键盘快捷键
-        document.addEventListener('keydown', function(e) {
-            if (isYouTube || videoPlayer.style.display === 'none') return;
+        // 初始化页面
+        function initPage() {
+            // 设置随机背景
+            document.body.style.background = getRandomItem(gradients);
             
-            switch(e.key) {
-                case ' ':
-                    e.preventDefault();
-                    togglePlayPause();
-                    break;
-                case 'ArrowLeft':
-                    skipTime(-5);
-                    break;
-                case 'ArrowRight':
-                    skipTime(5);
-                    break;
-                case 'f':
-                    toggleFullscreen();
-                    break;
-                case 'm':
-                    toggleMute();
-                    break;
+            // 设置随机标题和文案
+            document.getElementById('title').textContent = getRandomItem(titles);
+            document.getElementById('message').textContent = getRandomItem(messages);
+            
+            // 设置随机动画效果
+            const animationType = getRandomItem(animationTypes);
+            createAnimation(animationType);
+        }
+
+        // 创建动画效果
+        function createAnimation(type) {
+            const container = document.getElementById('bgAnimation');
+            
+            if (type === 'hearts' || type === 'mixed') {
+                createHearts(container, type === 'mixed' ? 15 : 30);
             }
-        });
+            
+            if (type === 'stars' || type === 'mixed') {
+                createStars(container, type === 'mixed' ? 30 : 60);
+            }
+            
+            if (type === 'particles' || type === 'mixed') {
+                createParticles(container, type === 'mixed' ? 20 : 40);
+            }
+        }
+
+        // 创建漂浮的心形
+        function createHearts(container, count) {
+            const heartSymbols = ['❤️', '💕', '💖', '💗', '💓', '💝', '💘'];
+            
+            for (let i = 0; i < count; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = getRandomItem(heartSymbols);
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        // 创建星星
+        function createStars(container, count) {
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // 创建粒子效果
+        function createParticles(container, count) {
+            const colors = ['#ff9a9e', '#fecfef', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 8 + 3) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = getRandomItem(colors);
+                particle.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.setProperty('--drift', (Math.random() * 200 - 100) + 'px');
+                container.appendChild(particle);
+            }
+        }
+
+        // 点击"我愿意"按钮
+        function handleYes() {
+            const responses = [
+                '太好了！你让我成为了世界上最幸福的人！💕',
+                '我就知道你也喜欢我！让我们一起创造美好回忆吧！✨',
+                '谢谢你愿意给我这个机会，我会好好珍惜你的！🌹',
+                '耶！从今天开始，让我们一起走向幸福的未来！💖',
+                '你答应了！我要把这个瞬间永远记在心里！🎉'
+            ];
+            
+            alert(getRandomItem(responses));
+            
+            // 创建烟花特效
+            createFireworks();
+        }
+
+        // 烟花特效
+        function createFireworks() {
+            const container = document.getElementById('bgAnimation');
+            const colors = ['#ff0000', '#ff69b4', '#ffd700', '#00ff00', '#00ffff', '#ff1493'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.style.position = 'absolute';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.width = '10px';
+                    firework.style.height = '10px';
+                    firework.style.borderRadius = '50%';
+                    firework.style.background = getRandomItem(colors);
+                    firework.style.boxShadow = `0 0 20px ${getRandomItem(colors)}`;
+                    firework.style.animation = 'fadeIn 0.5s ease, fadeOut 1s ease 0.5s';
+                    container.appendChild(firework);
+                    
+                    setTimeout(() => firework.remove(), 1500);
+                }, i * 50);
+            }
+        }
+
+        // 页面加载时初始化
+        window.onload = initPage;
     </script>
 </body>
 </html>
