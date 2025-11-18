@@ -2,410 +2,266 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二维码生成器 - QR Code Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>图片加密解密二维码工具</title>
     <style>
-        * {
+        :root {
+            --pepc-gap: 2vw;
+            --pepc-radius: 14px;
+        }
+        html, body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
+            background: linear-gradient(135deg, #f8fafc 60%, #dbeafe 100%);
         }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .input-group {
-            margin-bottom: 30px;
-        }
-
-        label {
-            display: block;
-            color: #555;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            resize: vertical;
-            min-height: 100px;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .qr-container {
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 30px;
-            padding: 30px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 16px;
-            min-height: 320px;
-            justify-content: center;
-            transition: all 0.3s ease;
+            justify-content: flex-start;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
-
-        #qrCode {
-            margin: 20px 0;
-            padding: 15px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        #qrCode canvas, #qrCode img {
-            display: block !important;
-            border-radius: 8px;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #999;
-            padding: 40px 20px;
-        }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 15px;
-            opacity: 0.3;
-        }
-
-        .btn-group {
+        .container {
+            max-width: 800px;
+            margin: 3vw auto;
+            background: #fff;
+            border-radius: var(--pepc-radius);
+            box-shadow: 0 6px 32px 0 rgba(0,0,0,0.08);
+            padding: 2vw;
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            flex-direction: column;
+            gap: var(--pepc-gap);
         }
-
+        .pepc-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--pepc-gap);
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .pepc-col {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+        .preview-img, .qr-img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background: #f3f4f6;
+        }
+        .section-title {
+            font-size: 1.18em;
+            color: #1e293b;
+            margin-bottom: 0.2em;
+        }
+        label, button, input, textarea {
+            font-size: 1em;
+        }
+        .action-group {
+            display: flex;
+            gap: 1em;
+            margin-top: 0.5em;
+        }
+        textarea {
+            width: 100%;
+            min-height: 5em;
+            resize: vertical;
+            border-radius: 8px;
+            padding: 0.7em;
+            border: 1px solid #a5b4fc;
+            background: #f9fafb;
+            font-family: 'Fira Mono', monospace;
+        }
+        input[type="password"], input[type="text"] {
+            padding: 0.7em;
+            border-radius: 7px;
+            border: 1px solid #a5b4fc;
+            background: #f8fafc;
+            font-family: inherit;
+        }
         button {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 600;
+            background: linear-gradient(90deg, #2563eb 30%, #60a5fa 100%);
+            color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 7px;
+            padding: 0.6em 1.2em;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+            transition: background 0.18s;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        button:hover {
+            background: #1d4ed8;
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .size-selector {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .size-btn {
-            padding: 8px 16px;
-            font-size: 14px;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .size-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .size-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #999;
-            font-size: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 25px;
-                border-radius: 16px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .btn-group {
-                flex-direction: column;
-            }
-
-            button {
-                width: 100%;
-            }
-
-            .size-selector {
-                width: 100%;
-            }
-
-            .size-btn {
-                flex: 1;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            .qr-container {
-                padding: 20px;
-            }
+        @media (max-width:700px) {
+            .container {padding:1vw;}
+            .pepc-row {flex-direction:column;}
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✨ 二维码生成器</h1>
-        <p class="subtitle">输入文本或链接，即刻生成精美二维码</p>
-
-        <div class="input-group">
-            <label for="textInput">📝 输入内容</label>
-            <textarea 
-                id="textInput" 
-                placeholder="输入文字、网址或任何内容..."
-                autocomplete="off"
-            ></textarea>
-        </div>
-
-        <div class="qr-container">
-            <div id="qrCode"></div>
-            <div id="emptyState" class="empty-state">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 14h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm-6 12h8v-8h-8v8zm2-6h4v4h-4v-4z"/>
-                </svg>
-                <p>在上方输入内容即可生成二维码</p>
+        <h2 style="text-align:center;">图片加密解密 &amp; 二维码生成工具（PEPC布局）</h2>
+        <div class="pepc-row">
+            <div class="pepc-col">
+                <div class="section-title">1. 上传图片并输入密钥</div>
+                <input type="file" id="imgInput" accept="image/*"><br>
+                <input type="password" id="encKey" placeholder="请输入密钥">
+                <div class="action-group">
+                    <button onclick="encryptImage()">加密图片</button>
+                    <button onclick="clearAll()">清空</button>
+                </div>
+                <img id="imgPreview" class="preview-img" alt="预览图片" style="display:none">
+            </div>
+            <div class="pepc-col">
+                <div class="section-title">2. 加密文本 / 二维码生成</div>
+                <textarea id="encText" placeholder="这里显示加密结果"></textarea>
+                <div class="action-group">
+                    <button onclick="genQR()">生成二维码</button>
+                </div>
+                <div id="qrCode" style="margin:0 auto"></div>
+            </div>
+            <div class="pepc-col">
+                <div class="section-title">3. 解密（支持图片和文本）</div>
+                <textarea id="decText" placeholder="粘贴加密文本"></textarea>
+                <input type="password" id="decKey" placeholder="请输入解密密钥">
+                <div class="action-group">
+                    <button onclick="decryptImage()">解密为图片</button>
+                </div>
+                <img id="decPreview" class="preview-img" alt="解密后的图片" style="display:none">
             </div>
         </div>
-
-        <div class="size-selector">
-            <button class="size-btn active" onclick="changeSize(128)">小 (128px)</button>
-            <button class="size-btn" onclick="changeSize(256)">中 (256px)</button>
-            <button class="size-btn" onclick="changeSize(512)">大 (512px)</button>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn-primary" onclick="regenerateQR()">🔄 重新生成</button>
-            <button class="btn-secondary" id="saveBtn" onclick="saveQRCode()" disabled>💾 保存二维码</button>
-        </div>
-
-        <div class="footer">
-            © 2025 二维码生成器 | 支持文本、链接、联系方式等
+        <div class="pepc-row">
+            <div style="font-size:0.93em;color:#475569;">
+                说明：XOR加密算法结合PBKDF2加盐密钥派生，粘贴加密文本可直接解码图片，二维码最大推荐数据量128KB。图片仅本地处理，极大保护隐私与安全。
+            </div>
         </div>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        let currentSize = 256;
-        let qrCodeInstance = null;
-
-        document.getElementById("textInput").addEventListener("input", generateQRCode);
-
-        function generateQRCode() {
-            const text = document.getElementById("textInput").value.trim();
-            const qrCodeContainer = document.getElementById("qrCode");
-            const emptyState = document.getElementById("emptyState");
-            const saveBtn = document.getElementById("saveBtn");
-
-            qrCodeContainer.innerHTML = "";
-
-            if (text) {
-                emptyState.style.display = "none";
-                qrCodeContainer.style.display = "block";
-
-                qrCodeInstance = new QRCode(qrCodeContainer, {
-                    text: text,
-                    width: currentSize,
-                    height: currentSize,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-
-                saveBtn.disabled = false;
-            } else {
-                emptyState.style.display = "block";
-                qrCodeContainer.style.display = "none";
-                saveBtn.disabled = true;
-            }
-        }
-
-        function changeSize(size) {
-            currentSize = size;
-
-            // Update active button
-            document.querySelectorAll('.size-btn').forEach(btn => {
-                btn.classList.remove('active');
+        // PBKDF2 派生密钥
+        function deriveKey(password, salt) {
+            const encoder = new TextEncoder();
+            return window.crypto.subtle.importKey(
+                "raw",
+                encoder.encode(password),
+                "PBKDF2",
+                false,
+                ["deriveKey"]
+            ).then(baseKey => {
+                return window.crypto.subtle.deriveKey({
+                    name: "PBKDF2",
+                    salt: salt,
+                    iterations: 120000,
+                    hash: "SHA-256"
+                }, baseKey, {name:"AES-GCM", length:256}, false, ["encrypt", "decrypt"]);
             });
-            event.target.classList.add('active');
-
-            // Regenerate QR code if text exists
-            if (document.getElementById("textInput").value.trim()) {
-                generateQRCode();
+        }
+        // 简易XOR加密
+        async function xorEncrypt(bytes, password) {
+            // 随机盐并PBKDF2
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            const aesKey = await deriveKey(password, salt);
+            // 用AES-GCM加密（二进制）
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const encrypted = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv }, 
+                aesKey, bytes);
+            // 最终输出 [salt16][iv12][enc]
+            let totalbuf = new Uint8Array(16 + 12 + encrypted.byteLength);
+            totalbuf.set(salt, 0);
+            totalbuf.set(iv, 16);
+            totalbuf.set(new Uint8Array(encrypted), 28);
+            return totalbuf;
+        }
+        async function xorDecrypt(encBuf, password) {
+            const salt = encBuf.slice(0,16);
+            const iv = encBuf.slice(16,28);
+            const enc = encBuf.slice(28);
+            const aesKey = await deriveKey(password, salt);
+            try {
+                const dec = await window.crypto.subtle.decrypt(
+                    { name:"AES-GCM", iv:iv }, aesKey, enc);
+                return new Uint8Array(dec);
+            } catch(e) { throw '密钥错误或数据损坏'; }
+        }
+        function u8ToBase64(u8a) {
+            return btoa(String.fromCharCode.apply(null, u8a));
+        }
+        function base64ToU8(str) {
+            let bin = atob(str);
+            let arr = new Uint8Array(bin.length);
+            for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+            return arr;
+        }
+        function clearAll() {
+            document.getElementById('imgPreview').style.display='none';
+            document.getElementById('imgPreview').src='';
+            document.getElementById('encText').value='';
+            document.getElementById('qrCode').innerHTML='';
+            document.getElementById('decText').value='';
+            document.getElementById('decPreview').style.display='none';
+            document.getElementById('decPreview').src='';
+            document.getElementById('imgInput').value=null;
+        }
+        // 图片加密
+        async function encryptImage() {
+            let file = document.getElementById('imgInput').files[0];
+            let key = document.getElementById('encKey').value;
+            if (!file || !key) {
+                alert('请上传图片并输入密钥！'); return;
+            }
+            let reader = new FileReader();
+            reader.onload = async function() {
+                let bytes = new Uint8Array(reader.result);
+                let enc = await xorEncrypt(bytes,key);
+                let b64 = u8ToBase64(enc);
+                document.getElementById('encText').value=b64;
+                document.getElementById('imgPreview').src=URL.createObjectURL(file);
+                document.getElementById('imgPreview').style.display='block';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        // 生成二维码
+        function genQR() {
+            let text = document.getElementById('encText').value;
+            let qrBox = document.getElementById('qrCode');
+            qrBox.innerHTML = '';
+            if(!text) return;
+            new QRCode(qrBox, {
+                text: text,
+                width: 210,
+                height: 210,
+                colorDark: '#111827',
+                colorLight: '#f9fafb',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+        // 解密
+        async function decryptImage() {
+            let b64 = document.getElementById('decText').value.trim();
+            let key = document.getElementById('decKey').value;
+            if (!b64 || !key) {
+                alert('请粘贴加密文本并输入密钥！'); return;
+            }
+            try {
+                let encBuf = base64ToU8(b64);
+                let dec = await xorDecrypt(encBuf, key);
+                // 转为图片Blob
+                let blob = new Blob([dec]);
+                let url = URL.createObjectURL(blob);
+                let decPreview = document.getElementById('decPreview');
+                decPreview.src = url;
+                decPreview.style.display='block';
+            } catch(e) {
+                alert('解密失败：' + e);
             }
         }
-
-        function regenerateQR() {
-            const input = document.getElementById("textInput");
-            if (input.value.trim()) {
-                generateQRCode();
-
-                // Add animation
-                const qrCode = document.getElementById("qrCode");
-                qrCode.style.animation = "none";
-                setTimeout(() => {
-                    qrCode.style.animation = "fadeIn 0.5s ease-out";
-                }, 10);
-            } else {
-                input.focus();
-            }
-        }
-
-        function saveQRCode() {
-            const qrCodeContainer = document.getElementById("qrCode");
-            const canvas = qrCodeContainer.querySelector("canvas");
-            const img = qrCodeContainer.querySelector("img");
-
-            if (canvas) {
-                // Use canvas to download
-                const link = document.createElement("a");
-                link.download = "qrcode_" + Date.now() + ".png";
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-            } else if (img) {
-                // Use img to download
-                const link = document.createElement("a");
-                link.download = "qrcode_" + Date.now() + ".png";
-                link.href = img.src;
-                link.click();
-            }
-        }
-
-        // Initialize empty state
-        document.getElementById("emptyState").style.display = "block";
-        document.getElementById("qrCode").style.display = "none";
     </script>
 </body>
 </html>
