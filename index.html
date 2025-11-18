@@ -1123,8 +1123,8 @@ function decrypt(data, password, strength) {
             
             // 解密图片
             function decryptImage() {
-                if (!originalImage) {
-                    showNotification('请先上传图片', 'error');
+                if (!processedImage) {
+                    showNotification('请先加密图片', 'error');
                     return;
                 }
                 
@@ -1150,7 +1150,7 @@ function decrypt(data, password, strength) {
                     if (progress >= 100) {
                         clearInterval(progressInterval);
                         
-                        // 实际解密处理 - 使用相同的算法但反向操作
+                        // 实际解密处理
                         performDecryption(password);
                         
                         document.getElementById('processStatus').textContent = '已解密';
@@ -1171,11 +1171,11 @@ function decrypt(data, password, strength) {
             // 实际执行解密
             function performDecryption(password) {
                 // 设置canvas尺寸
-                encryptionCanvas.width = originalImage.width;
-                encryptionCanvas.height = originalImage.height;
+                encryptionCanvas.width = processedImage.width;
+                encryptionCanvas.height = processedImage.height;
                 
-                // 绘制原图到canvas
-                encryptionCtx.drawImage(originalImage, 0, 0);
+                // 绘制加密后的图片到canvas
+                encryptionCtx.drawImage(processedImage, 0, 0);
                 
                 // 获取图像数据
                 const imageData = encryptionCtx.getImageData(0, 0, encryptionCanvas.width, encryptionCanvas.height);
@@ -1195,7 +1195,7 @@ function decrypt(data, password, strength) {
                         break;
                     case 'pixel':
                         // 像素混淆解密
-                        pixelScrambleEncrypt(imageData, password, strength);
+                        pixelScrambleDecrypt(imageData, password, strength);
                         break;
                     case 'shift':
                         shiftDecrypt(imageData, password, strength);
@@ -1257,6 +1257,13 @@ function decrypt(data, password, strength) {
                     data[i+1] = (data[i+1] + key) % 256;
                     data[i] = (data[i] - key + 256) % 256;
                 }
+            }
+            
+            // 像素混淆解密
+            function pixelScrambleDecrypt(imageData, password, strength) {
+                // 像素混淆解密与加密使用相同的算法
+                // 因为交换操作是对称的
+                pixelScrambleEncrypt(imageData, password, strength);
             }
             
             // 位移解密
