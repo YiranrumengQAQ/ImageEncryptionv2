@@ -3,265 +3,781 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>图片加密解密二维码工具</title>
+    <title>图片加密解密二维码工具 Pro</title>
     <style>
-        :root {
-            --pepc-gap: 2vw;
-            --pepc-radius: 14px;
-        }
-        html, body {
+        * {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #f8fafc 60%, #dbeafe 100%);
+            box-sizing: border-box;
         }
+        
+        :root {
+            --primary: #667eea;
+            --primary-light: #764ba2;
+            --secondary: #f093fb;
+            --accent: #4facfe;
+            --success: #43e97b;
+            --danger: #fa709a;
+            --dark: #1a202c;
+            --light: #f7fafc;
+            --shadow: rgba(102, 126, 234, 0.4);
+        }
+        
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow-x: hidden;
         }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
         .container {
-            max-width: 800px;
-            margin: 3vw auto;
-            background: #fff;
-            border-radius: var(--pepc-radius);
-            box-shadow: 0 6px 32px 0 rgba(0,0,0,0.08);
-            padding: 2vw;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .pepc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px var(--shadow);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
             display: flex;
-            flex-direction: column;
-            gap: var(--pepc-gap);
+            align-items: center;
+            gap: 0.5rem;
         }
-        .pepc-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--pepc-gap);
-            justify-content: space-between;
-            align-items: flex-start;
+        
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 2px;
         }
-        .pepc-col {
-            flex: 1;
-            min-width: 250px;
-            max-width: 350px;
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
+        
+        .input-group {
+            margin-bottom: 1.5rem;
         }
-        .preview-img, .qr-img {
-            max-width: 100%;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            background: #f3f4f6;
+        
+        .input-group label {
+            display: block;
+            color: var(--dark);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
-        .section-title {
-            font-size: 1.18em;
-            color: #1e293b;
-            margin-bottom: 0.2em;
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            background: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
-        label, button, input, textarea {
-            font-size: 1em;
+        
+        input[type="file"]:hover {
+            border-color: var(--primary-light);
+            background: #edf2f7;
         }
-        .action-group {
-            display: flex;
-            gap: 1em;
-            margin-top: 0.5em;
+        
+        input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
         }
+        
+        input[type="password"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
         textarea {
             width: 100%;
-            min-height: 5em;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: 'Consolas', 'Monaco', monospace;
             resize: vertical;
-            border-radius: 8px;
-            padding: 0.7em;
-            border: 1px solid #a5b4fc;
-            background: #f9fafb;
-            font-family: 'Fira Mono', monospace;
+            transition: all 0.3s ease;
+            background: white;
         }
-        input[type="password"], input[type="text"] {
-            padding: 0.7em;
-            border-radius: 7px;
-            border: 1px solid #a5b4fc;
-            background: #f8fafc;
-            font-family: inherit;
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
         button {
-            background: linear-gradient(90deg, #2563eb 30%, #60a5fa 100%);
-            color: #fff;
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem 1.5rem;
             border: none;
-            border-radius: 7px;
-            padding: 0.6em 1.2em;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: 700;
-            transition: background 0.18s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        button:hover {
-            background: #1d4ed8;
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
-        @media (max-width:700px) {
-            .container {padding:1vw;}
-            .pepc-row {flex-direction:column;}
+        
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 233, 123, 0.6);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(250, 112, 154, 0.6);
+        }
+        
+        .btn-accent {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+        }
+        
+        .preview-box {
+            margin-top: 1.5rem;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--light);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e2e8f0;
+            position: relative;
+        }
+        
+        .preview-box img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            display: block;
+        }
+        
+        .preview-box.empty::after {
+            content: '预览区域';
+            color: #a0aec0;
+            font-size: 1.1rem;
+        }
+        
+        #qrCode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 220px;
+            background: var(--light);
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 2px solid #e2e8f0;
+        }
+        
+        #qrCode:empty::after {
+            content: '二维码将在这里生成';
+            color: #a0aec0;
+        }
+        
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+            position: relative;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 1s ease;
+        }
+        
+        .info-box h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .info-box p {
+            color: var(--dark);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .pepc-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            display: none;
+        }
+        
+        .toast.show {
+            display: block;
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 style="text-align:center;">图片加密解密 &amp; 二维码生成工具（PEPC布局）</h2>
-        <div class="pepc-row">
-            <div class="pepc-col">
-                <div class="section-title">1. 上传图片并输入密钥</div>
-                <input type="file" id="imgInput" accept="image/*"><br>
-                <input type="password" id="encKey" placeholder="请输入密钥">
-                <div class="action-group">
-                    <button onclick="encryptImage()">加密图片</button>
-                    <button onclick="clearAll()">清空</button>
+        <div class="header">
+            <h1>🔐 图片加密解密工具</h1>
+            <p>安全 · 快速 · 美观 | PEPC响应式布局</p>
+        </div>
+        
+        <div class="pepc-grid">
+            <!-- 加密卡片 -->
+            <div class="card">
+                <div class="card-title">📤 图片加密</div>
+                
+                <div class="input-group">
+                    <label>选择图片文件</label>
+                    <input type="file" id="imgInput" accept="image/*">
                 </div>
-                <img id="imgPreview" class="preview-img" alt="预览图片" style="display:none">
+                
+                <div class="input-group">
+                    <label>输入加密密钥</label>
+                    <input type="password" id="encKey" placeholder="请输入强密码">
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="encryptImage()">
+                        <span>🔒 加密图片</span>
+                    </button>
+                    <button class="btn-danger" onclick="clearAll()">
+                        <span>🗑️ 清空</span>
+                    </button>
+                </div>
+                
+                <div class="preview-box empty" id="imgPreviewBox">
+                    <img id="imgPreview" style="display:none">
+                </div>
             </div>
-            <div class="pepc-col">
-                <div class="section-title">2. 加密文本 / 二维码生成</div>
-                <textarea id="encText" placeholder="这里显示加密结果"></textarea>
-                <div class="action-group">
-                    <button onclick="genQR()">生成二维码</button>
+            
+            <!-- 加密结果与二维码 -->
+            <div class="card">
+                <div class="card-title">📱 加密结果 & 二维码</div>
+                
+                <div class="input-group">
+                    <label>加密文本（可复制分享）</label>
+                    <textarea id="encText" placeholder="加密结果将显示在这里..." readonly></textarea>
                 </div>
-                <div id="qrCode" style="margin:0 auto"></div>
+                
+                <div class="btn-group">
+                    <button class="btn-success" onclick="genQR()">
+                        <span>📊 生成二维码</span>
+                    </button>
+                    <button class="btn-accent" onclick="copyText()">
+                        <span>📋 复制文本</span>
+                    </button>
+                </div>
+                
+                <div id="qrCode"></div>
             </div>
-            <div class="pepc-col">
-                <div class="section-title">3. 解密（支持图片和文本）</div>
-                <textarea id="decText" placeholder="粘贴加密文本"></textarea>
-                <input type="password" id="decKey" placeholder="请输入解密密钥">
-                <div class="action-group">
-                    <button onclick="decryptImage()">解密为图片</button>
+            
+            <!-- 解密卡片 -->
+            <div class="card">
+                <div class="card-title">🔓 图片解密</div>
+                
+                <div class="input-group">
+                    <label>粘贴加密文本</label>
+                    <textarea id="decText" placeholder="在此粘贴加密文本..."></textarea>
                 </div>
-                <img id="decPreview" class="preview-img" alt="解密后的图片" style="display:none">
+                
+                <div class="input-group">
+                    <label>输入解密密钥</label>
+                    <input type="password" id="decKey" placeholder="请输入密码">
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="decryptImage()">
+                        <span>🔓 解密图片</span>
+                    </button>
+                </div>
+                
+                <div class="preview-box empty" id="decPreviewBox">
+                    <img id="decPreview" style="display:none">
+                </div>
             </div>
         </div>
-        <div class="pepc-row">
-            <div style="font-size:0.93em;color:#475569;">
-                说明：XOR加密算法结合PBKDF2加盐密钥派生，粘贴加密文本可直接解码图片，二维码最大推荐数据量128KB。图片仅本地处理，极大保护隐私与安全。
-            </div>
+        
+        <div class="info-box">
+            <h3>🛡️ 安全说明</h3>
+            <p>✅ 采用AES-GCM-256加密算法，结合PBKDF2密钥派生（120000次迭代）</p>
+            <p>✅ 随机盐值防止彩虹表攻击，密钥需8位以上强密码</p>
+            <p>✅ 所有处理完全在本地浏览器完成，图片不会上传到任何服务器</p>
+            <p>✅ 二维码最大支持约2KB文本，大图片建议分割或压缩</p>
         </div>
     </div>
+    
+    <div class="toast" id="toast"></div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        // PBKDF2 派生密钥
-        function deriveKey(password, salt) {
+        // Toast通知
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // PBKDF2密钥派生
+        async function deriveKey(password, salt) {
             const encoder = new TextEncoder();
-            return window.crypto.subtle.importKey(
-                "raw",
+            const keyMaterial = await window.crypto.subtle.importKey(
+                'raw',
                 encoder.encode(password),
-                "PBKDF2",
+                'PBKDF2',
                 false,
-                ["deriveKey"]
-            ).then(baseKey => {
-                return window.crypto.subtle.deriveKey({
-                    name: "PBKDF2",
+                ['deriveKey']
+            );
+            
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
                     salt: salt,
                     iterations: 120000,
-                    hash: "SHA-256"
-                }, baseKey, {name:"AES-GCM", length:256}, false, ["encrypt", "decrypt"]);
-            });
+                    hash: 'SHA-256'
+                },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
         }
-        // 简易XOR加密
-        async function xorEncrypt(bytes, password) {
-            // 随机盐并PBKDF2
+        
+        // AES-GCM加密
+        async function encryptData(data, password) {
             const salt = window.crypto.getRandomValues(new Uint8Array(16));
-            const aesKey = await deriveKey(password, salt);
-            // 用AES-GCM加密（二进制）
             const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveKey(password, salt);
+            
             const encrypted = await window.crypto.subtle.encrypt(
-                { name: "AES-GCM", iv: iv }, 
-                aesKey, bytes);
-            // 最终输出 [salt16][iv12][enc]
-            let totalbuf = new Uint8Array(16 + 12 + encrypted.byteLength);
-            totalbuf.set(salt, 0);
-            totalbuf.set(iv, 16);
-            totalbuf.set(new Uint8Array(encrypted), 28);
-            return totalbuf;
+                { name: 'AES-GCM', iv: iv },
+                key,
+                data
+            );
+            
+            // 组合: [salt(16)][iv(12)][encrypted_data]
+            const result = new Uint8Array(16 + 12 + encrypted.byteLength);
+            result.set(salt, 0);
+            result.set(iv, 16);
+            result.set(new Uint8Array(encrypted), 28);
+            
+            return result;
         }
-        async function xorDecrypt(encBuf, password) {
-            const salt = encBuf.slice(0,16);
-            const iv = encBuf.slice(16,28);
-            const enc = encBuf.slice(28);
-            const aesKey = await deriveKey(password, salt);
+        
+        // AES-GCM解密
+        async function decryptData(encryptedData, password) {
+            const salt = encryptedData.slice(0, 16);
+            const iv = encryptedData.slice(16, 28);
+            const data = encryptedData.slice(28);
+            
+            const key = await deriveKey(password, salt);
+            
             try {
-                const dec = await window.crypto.subtle.decrypt(
-                    { name:"AES-GCM", iv:iv }, aesKey, enc);
-                return new Uint8Array(dec);
-            } catch(e) { throw '密钥错误或数据损坏'; }
-        }
-        function u8ToBase64(u8a) {
-            return btoa(String.fromCharCode.apply(null, u8a));
-        }
-        function base64ToU8(str) {
-            let bin = atob(str);
-            let arr = new Uint8Array(bin.length);
-            for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-            return arr;
-        }
-        function clearAll() {
-            document.getElementById('imgPreview').style.display='none';
-            document.getElementById('imgPreview').src='';
-            document.getElementById('encText').value='';
-            document.getElementById('qrCode').innerHTML='';
-            document.getElementById('decText').value='';
-            document.getElementById('decPreview').style.display='none';
-            document.getElementById('decPreview').src='';
-            document.getElementById('imgInput').value=null;
-        }
-        // 图片加密
-        async function encryptImage() {
-            let file = document.getElementById('imgInput').files[0];
-            let key = document.getElementById('encKey').value;
-            if (!file || !key) {
-                alert('请上传图片并输入密钥！'); return;
+                const decrypted = await window.crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    data
+                );
+                return new Uint8Array(decrypted);
+            } catch (e) {
+                throw new Error('密钥错误或数据损坏');
             }
-            let reader = new FileReader();
-            reader.onload = async function() {
-                let bytes = new Uint8Array(reader.result);
-                let enc = await xorEncrypt(bytes,key);
-                let b64 = u8ToBase64(enc);
-                document.getElementById('encText').value=b64;
-                document.getElementById('imgPreview').src=URL.createObjectURL(file);
-                document.getElementById('imgPreview').style.display='block';
-            };
-            reader.readAsArrayBuffer(file);
         }
+        
+        // Base64编码
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+        
+        // Base64解码
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        }
+        
+        // 加密图片
+        async function encryptImage() {
+            const fileInput = document.getElementById('imgInput');
+            const password = document.getElementById('encKey').value;
+            
+            if (!fileInput.files[0]) {
+                showToast('请先选择图片文件！', 'error');
+                return;
+            }
+            
+            if (!password || password.length < 8) {
+                showToast('密钥长度至少8位！', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const button = event.target.closest('button');
+            button.classList.add('loading');
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const encrypted = await encryptData(new Uint8Array(arrayBuffer), password);
+                const base64 = arrayBufferToBase64(encrypted);
+                
+                document.getElementById('encText').value = base64;
+                
+                // 显示预览
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('imgPreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('imgPreviewBox').classList.remove('empty');
+                };
+                reader.readAsDataURL(file);
+                
+                showToast('✅ 图片加密成功！', 'success');
+            } catch (error) {
+                showToast('加密失败：' + error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
+            }
+        }
+        
         // 生成二维码
         function genQR() {
-            let text = document.getElementById('encText').value;
-            let qrBox = document.getElementById('qrCode');
-            qrBox.innerHTML = '';
-            if(!text) return;
-            new QRCode(qrBox, {
-                text: text,
-                width: 210,
-                height: 210,
-                colorDark: '#111827',
-                colorLight: '#f9fafb',
-                correctLevel: QRCode.CorrectLevel.H
+            const text = document.getElementById('encText').value.trim();
+            const qrContainer = document.getElementById('qrCode');
+            
+            if (!text) {
+                showToast('没有可生成二维码的内容！', 'error');
+                return;
+            }
+            
+            if (text.length > 2048) {
+                showToast('文本过长，二维码可能无法扫描！建议压缩图片', 'error');
+            }
+            
+            qrContainer.innerHTML = '';
+            
+            try {
+                new QRCode(qrContainer, {
+                    text: text,
+                    width: 220,
+                    height: 220,
+                    colorDark: '#667eea',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                showToast('✅ 二维码生成成功！', 'success');
+            } catch (error) {
+                showToast('二维码生成失败：' + error.message, 'error');
+            }
+        }
+        
+        // 复制文本
+        function copyText() {
+            const text = document.getElementById('encText').value;
+            if (!text) {
+                showToast('没有可复制的内容！', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ 已复制到剪贴板！', 'success');
+            }).catch(() => {
+                showToast('复制失败，请手动复制', 'error');
             });
         }
-        // 解密
+        
+        // 解密图片
         async function decryptImage() {
-            let b64 = document.getElementById('decText').value.trim();
-            let key = document.getElementById('decKey').value;
-            if (!b64 || !key) {
-                alert('请粘贴加密文本并输入密钥！'); return;
+            const encryptedText = document.getElementById('decText').value.trim();
+            const password = document.getElementById('decKey').value;
+            
+            if (!encryptedText) {
+                showToast('请粘贴加密文本！', 'error');
+                return;
             }
+            
+            if (!password) {
+                showToast('请输入解密密钥！', 'error');
+                return;
+            }
+            
+            const button = event.target.closest('button');
+            button.classList.add('loading');
+            
             try {
-                let encBuf = base64ToU8(b64);
-                let dec = await xorDecrypt(encBuf, key);
-                // 转为图片Blob
-                let blob = new Blob([dec]);
-                let url = URL.createObjectURL(blob);
-                let decPreview = document.getElementById('decPreview');
-                decPreview.src = url;
-                decPreview.style.display='block';
-            } catch(e) {
-                alert('解密失败：' + e);
+                const encryptedData = base64ToArrayBuffer(encryptedText);
+                const decrypted = await decryptData(encryptedData, password);
+                
+                const blob = new Blob([decrypted]);
+                const url = URL.createObjectURL(blob);
+                
+                const img = document.getElementById('decPreview');
+                img.src = url;
+                img.style.display = 'block';
+                document.getElementById('decPreviewBox').classList.remove('empty');
+                
+                showToast('✅ 图片解密成功！', 'success');
+            } catch (error) {
+                showToast('解密失败：' + error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
             }
         }
+        
+        // 清空所有
+        function clearAll() {
+            document.getElementById('imgInput').value = '';
+            document.getElementById('encKey').value = '';
+            document.getElementById('encText').value = '';
+            document.getElementById('decText').value = '';
+            document.getElementById('decKey').value = '';
+            
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('imgPreviewBox').classList.add('empty');
+            document.getElementById('decPreview').style.display = 'none';
+            document.getElementById('decPreviewBox').classList.add('empty');
+            document.getElementById('qrCode').innerHTML = '';
+            
+            showToast('✅ 已清空所有内容！', 'success');
+        }
+        
+        // 文件选择预览
+        document.getElementById('imgInput').addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                showToast('图片已选择：' + e.target.files[0].name, 'success');
+            }
+        });
     </script>
 </body>
 </html>
