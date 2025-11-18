@@ -1,293 +1,411 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>春天的绿树</title>
-</head>
-
-<body style="margin: 0; overflow: hidden;">
-    <canvas id="canvas"></canvas>
-    <script>
-        const c = document.getElementById('canvas');
-        a = c.getContext('2d');
-        b = document.body;
-        var p2d = window.Path2D;
-        function wrap(ctx) {
-            var fill = ctx.fill,
-                clip = ctx.clip,
-                stroke = ctx.stroke;
-            ctx.scale = ctx.scale;
-            ctx.drawFocusIfNeeded = ctx.drawFocusIfNeeded;
-            ctx.ellipse = ctx.ellipse;
-            ctx.fill = function (r) {
-                fill.call(ctx, r === "evenodd" ? "evenodd" : "nonzero")
-            };
-            ctx.stroke = function (p) {
-                if (p && p2d && p instanceof p2d) stroke.call(ctx, p);
-                else stroke.call(ctx)
-            };
-            ctx.clip = function (p) {
-                if (p && p2d && p instanceof p2d) clip.call(ctx, p);
-                else clip.call(ctx)
-            };
-            return ctx
+    <title>二维码生成器 - QR Code Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        wrap(a)
-        /*
-         *       春天的绿树
-         *       js1k demo by Philip Buchanan
-         *       philip @ surrealix com
-         *
-         * In my opinion, the most romantic scene is an autumn evening, just at sunset
-         * when the sky turns red and everything looks so beautiful and warm. So I was
-         * inspired to write this scene and see how far I could push "high-quality"
-         * graphics in 1k. I'm pleased with the result - it looks almost identical to
-         * my original 20k concept :).
-         * 
-         * It took me one day to write the demo, then two weeks to get the size down
-         * below the 1k limit. I've commented some of the more interesting optimisations
-         * in the code below. 
-         * 
-         * It runs fullscreen at 30fps in Chrome, Safari & Opera on my I7 laptop. Firefox
-         * and IE are a bit slower. If you've got a lower spec machine then running it in
-         * a smaller window will probably help things along.
-         * 
-         * You're welcome to learn from this demo, but please don't rip it off directly!
-         */
 
-        /*
-         * The code below isn't written to be as small as possible, instead it's written
-         * to be as repetitive as possible (albeit in as small space as possible). Up to
-         * a certain limit, unraveled code compresses better than the corresponding loop.
-         * 
-         * Compression is using JScrush (http://www.iteral.com/jscrush/) 
-         * 
-         * To strip the comments and extra semi-colons, the code is first run through the
-         * closure compiler (http://closure-compiler.appspot.com/home)
-         */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
 
-        /*
-         * List of 1-letter variables
-         *
-         * a context
-         * b body
-         * c element
-         * h canvas height
-         * l function parameter
-         * p   "
-         * r   "
-         * s local temporary variable
-         * t time/counter
-         * u local temporary variable
-         * w canvas width
-         * y function parameter
-         *
-         * B branches array
-         * G generate branch (1st) / render loop (2nd)
-         * L leaves array
-         */
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.5s ease-out;
+        }
 
-        /*
-         * Okay, let's get started ...
-         */
-        //  w = c.width = window.innerWidth - 25;
-        //  h = c.height = window.innerHeight - 25;
-        w = c.width = window.innerWidth;
-        h = c.height = window.innerHeight;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        /*
-         * Initialisation
-         */
-        t = -0.4; // wait a moment before shedding leaves
-        B = []; // branches [242]
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-        /*
-         * Leaves array [703], with the inital value of an island. This data takes up
-         * more space than I want, but it's integral to the illusion.
-         */
-        L = [[1, h - 115, 1,       //X, Y, Z
-            -150, 0,     //vertex1 X, vertex1 Y
-            0, -15,      //vertex1 X, vertex1 Y
-            150, 0,      //vertex1 X, vertex1 Y
-            60, 9, 0]]; // R, G, B
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
 
+        .input-group {
+            margin-bottom: 30px;
+        }
 
-        /*
-         * Create Tree (saving everything as angle/height/radius instead of X/Y/Z allows
-         * us to save a trig operator every time we calculate the projection).
-         */
-        G = function (p, y, r, l, s) { // angle, y, radius, depth, spacing
-            // create some leaves
-            dim = 1.5
-            num1 = 30 * 1
-            num2 = 40 * 1
-            num3 = 40 * dim
-            num4 = 40 * dim
-            num5 = 40 * dim
-            for (i = 2 * (l > 3); i--;)
-                L.push([p + Math.random() / 9,
-                y + Math.random() * num1 - num1 / 2,
-                r + Math.random() * num2 - num2 / 2,
-                Math.random() * num3 - num3 / 2, Math.random() * num3 - num3 / 2,
-                Math.random() * num4 - num4 / 2, Math.random() * num4 - num4 / 2,
-                Math.random() * num5 - num5 / 2, Math.random() * num5 - num5 / 2,
-                Math.random() * 60 + 20, Math.random() * 80 + 100, Math.random() * 40 + 20]);// color
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-            if (l < 6) {
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
 
-                // child branches
-                bdim = 2
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
 
-                b1 = 2
-                blen = 60 * bdim
-                br = 25 * bdim
-                for (
-                    // Note that generating the offset here only happens once because
-                    // it's not part of the for-loop.
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+            min-height: 320px;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
 
-                    B.push([p, y, r],
-                        [p += Math.random() * 2 - 1 + (l == 2) * s,
-                        y -= Math.random() * blen + 20 - r / 5,
-                        r += Math.random() * br * s - 5,
-                        12 - l * 2]),
-                    // but this stuff happens 3 times
-                    s = 3; s--;)
-                    G(p, y, r, l + 1, s * 2)
+        #qrCode {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            animation: fadeIn 0.5s ease-out;
+        }
 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #qrCode canvas, #qrCode img {
+            display: block !important;
+            border-radius: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .size-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .size-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .size-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .size-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+                border-radius: 16px;
             }
 
-
-        }; G(9, h - 80, 0, 1, 0);
-
-
-        /*
-         * The rendering function is pretty straight forward, just long.
-         * Compression works best when functions have the same declaration, so we just 
-         * copy the longest declaration and run with it. Additionally, math calls 
-         * (Math.sin, cos, random) get replaced more efficiently than re-mapping them.
-         */
-        setInterval(function (p, y, r, l, s) { // counter, unused
-            /*
-             * Time updates for controlling the wind, the sun, the rotation, etc
-             */
-            t += 0.01 *1    
-            // console.log(t)
-            if(t>33){
-                t=-3.4
+            h1 {
+                font-size: 24px;
             }
 
-            /*
-             * Render Sky
-             */
-            a.fillStyle = a.createRadialGradient(w * 0.6, t * 40 - 99, 1, 460, 460, w * 0.7);
-            a.fillStyle.addColorStop(0.06, '#ade');
-            a.fillStyle.addColorStop(0.07, '#9cf');
-            a.fillStyle.addColorStop(0.2, '#7bd');
-            a.fillStyle.addColorStop(1, '#468');
-            a.fillRect(0, 0, w, h);
+            .btn-group {
+                flex-direction: column;
+            }
 
-            /*
-             * Render leaves behind the tree. Wild abuse of the comma operator abounds -
-             * see tree rendering for details.
-             * 
-             * To maintain the 3d illusion the leaves are drawn in two batches, one in
-             * front, and one behind the tree. Depth sorting the leaves took too much
-             * space, and repeating this code twice doesn't increase the file size
-             * overly because it's identical and therefore highly compressable.
-             */
+            button {
+                width: 100%;
+            }
 
-            offs = w * 0.3
-            for (s = 703; s--;) //703 = leaves array size
-                Math.sin(L[s][0] + t) < 0 && ( //depth test
-                    // Original position
-                    p = L[s][1],
-                    q = Math.cos(L[s][0] + t) * L[s][2] + offs, //offsetx
+            .size-selector {
+                width: 100%;
+            }
 
-                    // Leaf shedding (xspeed, difference/wait)
-                    // if we get to choose numbers, 99 is better than 100
-                    u = (t * 9 - s % 300) * 99,
+            .size-btn {
+                flex: 1;
+            }
+        }
 
-                    // Leaf rotation
-                    q += u *= (u > 0) * !!s,
-                    p += u * Math.sin(u / 99) / 9 + 0.4,
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
 
-                    a.fillStyle = 'rgba(' + ~~L[s][9] + ',' + ~~L[s][10] + ',' + ~~L[s][11] + ',0.8)',
-                    a.beginPath(),
-                    a.moveTo(L[s][3] + q, L[s][4] * Math.cos(u /= 14) + p),
-                    a.lineTo(L[s][5] + q, L[s][6] * Math.cos(u /= 14) + p),
-                    a.lineTo(L[s][7] + q, L[s][8] * Math.cos(u /= 14) + p),
-                    a.closePath(),
-                    a.fill()
-                )
+            h1 {
+                font-size: 20px;
+            }
 
-            /*
-             * Render Tree. Here we abuse the comma and ternary operators to replace an 
-             * if/else statement. As a bonus, we save several braces and semicolons 
-             * by nesting function calls in array access and other places that already have
-             * brackets, so that we don't need to create our own pair.
-             */
-            a.strokeStyle = '#654321';
-            for (s = 242; s--;)
-                s % 2 ?
-                    a.lineWidth = B[a.beginPath(), s][
-                    a.moveTo(Math.cos(B[s][0] + t) * B[s][2] + offs, B[s][1]), 3]
-                    :
-                    a.stroke(a.lineTo(Math.cos(B[s][0] + t) * B[s][2] + offs, B[s][1]))
+            .qr-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ 二维码生成器</h1>
+        <p class="subtitle">输入文本或链接，即刻生成精美二维码</p>
 
-            /*
-             * Rendering leaves in front of the tree
-             */
-            for (s = 703; s--;) //703 = leaves array size
-                Math.sin(L[s][0] + t) > 0 && ( //depth test
-                    // Original position
-                    p = L[s][1],
-                    q = Math.cos(L[s][0] + t) * L[s][2] + offs, //offsetx
+        <div class="input-group">
+            <label for="textInput">📝 输入内容</label>
+            <textarea 
+                id="textInput" 
+                placeholder="输入文字、网址或任何内容..."
+                autocomplete="off"
+            ></textarea>
+        </div>
 
-                    // Leaf shedding (xspeed, difference/wait)
-                    // if we get to choose numbers, 99 is better than 100
-                    u = (t * 9 - s % 300) * 99,
+        <div class="qr-container">
+            <div id="qrCode"></div>
+            <div id="emptyState" class="empty-state">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 14h8v-8H3v8zm2-6h4v4H5v-4zm8-12v8h8V3h-8zm6 6h-4V5h4v4zm-6 12h8v-8h-8v8zm2-6h4v4h-4v-4z"/>
+                </svg>
+                <p>在上方输入内容即可生成二维码</p>
+            </div>
+        </div>
 
-                    // Leaf rotation
-                    q += u *= (u > 0) * !!s,
-                    p += u * Math.sin(u / 99) / 9 + 0.4,
+        <div class="size-selector">
+            <button class="size-btn active" onclick="changeSize(128)">小 (128px)</button>
+            <button class="size-btn" onclick="changeSize(256)">中 (256px)</button>
+            <button class="size-btn" onclick="changeSize(512)">大 (512px)</button>
+        </div>
 
-                    a.fillStyle = 'rgba(' + ~~L[s][9] + ',' + ~~L[s][10] + ',' + ~~L[s][11] + ',0.8)',
-                    a.beginPath(),
-                    a.moveTo(L[s][3] + q, L[s][4] * Math.cos(u /= 14) + p),
-                    a.lineTo(L[s][5] + q, L[s][6] * Math.cos(u /= 14) + p),
-                    a.lineTo(L[s][7] + q, L[s][8] * Math.cos(u /= 14) + p),
-                    a.closePath(),
-                    a.fill()
-                )
+        <div class="btn-group">
+            <button class="btn-primary" onclick="regenerateQR()">🔄 重新生成</button>
+            <button class="btn-secondary" id="saveBtn" onclick="saveQRCode()" disabled>💾 保存二维码</button>
+        </div>
 
-            /*
-             * Render Text. We use the same colour as the background to increase
-             * compresability, plus it makes the heart look as though it fades in.
-             * 
-             * We have to specify a font family to set the size, but it doesn't 
-             * need to be valid ...
-             *
-             */
-            a.fillStyle = '#4a4';
-            a.font = '120px x';
-            a.fillText('❦', w * 0.7, h - 150);
+        <div class="footer">
+            © 2025 二维码生成器 | 支持文本、链接、联系方式等
+        </div>
+    </div>
 
-            /*
-             * Render Reflection
-             */
-            for (y = 120; y--;) // 100 = water height
-                // getImageData        340 = elementheight - waterheight 900 = element.width
-                a.putImageData(a.getImageData(0, h - 120 - y + ~~(Math.sin(t * 9 + y / 8) * y / 5), w, 1),
-                    // putImageData
-                    ~~(Math.sin(t * 9 + y / 4) * y / 9), h - 120 + y);
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        let currentSize = 256;
+        let qrCodeInstance = null;
 
-            a.fillStyle = 'rgba(0,99,99,0.15)';
-            a.fillRect(0, h - 120, w, 120)  // magic numbers : element.height * 0.75, element.width, element.height * 0.25
+        document.getElementById("textInput").addEventListener("input", generateQRCode);
 
-        }, 50);
+        function generateQRCode() {
+            const text = document.getElementById("textInput").value.trim();
+            const qrCodeContainer = document.getElementById("qrCode");
+            const emptyState = document.getElementById("emptyState");
+            const saveBtn = document.getElementById("saveBtn");
+
+            qrCodeContainer.innerHTML = "";
+
+            if (text) {
+                emptyState.style.display = "none";
+                qrCodeContainer.style.display = "block";
+
+                qrCodeInstance = new QRCode(qrCodeContainer, {
+                    text: text,
+                    width: currentSize,
+                    height: currentSize,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                saveBtn.disabled = false;
+            } else {
+                emptyState.style.display = "block";
+                qrCodeContainer.style.display = "none";
+                saveBtn.disabled = true;
+            }
+        }
+
+        function changeSize(size) {
+            currentSize = size;
+
+            // Update active button
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Regenerate QR code if text exists
+            if (document.getElementById("textInput").value.trim()) {
+                generateQRCode();
+            }
+        }
+
+        function regenerateQR() {
+            const input = document.getElementById("textInput");
+            if (input.value.trim()) {
+                generateQRCode();
+
+                // Add animation
+                const qrCode = document.getElementById("qrCode");
+                qrCode.style.animation = "none";
+                setTimeout(() => {
+                    qrCode.style.animation = "fadeIn 0.5s ease-out";
+                }, 10);
+            } else {
+                input.focus();
+            }
+        }
+
+        function saveQRCode() {
+            const qrCodeContainer = document.getElementById("qrCode");
+            const canvas = qrCodeContainer.querySelector("canvas");
+            const img = qrCodeContainer.querySelector("img");
+
+            if (canvas) {
+                // Use canvas to download
+                const link = document.createElement("a");
+                link.download = "qrcode_" + Date.now() + ".png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } else if (img) {
+                // Use img to download
+                const link = document.createElement("a");
+                link.download = "qrcode_" + Date.now() + ".png";
+                link.href = img.src;
+                link.click();
+            }
+        }
+
+        // Initialize empty state
+        document.getElementById("emptyState").style.display = "block";
+        document.getElementById("qrCode").style.display = "none";
     </script>
-<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "86559f1033f84863af5fdfe987bd86d7"}'></script><!-- Cloudflare Pages Analytics --></body>
-
+</body>
 </html>
