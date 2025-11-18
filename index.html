@@ -207,8 +207,16 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@stablelib/xchacha20poly1305@1.0.1/lib/xchacha20poly1305.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@stablelib/random@1.0.2/lib/random.min.js"></script>
+<script type="module">
+// 导入加密库
+import { XChaCha20Poly1305 } from 'https://cdn.jsdelivr.net/npm/@stablelib/xchacha20poly1305@1.0.1/+esm';
+import { randomBytes } from 'https://cdn.jsdelivr.net/npm/@stablelib/random@1.0.2/+esm';
+
+// 暴露到全局
+window.XChaCha20Poly1305 = XChaCha20Poly1305;
+window.randomBytes = randomBytes;
+window.cryptoLoaded = true;
+</script>
 
 <script>
 function switchTab(tab) {
@@ -275,15 +283,20 @@ async function encryptFile() {
     return;
   }
 
+  if(!window.cryptoLoaded) {
+    showMsg('加密库加载中，请稍候重试...', 'error');
+    return;
+  }
+
   showMsg('正在加密，请稍候...', 'info');
 
   try {
     const data = await file.arrayBuffer();
-    const salt = stablelib.random.randomBytes(32);
-    const nonce = stablelib.random.randomBytes(24);
+    const salt = randomBytes(32);
+    const nonce = randomBytes(24);
     const key = await deriveKey(password, salt);
 
-    const cipher = new stablelib.xchacha20poly1305.XChaCha20Poly1305(key);
+    const cipher = new XChaCha20Poly1305(key);
     const encrypted = cipher.seal(nonce, new Uint8Array(data));
 
     const output = new Uint8Array(salt.length + nonce.length + encrypted.length);
@@ -302,6 +315,7 @@ async function encryptFile() {
     showMsg('✓ 加密成功！文件已下载', 'success');
   } catch(err) {
     showMsg('加密失败: ' + err.message, 'error');
+    console.error(err);
   }
 }
 
@@ -321,6 +335,11 @@ async function decryptFile() {
     return;
   }
 
+  if(!window.cryptoLoaded) {
+    showMsg('加密库加载中，请稍候重试...', 'error');
+    return;
+  }
+
   showMsg('正在解密，请稍候...', 'info');
 
   try {
@@ -336,7 +355,7 @@ async function decryptFile() {
     const encrypted = dataArray.slice(56);
 
     const key = await deriveKey(password, salt);
-    const cipher = new stablelib.xchacha20poly1305.XChaCha20Poly1305(key);
+    const cipher = new XChaCha20Poly1305(key);
 
     const decrypted = cipher.open(nonce, encrypted);
 
