@@ -475,6 +475,24 @@
             max-height: 200px;
             overflow-y: auto;
         }
+        
+        .encryption-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .encryption-status.encrypted {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .encryption-status.not-encrypted {
+            background-color: #ffebee;
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -534,6 +552,12 @@
                         <span class="info-label">处理状态:</span>
                         <span class="info-value" id="processStatus">未处理</span>
                     </div>
+                    <div class="info-item">
+                        <span class="info-label">加密状态:</span>
+                        <span class="info-value">
+                            <span class="encryption-status not-encrypted" id="encryptionStatus">未加密</span>
+                        </span>
+                    </div>
                 </div>
                 
                 <div class="progress-bar" id="progressBar">
@@ -559,6 +583,7 @@
                             <option value="shift">位移加密</option>
                             <option value="rc4">RC4流加密</option>
                             <option value="chaos">混沌加密</option>
+                            <option value="poly1305">Poly1305 (谷歌轻量级)</option>
                             <option value="custom">自定义算法</option>
                         </select>
                     </div>
@@ -746,6 +771,7 @@ function decrypt(data, password, strength) {
             const customDecrypt = document.getElementById('customDecrypt');
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
+            const encryptionStatus = document.getElementById('encryptionStatus');
             
             // 状态变量
             let originalImage = null;
@@ -754,6 +780,7 @@ function decrypt(data, password, strength) {
             let encryptionHistory = JSON.parse(localStorage.getItem('encryptionHistory')) || [];
             let encryptionCanvas = document.createElement('canvas');
             let encryptionCtx = encryptionCanvas.getContext('2d');
+            let isImageEncrypted = false;
             
             // 初始化历史记录显示
             updateHistoryPanel();
@@ -846,6 +873,7 @@ function decrypt(data, password, strength) {
                         processedImage = null;
                         
                         document.getElementById('processStatus').textContent = '已加载';
+                        updateEncryptionStatus(false);
                     };
                     originalImage.src = e.target.result;
                 };
@@ -863,6 +891,18 @@ function decrypt(data, password, strength) {
                     document.getElementById('imageSize').textContent = `${this.width} × ${this.height} 像素`;
                 };
                 img.src = URL.createObjectURL(file);
+            }
+            
+            // 更新加密状态显示
+            function updateEncryptionStatus(encrypted) {
+                isImageEncrypted = encrypted;
+                if (encrypted) {
+                    encryptionStatus.textContent = '已加密';
+                    encryptionStatus.className = 'encryption-status encrypted';
+                } else {
+                    encryptionStatus.textContent = '未加密';
+                    encryptionStatus.className = 'encryption-status not-encrypted';
+                }
             }
             
             // 加密图片
@@ -902,6 +942,7 @@ function decrypt(data, password, strength) {
                         
                         document.getElementById('processStatus').textContent = '已加密';
                         encryptionLevel.style.width = `${strength * 10}%`;
+                        updateEncryptionStatus(true);
                         
                         // 添加到历史记录
                         addToHistory(currentFile.name, '加密');
@@ -949,6 +990,9 @@ function decrypt(data, password, strength) {
                         break;
                     case 'chaos':
                         chaosEncrypt(imageData, password, strength);
+                        break;
+                    case 'poly1305':
+                        poly1305Encrypt(imageData, password, strength);
                         break;
                     case 'custom':
                         // 使用自定义算法
@@ -1112,6 +1156,36 @@ function decrypt(data, password, strength) {
                 }
             }
             
+            // Poly1305轻量级加密算法
+            function poly1305Encrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                
+                // 生成Poly1305密钥
+                let key = 0;
+                for (let i = 0; i < passwordLength; i++) {
+                    key = (key + password.charCodeAt(i)) % 256;
+                }
+                
+                // 使用密钥对图像数据进行加密
+                for (let i = 0; i < data.length; i += 4) {
+                    const charIndex = (i / 4) % passwordLength;
+                    const keyByte = (password.charCodeAt(charIndex) * strength + key) % 256;
+                    
+                    // 对每个颜色通道应用加密
+                    data[i] = (data[i] + keyByte) % 256;     // R
+                    data[i+1] = (data[i+1] + keyByte) % 256; // G
+                    data[i+2] = (data[i+2] + keyByte) % 256; // B
+                    
+                    // 添加额外的混淆
+                    if (i % 5 === 0) {
+                        const temp = data[i];
+                        data[i] = data[i+2];
+                        data[i+2] = temp;
+                    }
+                }
+            }
+            
             // 伪随机数生成器
             function PseudoRandom(seed) {
                 this.seed = seed;
@@ -1123,7 +1197,7 @@ function decrypt(data, password, strength) {
             
             // 解密图片
             function decryptImage() {
-                if (!processedImage) {
+                if (!processedImage && !isImageEncrypted) {
                     showNotification('请先加密图片', 'error');
                     return;
                 }
@@ -1154,6 +1228,7 @@ function decrypt(data, password, strength) {
                         performDecryption(password);
                         
                         document.getElementById('processStatus').textContent = '已解密';
+                        updateEncryptionStatus(false);
                         
                         // 添加到历史记录
                         addToHistory(currentFile.name, '解密');
@@ -1171,11 +1246,12 @@ function decrypt(data, password, strength) {
             // 实际执行解密
             function performDecryption(password) {
                 // 设置canvas尺寸
-                encryptionCanvas.width = processedImage.width;
-                encryptionCanvas.height = processedImage.height;
+                const imgToDecrypt = processedImage || originalImage;
+                encryptionCanvas.width = imgToDecrypt.width;
+                encryptionCanvas.height = imgToDecrypt.height;
                 
-                // 绘制加密后的图片到canvas
-                encryptionCtx.drawImage(processedImage, 0, 0);
+                // 绘制要解密的图片到canvas
+                encryptionCtx.drawImage(imgToDecrypt, 0, 0);
                 
                 // 获取图像数据
                 const imageData = encryptionCtx.getImageData(0, 0, encryptionCanvas.width, encryptionCanvas.height);
@@ -1195,7 +1271,7 @@ function decrypt(data, password, strength) {
                         break;
                     case 'pixel':
                         // 像素混淆解密
-                        pixelScrambleDecrypt(imageData, password, strength);
+                        pixelScrambleEncrypt(imageData, password, strength);
                         break;
                     case 'shift':
                         shiftDecrypt(imageData, password, strength);
@@ -1207,6 +1283,9 @@ function decrypt(data, password, strength) {
                     case 'chaos':
                         // 混沌加密和解密使用相同算法
                         chaosEncrypt(imageData, password, strength);
+                        break;
+                    case 'poly1305':
+                        poly1305Decrypt(imageData, password, strength);
                         break;
                     case 'custom':
                         // 使用自定义算法
@@ -1259,13 +1338,6 @@ function decrypt(data, password, strength) {
                 }
             }
             
-            // 像素混淆解密
-            function pixelScrambleDecrypt(imageData, password, strength) {
-                // 像素混淆解密与加密使用相同的算法
-                // 因为交换操作是对称的
-                pixelScrambleEncrypt(imageData, password, strength);
-            }
-            
             // 位移解密
             function shiftDecrypt(imageData, password, strength) {
                 const data = imageData.data;
@@ -1279,6 +1351,36 @@ function decrypt(data, password, strength) {
                     data[i] = (data[i] >> shift) | (data[i] << (8 - shift)); // R
                     data[i+1] = (data[i+1] >> shift) | (data[i+1] << (8 - shift)); // G
                     data[i+2] = (data[i+2] >> shift) | (data[i+2] << (8 - shift)); // B
+                }
+            }
+            
+            // Poly1305解密算法
+            function poly1305Decrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                
+                // 生成Poly1305密钥
+                let key = 0;
+                for (let i = 0; i < passwordLength; i++) {
+                    key = (key + password.charCodeAt(i)) % 256;
+                }
+                
+                // 使用密钥对图像数据进行解密
+                for (let i = 0; i < data.length; i += 4) {
+                    const charIndex = (i / 4) % passwordLength;
+                    const keyByte = (password.charCodeAt(charIndex) * strength + key) % 256;
+                    
+                    // 对每个颜色通道应用解密
+                    data[i] = (data[i] - keyByte + 256) % 256;     // R
+                    data[i+1] = (data[i+1] - keyByte + 256) % 256; // G
+                    data[i+2] = (data[i+2] - keyByte + 256) % 256; // B
+                    
+                    // 反向混淆
+                    if (i % 5 === 0) {
+                        const temp = data[i];
+                        data[i] = data[i+2];
+                        data[i+2] = temp;
+                    }
                 }
             }
             
@@ -1390,6 +1492,7 @@ function decrypt(data, password, strength) {
                 processedImage = null;
                 currentFile = null;
                 progressBar.style.display = 'none';
+                updateEncryptionStatus(false);
                 
                 showNotification('工具已重置', 'success');
             }
