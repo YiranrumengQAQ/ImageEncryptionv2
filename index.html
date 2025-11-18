@@ -10,6 +10,7 @@
             --secondary-color: #7e57c2;
             --success-color: #2ecc71;
             --warning-color: #e74c3c;
+            --info-color: #3498db;
             --light-bg: #f8f9fa;
             --dark-bg: #2c3e50;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -128,6 +129,8 @@
         .preview-box {
             flex: 1;
             text-align: center;
+            display: flex;
+            flex-direction: column;
         }
 
         .preview-title {
@@ -147,6 +150,14 @@
             justify-content: center;
             color: #888;
             height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-img img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .control-panel {
@@ -228,6 +239,15 @@
 
         .btn-warning:hover {
             background-color: #c0392b;
+        }
+
+        .btn-info {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #2980b9;
         }
 
         .btn-group {
@@ -332,6 +352,10 @@
             background-color: var(--warning-color);
         }
 
+        .notification.info {
+            background-color: var(--info-color);
+        }
+
         .theme-selector {
             position: fixed;
             bottom: 20px;
@@ -346,6 +370,110 @@
             box-shadow: var(--card-shadow);
             cursor: pointer;
             z-index: 100;
+        }
+
+        .encryption-level {
+            margin-top: 10px;
+        }
+
+        .level-indicator {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .level-fill {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .custom-algorithm-panel {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid var(--info-color);
+        }
+
+        .algorithm-info {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #666;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .algorithm-info code {
+            background: #e9e9e9;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .tab-container {
+            margin-top: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .algorithm-example {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #666;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -395,9 +523,21 @@
                         <span class="info-value" id="fileSize">-</span>
                     </div>
                     <div class="info-item">
+                        <span class="info-label">加密强度:</span>
+                        <div class="encryption-level">
+                            <div class="level-indicator">
+                                <div class="level-fill" id="encryptionLevel"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-item">
                         <span class="info-label">处理状态:</span>
                         <span class="info-value" id="processStatus">未处理</span>
                     </div>
+                </div>
+                
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
             
@@ -415,13 +555,85 @@
                         <select id="algorithm">
                             <option value="xor">XOR加密 (轻量级)</option>
                             <option value="aes">AES加密 (安全级)</option>
+                            <option value="pixel">像素混淆 (视觉级)</option>
+                            <option value="shift">位移加密</option>
+                            <option value="rc4">RC4流加密</option>
+                            <option value="chaos">混沌加密</option>
                             <option value="custom">自定义算法</option>
                         </select>
                     </div>
                     
                     <div class="control-group">
-                        <label class="control-label" for="customSettings">自定义设置</label>
-                        <textarea id="customSettings" rows="3" placeholder="自定义加密参数 (JSON格式)"></textarea>
+                        <label class="control-label" for="encryptionStrength">加密强度</label>
+                        <input type="range" id="encryptionStrength" min="1" max="10" value="5">
+                        <div class="level-indicator">
+                            <div class="level-fill" id="strengthIndicator" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 自定义算法面板 -->
+                    <div class="custom-algorithm-panel" id="customAlgorithmPanel">
+                        <div class="tab-container">
+                            <div class="tabs">
+                                <div class="tab active" data-tab="encrypt">加密函数</div>
+                                <div class="tab" data-tab="decrypt">解密函数</div>
+                                <div class="tab" data-tab="example">算法示例</div>
+                            </div>
+                            
+                            <div class="tab-content active" id="encryptTab">
+                                <label class="control-label">自定义加密函数:</label>
+                                <textarea id="customEncrypt" rows="6" placeholder="输入自定义加密函数，格式: function encrypt(data, password, strength) { ... }"></textarea>
+                                <div class="algorithm-info">
+                                    函数参数说明:
+                                    <ul>
+                                        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>
+                                        <li><code>password</code>: 字符串，用户输入的密码</li>
+                                        <li><code>strength</code>: 数字，加密强度(1-10)</li>
+                                    </ul>
+                                    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。
+                                </div>
+                            </div>
+                            
+                            <div class="tab-content" id="decryptTab">
+                                <label class="control-label">自定义解密函数:</label>
+                                <textarea id="customDecrypt" rows="6" placeholder="输入自定义解密函数，格式: function decrypt(data, password, strength) { ... }"></textarea>
+                                <div class="algorithm-info">
+                                    函数参数说明:
+                                    <ul>
+                                        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>
+                                        <li><code>password</code>: 字符串，用户输入的密码</li>
+                                        <li><code>strength</code>: 数字，加密强度(1-10)</li>
+                                    </ul>
+                                    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。
+                                </div>
+                            </div>
+                            
+                            <div class="tab-content" id="exampleTab">
+                                <label class="control-label">算法示例:</label>
+                                <div class="algorithm-example">
+// XOR加密算法示例
+function encrypt(data, password, strength) {
+    const passwordLength = password.length;
+    const keyMultiplier = strength * 10;
+    
+    for (let i = 0; i < data.data.length; i += 4) {
+        const charIndex = (i / 4) % passwordLength;
+        const key = password.charCodeAt(charIndex) * keyMultiplier;
+        
+        data.data[i] = data.data[i] ^ key;     // R
+        data.data[i+1] = data.data[i+1] ^ key; // G
+        data.data[i+2] = data.data[i+2] ^ key; // B
+    }
+}
+
+// XOR解密算法示例
+function decrypt(data, password, strength) {
+    // XOR加密和解密使用相同的算法
+    encrypt(data, password, strength);
+}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="btn-group">
@@ -436,6 +648,9 @@
                     <div class="btn-group">
                         <button class="btn btn-success" id="saveBtn">
                             <i>💾</i> 保存图片
+                        </button>
+                        <button class="btn btn-info" id="testAlgorithmBtn">
+                            <i>🧪</i> 测试算法
                         </button>
                         <button class="btn btn-warning" id="resetBtn">
                             <i>🔄</i> 重置
@@ -518,13 +733,27 @@
             const decryptBtn = document.getElementById('decryptBtn');
             const saveBtn = document.getElementById('saveBtn');
             const resetBtn = document.getElementById('resetBtn');
+            const testAlgorithmBtn = document.getElementById('testAlgorithmBtn');
             const notification = document.getElementById('notification');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const encryptionStrength = document.getElementById('encryptionStrength');
+            const strengthIndicator = document.getElementById('strengthIndicator');
+            const encryptionLevel = document.getElementById('encryptionLevel');
+            const algorithmSelect = document.getElementById('algorithm');
+            const customAlgorithmPanel = document.getElementById('customAlgorithmPanel');
+            const customEncrypt = document.getElementById('customEncrypt');
+            const customDecrypt = document.getElementById('customDecrypt');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
             
             // 状态变量
             let originalImage = null;
             let processedImage = null;
             let currentFile = null;
             let encryptionHistory = JSON.parse(localStorage.getItem('encryptionHistory')) || [];
+            let encryptionCanvas = document.createElement('canvas');
+            let encryptionCtx = encryptionCanvas.getContext('2d');
             
             // 初始化历史记录显示
             updateHistoryPanel();
@@ -557,11 +786,42 @@
                 }
             });
             
+            // 算法选择事件
+            algorithmSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customAlgorithmPanel.style.display = 'block';
+                } else {
+                    customAlgorithmPanel.style.display = 'none';
+                }
+            });
+            
+            // 标签页切换事件
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 移除所有活动标签
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // 激活当前标签
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
             // 按钮事件
             encryptBtn.addEventListener('click', encryptImage);
             decryptBtn.addEventListener('click', decryptImage);
             saveBtn.addEventListener('click', saveImage);
             resetBtn.addEventListener('click', resetTool);
+            testAlgorithmBtn.addEventListener('click', testCustomAlgorithm);
+            
+            // 加密强度滑块事件
+            encryptionStrength.addEventListener('input', function() {
+                const value = this.value;
+                strengthIndicator.style.width = `${value * 10}%`;
+            });
             
             // 处理文件选择
             function handleFileSelect(file) {
@@ -577,10 +837,14 @@
                 reader.onload = (e) => {
                     originalImage = new Image();
                     originalImage.onload = () => {
+                        // 清空预览区域并添加图片
                         originalPreview.innerHTML = '';
                         originalPreview.appendChild(originalImage);
+                        
+                        // 重置处理后的预览
                         processedPreview.innerHTML = '<span>处理后图片将在此显示</span>';
                         processedImage = null;
+                        
                         document.getElementById('processStatus').textContent = '已加载';
                     };
                     originalImage.src = e.target.result;
@@ -614,22 +878,247 @@
                     return;
                 }
                 
+                // 显示进度条
+                progressBar.style.display = 'block';
+                progressFill.style.width = '0%';
+                
                 // 模拟加密过程
                 showNotification('正在加密图片...', 'success');
                 
-                // 模拟处理时间
-                setTimeout(() => {
-                    processedImage = originalImage.cloneNode(true);
-                    processedPreview.innerHTML = '';
-                    processedPreview.appendChild(processedImage);
+                // 获取加密强度
+                const strength = parseInt(encryptionStrength.value);
+                
+                // 模拟处理进度
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    progressFill.style.width = `${progress}%`;
                     
-                    document.getElementById('processStatus').textContent = '已加密';
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        
+                        // 实际加密处理
+                        performEncryption(password, strength);
+                        
+                        document.getElementById('processStatus').textContent = '已加密';
+                        encryptionLevel.style.width = `${strength * 10}%`;
+                        
+                        // 添加到历史记录
+                        addToHistory(currentFile.name, '加密');
+                        
+                        showNotification('图片加密完成', 'success');
+                        
+                        // 隐藏进度条
+                        setTimeout(() => {
+                            progressBar.style.display = 'none';
+                        }, 1000);
+                    }
+                }, 100);
+            }
+            
+            // 实际执行加密
+            function performEncryption(password, strength) {
+                // 设置canvas尺寸
+                encryptionCanvas.width = originalImage.width;
+                encryptionCanvas.height = originalImage.height;
+                
+                // 绘制原图到canvas
+                encryptionCtx.drawImage(originalImage, 0, 0);
+                
+                // 获取图像数据
+                const imageData = encryptionCtx.getImageData(0, 0, encryptionCanvas.width, encryptionCanvas.height);
+                
+                // 根据选择的算法进行加密
+                const algorithm = document.getElementById('algorithm').value;
+                
+                switch(algorithm) {
+                    case 'xor':
+                        xorEncrypt(imageData, password, strength);
+                        break;
+                    case 'aes':
+                        simulateAESEncrypt(imageData, password, strength);
+                        break;
+                    case 'pixel':
+                        pixelScrambleEncrypt(imageData, password, strength);
+                        break;
+                    case 'shift':
+                        shiftEncrypt(imageData, password, strength);
+                        break;
+                    case 'rc4':
+                        rc4Encrypt(imageData, password, strength);
+                        break;
+                    case 'chaos':
+                        chaosEncrypt(imageData, password, strength);
+                        break;
+                    case 'custom':
+                        // 使用自定义算法
+                        try {
+                            const customEncryptFunc = new Function('data', 'password', 'strength', customEncrypt.value);
+                            customEncryptFunc(imageData, password, strength);
+                        } catch (e) {
+                            showNotification('自定义加密函数执行出错: ' + e.message, 'error');
+                            return;
+                        }
+                        break;
+                    default:
+                        // 默认使用XOR加密
+                        xorEncrypt(imageData, password, strength);
+                }
+                
+                // 将处理后的数据放回canvas
+                encryptionCtx.putImageData(imageData, 0, 0);
+                
+                // 创建新图片显示处理结果
+                processedImage = new Image();
+                processedImage.src = encryptionCanvas.toDataURL();
+                
+                // 更新预览
+                processedPreview.innerHTML = '';
+                processedPreview.appendChild(processedImage);
+            }
+            
+            // XOR加密算法
+            function xorEncrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    // 对每个像素的RGB通道进行XOR操作
+                    const charIndex = (i / 4) % passwordLength;
+                    const key = password.charCodeAt(charIndex) * strength;
                     
-                    // 添加到历史记录
-                    addToHistory(currentFile.name, '加密');
+                    data[i] = data[i] ^ key;     // R
+                    data[i+1] = data[i+1] ^ key; // G
+                    data[i+2] = data[i+2] ^ key; // B
+                    // 不修改Alpha通道
+                }
+            }
+            
+            // 模拟AES加密效果
+            function simulateAESEncrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                const blockSize = 16; // 模拟AES的块大小
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    // 对每个像素进行更复杂的变换
+                    const blockIndex = Math.floor((i / 4) / blockSize);
+                    const charIndex = blockIndex % passwordLength;
+                    const key = password.charCodeAt(charIndex) * strength;
                     
-                    showNotification('图片加密完成', 'success');
-                }, 1000);
+                    // 对每个颜色通道应用不同的变换
+                    data[i] = (data[i] + key) % 256;     // R
+                    data[i+1] = (data[i+1] - key + 256) % 256; // G
+                    data[i+2] = (data[i+2] ^ key);       // B
+                    
+                    // 添加额外的混淆
+                    if (i % 3 === 0) {
+                        const temp = data[i];
+                        data[i] = data[i+1];
+                        data[i+1] = temp;
+                    }
+                }
+            }
+            
+            // 像素混淆加密
+            function pixelScrambleEncrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                
+                // 根据密码生成一个伪随机序列
+                const seed = password.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const rng = new PseudoRandom(seed);
+                
+                // 根据强度决定混淆程度
+                const scrambleFactor = Math.floor(strength * 10);
+                
+                for (let s = 0; s < scrambleFactor; s++) {
+                    // 随机选择两个像素交换位置
+                    for (let i = 0; i < data.length / 8; i++) {
+                        const idx1 = Math.floor(rng.next() * (data.length / 4)) * 4;
+                        const idx2 = Math.floor(rng.next() * (data.length / 4)) * 4;
+                        
+                        // 交换RGB值
+                        for (let j = 0; j < 3; j++) {
+                            const temp = data[idx1 + j];
+                            data[idx1 + j] = data[idx2 + j];
+                            data[idx2 + j] = temp;
+                        }
+                    }
+                }
+            }
+            
+            // 位移加密
+            function shiftEncrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const charIndex = (i / 4) % passwordLength;
+                    const shift = password.charCodeAt(charIndex) % 8;
+                    
+                    // 对每个颜色通道应用位移操作
+                    data[i] = (data[i] << shift) | (data[i] >> (8 - shift)); // R
+                    data[i+1] = (data[i+1] << shift) | (data[i+1] >> (8 - shift)); // G
+                    data[i+2] = (data[i+2] << shift) | (data[i+2] >> (8 - shift)); // B
+                }
+            }
+            
+            // RC4流加密
+            function rc4Encrypt(imageData, password, strength) {
+                const data = imageData.data;
+                
+                // RC4密钥调度算法
+                const s = [];
+                for (let i = 0; i < 256; i++) {
+                    s[i] = i;
+                }
+                
+                let j = 0;
+                for (let i = 0; i < 256; i++) {
+                    j = (j + s[i] + password.charCodeAt(i % password.length)) % 256;
+                    [s[i], s[j]] = [s[j], s[i]];
+                }
+                
+                // RC4伪随机生成算法
+                let i = 0;
+                j = 0;
+                for (let k = 0; k < data.length; k++) {
+                    i = (i + 1) % 256;
+                    j = (j + s[i]) % 256;
+                    [s[i], s[j]] = [s[j], s[i]];
+                    const key = s[(s[i] + s[j]) % 256];
+                    
+                    // 对每个字节应用XOR操作
+                    data[k] = data[k] ^ key;
+                }
+            }
+            
+            // 混沌加密
+            function chaosEncrypt(imageData, password, strength) {
+                const data = imageData.data;
+                
+                // 使用Logistic混沌映射生成密钥流
+                let x = password.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) / (password.length * 256);
+                const r = 3.9; // 混沌参数
+                
+                for (let i = 0; i < data.length; i++) {
+                    // 生成混沌序列
+                    x = r * x * (1 - x);
+                    const key = Math.floor(x * 256);
+                    
+                    // 对每个字节应用XOR操作
+                    data[i] = data[i] ^ key;
+                }
+            }
+            
+            // 伪随机数生成器
+            function PseudoRandom(seed) {
+                this.seed = seed;
+                this.next = function() {
+                    this.seed = (this.seed * 9301 + 49297) % 233280;
+                    return this.seed / 233280;
+                };
             }
             
             // 解密图片
@@ -645,22 +1134,204 @@
                     return;
                 }
                 
+                // 显示进度条
+                progressBar.style.display = 'block';
+                progressFill.style.width = '0%';
+                
                 // 模拟解密过程
                 showNotification('正在解密图片...', 'success');
                 
-                // 模拟处理时间
-                setTimeout(() => {
-                    processedImage = originalImage.cloneNode(true);
-                    processedPreview.innerHTML = '';
-                    processedPreview.appendChild(processedImage);
+                // 模拟处理进度
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    progressFill.style.width = `${progress}%`;
                     
-                    document.getElementById('processStatus').textContent = '已解密';
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        
+                        // 实际解密处理 - 使用相同的算法但反向操作
+                        performDecryption(password);
+                        
+                        document.getElementById('processStatus').textContent = '已解密';
+                        
+                        // 添加到历史记录
+                        addToHistory(currentFile.name, '解密');
+                        
+                        showNotification('图片解密完成', 'success');
+                        
+                        // 隐藏进度条
+                        setTimeout(() => {
+                            progressBar.style.display = 'none';
+                        }, 1000);
+                    }
+                }, 100);
+            }
+            
+            // 实际执行解密
+            function performDecryption(password) {
+                // 设置canvas尺寸
+                encryptionCanvas.width = originalImage.width;
+                encryptionCanvas.height = originalImage.height;
+                
+                // 绘制原图到canvas
+                encryptionCtx.drawImage(originalImage, 0, 0);
+                
+                // 获取图像数据
+                const imageData = encryptionCtx.getImageData(0, 0, encryptionCanvas.width, encryptionCanvas.height);
+                
+                // 根据选择的算法进行解密
+                const algorithm = document.getElementById('algorithm').value;
+                const strength = parseInt(encryptionStrength.value);
+                
+                switch(algorithm) {
+                    case 'xor':
+                        // XOR解密 - 与加密相同
+                        xorEncrypt(imageData, password, strength);
+                        break;
+                    case 'aes':
+                        // 模拟AES解密效果
+                        simulateAESDecrypt(imageData, password, strength);
+                        break;
+                    case 'pixel':
+                        // 像素混淆解密
+                        pixelScrambleEncrypt(imageData, password, strength);
+                        break;
+                    case 'shift':
+                        shiftDecrypt(imageData, password, strength);
+                        break;
+                    case 'rc4':
+                        // RC4加密和解密使用相同算法
+                        rc4Encrypt(imageData, password, strength);
+                        break;
+                    case 'chaos':
+                        // 混沌加密和解密使用相同算法
+                        chaosEncrypt(imageData, password, strength);
+                        break;
+                    case 'custom':
+                        // 使用自定义算法
+                        try {
+                            const customDecryptFunc = new Function('data', 'password', 'strength', customDecrypt.value);
+                            customDecryptFunc(imageData, password, strength);
+                        } catch (e) {
+                            showNotification('自定义解密函数执行出错: ' + e.message, 'error');
+                            return;
+                        }
+                        break;
+                    default:
+                        // 默认使用XOR解密
+                        xorEncrypt(imageData, password, strength);
+                }
+                
+                // 将处理后的数据放回canvas
+                encryptionCtx.putImageData(imageData, 0, 0);
+                
+                // 创建新图片显示处理结果
+                processedImage = new Image();
+                processedImage.src = encryptionCanvas.toDataURL();
+                
+                // 更新预览
+                processedPreview.innerHTML = '';
+                processedPreview.appendChild(processedImage);
+            }
+            
+            // 模拟AES解密效果
+            function simulateAESDecrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                const blockSize = 16;
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const blockIndex = Math.floor((i / 4) / blockSize);
+                    const charIndex = blockIndex % passwordLength;
+                    const key = password.charCodeAt(charIndex) * strength;
                     
-                    // 添加到历史记录
-                    addToHistory(currentFile.name, '解密');
+                    // 反向操作恢复原图
+                    if (i % 3 === 0) {
+                        const temp = data[i];
+                        data[i] = data[i+1];
+                        data[i+1] = temp;
+                    }
                     
-                    showNotification('图片解密完成', 'success');
-                }, 1000);
+                    data[i+2] = (data[i+2] ^ key);
+                    data[i+1] = (data[i+1] + key) % 256;
+                    data[i] = (data[i] - key + 256) % 256;
+                }
+            }
+            
+            // 位移解密
+            function shiftDecrypt(imageData, password, strength) {
+                const data = imageData.data;
+                const passwordLength = password.length;
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const charIndex = (i / 4) % passwordLength;
+                    const shift = password.charCodeAt(charIndex) % 8;
+                    
+                    // 反向位移操作
+                    data[i] = (data[i] >> shift) | (data[i] << (8 - shift)); // R
+                    data[i+1] = (data[i+1] >> shift) | (data[i+1] << (8 - shift)); // G
+                    data[i+2] = (data[i+2] >> shift) | (data[i+2] << (8 - shift)); // B
+                }
+            }
+            
+            // 测试自定义算法
+            function testCustomAlgorithm() {
+                if (algorithmSelect.value !== 'custom') {
+                    showNotification('请先选择自定义算法', 'info');
+                    return;
+                }
+                
+                if (!customEncrypt.value || !customDecrypt.value) {
+                    showNotification('请填写加密和解密函数', 'error');
+                    return;
+                }
+                
+                // 创建一个简单的测试图像
+                const testCanvas = document.createElement('canvas');
+                testCanvas.width = 10;
+                testCanvas.height = 10;
+                const testCtx = testCanvas.getContext('2d');
+                
+                // 绘制测试图案
+                testCtx.fillStyle = 'red';
+                testCtx.fillRect(0, 0, 5, 5);
+                testCtx.fillStyle = 'blue';
+                testCtx.fillRect(5, 0, 5, 5);
+                testCtx.fillStyle = 'green';
+                testCtx.fillRect(0, 5, 5, 5);
+                testCtx.fillStyle = 'yellow';
+                testCtx.fillRect(5, 5, 5, 5);
+                
+                const testImageData = testCtx.getImageData(0, 0, 10, 10);
+                const originalData = new Uint8ClampedArray(testImageData.data);
+                
+                // 测试加密
+                try {
+                    const customEncryptFunc = new Function('data', 'password', 'strength', customEncrypt.value);
+                    customEncryptFunc(testImageData, 'test', 5);
+                    
+                    // 测试解密
+                    const customDecryptFunc = new Function('data', 'password', 'strength', customDecrypt.value);
+                    customDecryptFunc(testImageData, 'test', 5);
+                    
+                    // 检查解密后是否恢复原样
+                    let isCorrect = true;
+                    for (let i = 0; i < testImageData.data.length; i++) {
+                        if (testImageData.data[i] !== originalData[i]) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                    
+                    if (isCorrect) {
+                        showNotification('自定义算法测试通过！', 'success');
+                    } else {
+                        showNotification('自定义算法测试失败：解密后数据不一致', 'error');
+                    }
+                } catch (e) {
+                    showNotification('自定义算法测试出错: ' + e.message, 'error');
+                }
             }
             
             // 保存图片
@@ -701,9 +1372,17 @@
                 document.getElementById('fileName').textContent = '-';
                 document.getElementById('imageSize').textContent = '-';
                 document.getElementById('fileSize').textContent = '-';
+                encryptionLevel.style.width = '0%';
+                strengthIndicator.style.width = '50%';
+                encryptionStrength.value = 5;
+                algorithmSelect.value = 'xor';
+                customAlgorithmPanel.style.display = 'none';
+                customEncrypt.value = '';
+                customDecrypt.value = '';
                 originalImage = null;
                 processedImage = null;
                 currentFile = null;
+                progressBar.style.display = 'none';
                 
                 showNotification('工具已重置', 'success');
             }
