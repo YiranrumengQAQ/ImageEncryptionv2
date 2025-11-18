@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Image Encryption Tool</title>
+    <title>图片加密解密工具 / Image Encryption Tool</title>
     <style>
         :root {
             --primary: #4361ee;
@@ -45,6 +45,7 @@
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            position: relative;
         }
 
         h1 {
@@ -57,6 +58,30 @@
             color: var(--secondary);
             font-weight: 300;
             font-size: 1.2rem;
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 8px 15px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
         }
 
         .main-content {
@@ -581,32 +606,36 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔐 Advanced Image Encryption Tool</h1>
-            <p class="subtitle">Secure, efficient, and feature-rich image encryption solution</p>
+            <div class="language-switcher">
+                <button class="lang-btn active" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="en">English</button>
+            </div>
+            <h1 data-i18n="title">🔐 图片加密解密工具</h1>
+            <p class="subtitle" data-i18n="subtitle">安全、高效、体积友好的图片加密解决方案</p>
         </header>
 
         <div class="main-content">
             <div class="card">
-                <h2 class="card-title">📁 Image Upload & Preview</h2>
+                <h2 class="card-title" data-i18n="uploadTitle">📁 图片上传与预览</h2>
                 
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">📁</div>
-                    <h3>Click or Drag & Drop Image</h3>
-                    <p>Supports JPG, PNG, GIF, BMP, WEBP and all image formats</p>
+                    <h3 data-i18n="uploadHint">点击或拖拽图片到此处上传</h3>
+                    <p data-i18n="uploadFormats">支持 JPG, PNG, GIF, BMP, WEBP 等所有图片格式</p>
                     <input type="file" id="fileInput" accept="image/*" style="display: none;">
                 </div>
                 
                 <div class="preview-container">
                     <div class="preview-box">
-                        <div class="preview-title">Original Image</div>
+                        <div class="preview-title" data-i18n="originalPreview">原图预览</div>
                         <div class="preview-img" id="originalPreview">
-                            <span>Original image will appear here</span>
+                            <span data-i18n="originalPlaceholder">原图将在此显示</span>
                         </div>
                     </div>
                     <div class="preview-box">
-                        <div class="preview-title">Processed Image</div>
+                        <div class="preview-title" data-i18n="processedPreview">处理后预览</div>
                         <div class="preview-img" id="processedPreview">
-                            <span>Processed image will appear here</span>
+                            <span data-i18n="processedPlaceholder">处理后图片将在此显示</span>
                         </div>
                     </div>
                 </div>
@@ -614,21 +643,21 @@
                 <div class="file-info">
                     <div class="file-info-item">
                         <div class="file-info-value" id="fileName">-</div>
-                        <div class="file-info-label">File Name</div>
+                        <div class="file-info-label" data-i18n="fileName">文件名称</div>
                     </div>
                     <div class="file-info-item">
                         <div class="file-info-value" id="imageSize">-</div>
-                        <div class="file-info-label">Dimensions</div>
+                        <div class="file-info-label" data-i18n="imageSize">图片尺寸</div>
                     </div>
                     <div class="file-info-item">
                         <div class="file-info-value" id="fileSize">-</div>
-                        <div class="file-info-label">File Size</div>
+                        <div class="file-info-label" data-i18n="fileSize">文件大小</div>
                     </div>
                 </div>
                 
                 <div class="info-panel">
                     <div class="info-item">
-                        <span class="info-label">Encryption Level:</span>
+                        <span class="info-label" data-i18n="encryptionLevel">加密强度:</span>
                         <div class="encryption-level">
                             <div class="level-indicator">
                                 <div class="level-fill" id="encryptionLevel"></div>
@@ -636,13 +665,13 @@
                         </div>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Processing Status:</span>
-                        <span class="info-value" id="processStatus">Ready</span>
+                        <span class="info-label" data-i18n="processStatus">处理状态:</span>
+                        <span class="info-value" id="processStatus" data-i18n="ready">准备就绪</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Encryption Status:</span>
+                        <span class="info-label" data-i18n="encryptionStatus">加密状态:</span>
                         <span class="info-value">
-                            <span class="encryption-status not-encrypted" id="encryptionStatus">Not Encrypted</span>
+                            <span class="encryption-status not-encrypted" id="encryptionStatus" data-i18n="notEncrypted">未加密</span>
                         </span>
                     </div>
                 </div>
@@ -653,32 +682,32 @@
             </div>
             
             <div class="card">
-                <h2 class="card-title">🔧 Encryption & Decryption Controls</h2>
+                <h2 class="card-title" data-i18n="controlsTitle">🔧 加密解密控制</h2>
                 
                 <div class="control-panel">
                     <div class="control-group">
                         <label class="control-label" for="password">
-                            🔑 Encryption Password
+                            🔑 <span data-i18n="passwordLabel">加密密码</span>
                         </label>
-                        <input type="password" id="password" placeholder="Enter encryption password">
+                        <input type="password" id="password" data-i18n-placeholder="passwordPlaceholder" placeholder="输入加密密码">
                     </div>
                     
                     <div class="control-group">
                         <label class="control-label" for="algorithm">
-                            ⚙️ Encryption Algorithm
+                            ⚙️ <span data-i18n="algorithmLabel">加密算法</span>
                         </label>
                         <select id="algorithm">
-                            <option value="xor">XOR (Lightweight)</option>
-                            <option value="aes">AES (Secure)</option>
-                            <option value="rc4">RC4 Stream Cipher</option>
-                            <option value="chaos">Chaos Encryption</option>
-                            <option value="custom">Custom Algorithm</option>
+                            <option value="xor" data-i18n="xorAlgorithm">XOR加密 (轻量级)</option>
+                            <option value="aes" data-i18n="aesAlgorithm">AES加密 (安全级)</option>
+                            <option value="rc4" data-i18n="rc4Algorithm">RC4流加密</option>
+                            <option value="chaos" data-i18n="chaosAlgorithm">混沌加密</option>
+                            <option value="custom" data-i18n="customAlgorithm">自定义算法</option>
                         </select>
                     </div>
                     
                     <div class="control-group">
                         <label class="control-label" for="encryptionStrength">
-                            ⚡ Encryption Strength
+                            ⚡ <span data-i18n="strengthLabel">加密强度</span>
                         </label>
                         <input type="range" id="encryptionStrength" min="1" max="10" value="5">
                         <div class="level-indicator">
@@ -690,43 +719,43 @@
                     <div class="custom-algorithm-panel" id="customAlgorithmPanel">
                         <div class="tab-container">
                             <div class="tabs">
-                                <div class="tab active" data-tab="encrypt">Encryption Function</div>
-                                <div class="tab" data-tab="decrypt">Decryption Function</div>
-                                <div class="tab" data-tab="example">Algorithm Example</div>
+                                <div class="tab active" data-i18n="encryptTab" data-tab="encrypt">加密函数</div>
+                                <div class="tab" data-i18n="decryptTab" data-tab="decrypt">解密函数</div>
+                                <div class="tab" data-i18n="exampleTab" data-tab="example">算法示例</div>
                             </div>
                             
                             <div class="tab-content active" id="encryptTab">
-                                <label class="control-label">Custom Encryption Function:</label>
-                                <textarea id="customEncrypt" rows="6" placeholder="Enter custom encryption function: function encrypt(data, password, strength) { ... }"></textarea>
-                                <div class="algorithm-info">
-                                    Function Parameters:
+                                <label class="control-label" data-i18n="customEncryptLabel">自定义加密函数:</label>
+                                <textarea id="customEncrypt" rows="6" data-i18n-placeholder="customEncryptPlaceholder" placeholder="输入自定义加密函数，格式: function encrypt(data, password, strength) { ... }"></textarea>
+                                <div class="algorithm-info" data-i18n="customEncryptInfo">
+                                    函数参数说明:
                                     <ul>
-                                        <li><code>data</code>: ImageData object containing pixel data</li>
-                                        <li><code>password</code>: String, user-entered password</li>
-                                        <li><code>strength</code>: Number, encryption strength (1-10)</li>
+                                        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>
+                                        <li><code>password</code>: 字符串，用户输入的密码</li>
+                                        <li><code>strength</code>: 数字，加密强度(1-10)</li>
                                     </ul>
-                                    The function should directly modify the <code>data</code> object's pixel data, no return value needed.
+                                    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。
                                 </div>
                             </div>
                             
                             <div class="tab-content" id="decryptTab">
-                                <label class="control-label">Custom Decryption Function:</label>
-                                <textarea id="customDecrypt" rows="6" placeholder="Enter custom decryption function: function decrypt(data, password, strength) { ... }"></textarea>
-                                <div class="algorithm-info">
-                                    Function Parameters:
+                                <label class="control-label" data-i18n="customDecryptLabel">自定义解密函数:</label>
+                                <textarea id="customDecrypt" rows="6" data-i18n-placeholder="customDecryptPlaceholder" placeholder="输入自定义解密函数，格式: function decrypt(data, password, strength) { ... }"></textarea>
+                                <div class="algorithm-info" data-i18n="customDecryptInfo">
+                                    函数参数说明:
                                     <ul>
-                                        <li><code>data</code>: ImageData object containing pixel data</li>
-                                        <li><code>password</code>: String, user-entered password</li>
-                                        <li><code>strength</code>: Number, encryption strength (1-10)</li>
+                                        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>
+                                        <li><code>password</code>: 字符串，用户输入的密码</li>
+                                        <li><code>strength</code>: 数字，加密强度(1-10)</li>
                                     </ul>
-                                    The function should directly modify the <code>data</code> object's pixel data, no return value needed.
+                                    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。
                                 </div>
                             </div>
                             
                             <div class="tab-content" id="exampleTab">
-                                <label class="control-label">Algorithm Example:</label>
-                                <div class="algorithm-example">
-// XOR Encryption Algorithm Example
+                                <label class="control-label" data-i18n="exampleLabel">算法示例:</label>
+                                <div class="algorithm-example" data-i18n="algorithmExample">
+// XOR加密算法示例
 function encrypt(data, password, strength) {
     const passwordLength = password.length;
     const keyMultiplier = strength * 10;
@@ -741,9 +770,9 @@ function encrypt(data, password, strength) {
     }
 }
 
-// XOR Decryption Algorithm Example
+// XOR解密算法示例
 function decrypt(data, password, strength) {
-    // XOR encryption and decryption use the same algorithm
+    // XOR加密和解密使用相同的算法
     encrypt(data, password, strength);
 }
                                 </div>
@@ -752,61 +781,61 @@ function decrypt(data, password, strength) {
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-primary" id="encryptBtn">
-                            🔒 Encrypt Image
+                        <button class="btn btn-primary" id="encryptBtn" data-i18n="encryptBtn">
+                            🔒 加密图片
                         </button>
-                        <button class="btn btn-secondary" id="decryptBtn">
-                            🔓 Decrypt Image
+                        <button class="btn btn-secondary" id="decryptBtn" data-i18n="decryptBtn">
+                            🔓 解密图片
                         </button>
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-success" id="saveBtn">
-                            💾 Save Image
+                        <button class="btn btn-success" id="saveBtn" data-i18n="saveBtn">
+                            💾 保存图片
                         </button>
-                        <button class="btn btn-warning" id="resetBtn">
-                            🔄 Reset
+                        <button class="btn btn-warning" id="resetBtn" data-i18n="resetBtn">
+                            🔄 重置
                         </button>
                     </div>
                 </div>
                 
                 <div class="advanced-settings">
-                    <h2 class="card-title">⚙️ Advanced Settings</h2>
+                    <h2 class="card-title" data-i18n="advancedTitle">⚙️ 高级设置</h2>
                     <div class="settings-grid">
                         <div class="control-group">
-                            <label class="control-label" for="compression">Compression Level</label>
+                            <label class="control-label" for="compression" data-i18n="compressionLabel">压缩级别</label>
                             <select id="compression">
-                                <option value="0">No Compression</option>
-                                <option value="1" selected>Light Compression</option>
-                                <option value="2">Medium Compression</option>
-                                <option value="3">Heavy Compression</option>
+                                <option value="0" data-i18n="noCompression">无压缩</option>
+                                <option value="1" selected data-i18n="lightCompression">轻度压缩</option>
+                                <option value="2" data-i18n="mediumCompression">中度压缩</option>
+                                <option value="3" data-i18n="heavyCompression">重度压缩</option>
                             </select>
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label" for="format">Output Format</label>
+                            <label class="control-label" for="format" data-i18n="formatLabel">输出格式</label>
                             <select id="format">
-                                <option value="original">Keep Original</option>
-                                <option value="png">PNG</option>
-                                <option value="jpeg">JPEG</option>
-                                <option value="webp">WebP</option>
+                                <option value="original" data-i18n="originalFormat">保持原格式</option>
+                                <option value="png" data-i18n="pngFormat">PNG</option>
+                                <option value="jpeg" data-i18n="jpegFormat">JPEG</option>
+                                <option value="webp" data-i18n="webpFormat">WebP</option>
                             </select>
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label" for="autoSave">Auto Save</label>
+                            <label class="control-label" for="autoSave" data-i18n="autoSaveLabel">自动保存</label>
                             <select id="autoSave">
-                                <option value="false">Disabled</option>
-                                <option value="true">Enabled</option>
+                                <option value="false" data-i18n="disabled">关闭</option>
+                                <option value="true" data-i18n="enabled">开启</option>
                             </select>
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label" for="historySize">History Size</label>
+                            <label class="control-label" for="historySize" data-i18n="historySizeLabel">历史记录数量</label>
                             <select id="historySize">
-                                <option value="5">5 items</option>
-                                <option value="10" selected>10 items</option>
-                                <option value="20">20 items</option>
+                                <option value="5" data-i18n="fiveItems">5条</option>
+                                <option value="10" selected data-i18n="tenItems">10条</option>
+                                <option value="20" data-i18n="twentyItems">20条</option>
                             </select>
                         </div>
                     </div>
@@ -814,37 +843,37 @@ function decrypt(data, password, strength) {
                     <div class="settings-grid">
                         <div class="custom-checkbox">
                             <input type="checkbox" id="addWatermark" checked>
-                            <label for="addWatermark">Add Watermark to Encrypted Images</label>
+                            <label for="addWatermark" data-i18n="watermarkLabel">为加密图片添加水印</label>
                         </div>
                         
                         <div class="custom-checkbox">
                             <input type="checkbox" id="preserveMetadata">
-                            <label for="preserveMetadata">Preserve Image Metadata</label>
+                            <label for="preserveMetadata" data-i18n="metadataLabel">保留图片元数据</label>
                         </div>
                         
                         <div class="custom-checkbox">
                             <input type="checkbox" id="autoOptimize" checked>
-                            <label for="autoOptimize">Auto Optimize Image Size</label>
+                            <label for="autoOptimize" data-i18n="optimizeLabel">自动优化图片大小</label>
                         </div>
                         
                         <div class="custom-checkbox">
                             <input type="checkbox" id="enableLogging">
-                            <label for="enableLogging">Enable Detailed Logging</label>
+                            <label for="enableLogging" data-i18n="loggingLabel">启用详细日志记录</label>
                         </div>
                     </div>
                 </div>
                 
-                <h2 class="card-title" style="margin-top: 20px;">📋 Processing History</h2>
+                <h2 class="card-title" style="margin-top: 20px;" data-i18n="historyTitle">📋 处理历史</h2>
                 <div class="history-panel" id="historyPanel">
                     <div class="history-item">
-                        <div class="history-name">No history available</div>
+                        <div class="history-name" data-i18n="noHistory">暂无历史记录</div>
                     </div>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>Advanced Image Encryption Tool &copy; 2023 | Secure | Efficient | Feature-Rich</p>
+            <p data-i18n="footerText">图片加密解密工具 &copy; 2023 | 安全可靠 | 体积友好 | 响应式设计</p>
         </footer>
     </div>
     
@@ -855,6 +884,202 @@ function decrypt(data, password, strength) {
     </div>
 
     <script>
+        // Language resources
+        const resources = {
+            zh: {
+                // Header
+                "title": "🔐 图片加密解密工具",
+                "subtitle": "安全、高效、体积友好的图片加密解决方案",
+                
+                // Upload section
+                "uploadTitle": "📁 图片上传与预览",
+                "uploadHint": "点击或拖拽图片到此处上传",
+                "uploadFormats": "支持 JPG, PNG, GIF, BMP, WEBP 等所有图片格式",
+                "originalPreview": "原图预览",
+                "originalPlaceholder": "原图将在此显示",
+                "processedPreview": "处理后预览",
+                "processedPlaceholder": "处理后图片将在此显示",
+                "fileName": "文件名称",
+                "imageSize": "图片尺寸",
+                "fileSize": "文件大小",
+                "encryptionLevel": "加密强度:",
+                "processStatus": "处理状态:",
+                "ready": "准备就绪",
+                "encryptionStatus": "加密状态:",
+                "notEncrypted": "未加密",
+                "encrypted": "已加密",
+                
+                // Controls section
+                "controlsTitle": "🔧 加密解密控制",
+                "passwordLabel": "加密密码",
+                "passwordPlaceholder": "输入加密密码",
+                "algorithmLabel": "加密算法",
+                "xorAlgorithm": "XOR加密 (轻量级)",
+                "aesAlgorithm": "AES加密 (安全级)",
+                "rc4Algorithm": "RC4流加密",
+                "chaosAlgorithm": "混沌加密",
+                "customAlgorithm": "自定义算法",
+                "strengthLabel": "加密强度",
+                
+                // Custom algorithm panel
+                "encryptTab": "加密函数",
+                "decryptTab": "解密函数",
+                "exampleTab": "算法示例",
+                "customEncryptLabel": "自定义加密函数:",
+                "customEncryptPlaceholder": "输入自定义加密函数，格式: function encrypt(data, password, strength) { ... }",
+                "customEncryptInfo": "函数参数说明:\n    <ul>\n        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>\n        <li><code>password</code>: 字符串，用户输入的密码</li>\n        <li><code>strength</code>: 数字，加密强度(1-10)</li>\n    </ul>\n    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。",
+                "customDecryptLabel": "自定义解密函数:",
+                "customDecryptPlaceholder": "输入自定义解密函数，格式: function decrypt(data, password, strength) { ... }",
+                "customDecryptInfo": "函数参数说明:\n    <ul>\n        <li><code>data</code>: ImageData对象，包含图像的像素数据</li>\n        <li><code>password</code>: 字符串，用户输入的密码</li>\n        <li><code>strength</code>: 数字，加密强度(1-10)</li>\n    </ul>\n    函数需要直接修改<code>data</code>对象的像素数据，无需返回值。",
+                "exampleLabel": "算法示例:",
+                "algorithmExample": "// XOR加密算法示例\nfunction encrypt(data, password, strength) {\n    const passwordLength = password.length;\n    const keyMultiplier = strength * 10;\n    \n    for (let i = 0; i < data.data.length; i += 4) {\n        const charIndex = (i / 4) % passwordLength;\n        const key = password.charCodeAt(charIndex) * keyMultiplier;\n        \n        data.data[i] = data.data[i] ^ key;     // R\n        data.data[i+1] = data.data[i+1] ^ key; // G\n        data.data[i+2] = data.data[i+2] ^ key; // B\n    }\n}\n\n// XOR解密算法示例\nfunction decrypt(data, password, strength) {\n    // XOR加密和解密使用相同的算法\n    encrypt(data, password, strength);\n}",
+                
+                // Buttons
+                "encryptBtn": "🔒 加密图片",
+                "decryptBtn": "🔓 解密图片",
+                "saveBtn": "💾 保存图片",
+                "resetBtn": "🔄 重置",
+                
+                // Advanced settings
+                "advancedTitle": "⚙️ 高级设置",
+                "compressionLabel": "压缩级别",
+                "noCompression": "无压缩",
+                "lightCompression": "轻度压缩",
+                "mediumCompression": "中度压缩",
+                "heavyCompression": "重度压缩",
+                "formatLabel": "输出格式",
+                "originalFormat": "保持原格式",
+                "pngFormat": "PNG",
+                "jpegFormat": "JPEG",
+                "webpFormat": "WebP",
+                "autoSaveLabel": "自动保存",
+                "disabled": "关闭",
+                "enabled": "开启",
+                "historySizeLabel": "历史记录数量",
+                "fiveItems": "5条",
+                "tenItems": "10条",
+                "twentyItems": "20条",
+                "watermarkLabel": "为加密图片添加水印",
+                "metadataLabel": "保留图片元数据",
+                "optimizeLabel": "自动优化图片大小",
+                "loggingLabel": "启用详细日志记录",
+                
+                // History
+                "historyTitle": "📋 处理历史",
+                "noHistory": "暂无历史记录",
+                
+                // Footer
+                "footerText": "图片加密解密工具 &copy; 2023 | 安全可靠 | 体积友好 | 响应式设计",
+                
+                // Notifications
+                "uploadSuccess": "图片上传成功！",
+                "uploadError": "请选择图片文件",
+                "passwordError": "请输入加密密码",
+                "encryptSuccess": "图片加密成功！",
+                "decryptSuccess": "图片解密成功！",
+                "saveSuccess": "图片保存成功！",
+                "resetSuccess": "工具重置成功",
+                "encrypting": "正在加密图片...",
+                "decrypting": "正在解密图片..."
+            },
+            en: {
+                // Header
+                "title": "🔐 Image Encryption Tool",
+                "subtitle": "Secure, efficient, and size-friendly image encryption solution",
+                
+                // Upload section
+                "uploadTitle": "📁 Image Upload & Preview",
+                "uploadHint": "Click or drag & drop image here",
+                "uploadFormats": "Supports JPG, PNG, GIF, BMP, WEBP and all image formats",
+                "originalPreview": "Original Image",
+                "originalPlaceholder": "Original image will appear here",
+                "processedPreview": "Processed Image",
+                "processedPlaceholder": "Processed image will appear here",
+                "fileName": "File Name",
+                "imageSize": "Dimensions",
+                "fileSize": "File Size",
+                "encryptionLevel": "Encryption Level:",
+                "processStatus": "Processing Status:",
+                "ready": "Ready",
+                "encryptionStatus": "Encryption Status:",
+                "notEncrypted": "Not Encrypted",
+                "encrypted": "Encrypted",
+                
+                // Controls section
+                "controlsTitle": "🔧 Encryption & Decryption Controls",
+                "passwordLabel": "Encryption Password",
+                "passwordPlaceholder": "Enter encryption password",
+                "algorithmLabel": "Encryption Algorithm",
+                "xorAlgorithm": "XOR (Lightweight)",
+                "aesAlgorithm": "AES (Secure)",
+                "rc4Algorithm": "RC4 Stream Cipher",
+                "chaosAlgorithm": "Chaos Encryption",
+                "customAlgorithm": "Custom Algorithm",
+                "strengthLabel": "Encryption Strength",
+                
+                // Custom algorithm panel
+                "encryptTab": "Encryption Function",
+                "decryptTab": "Decryption Function",
+                "exampleTab": "Algorithm Example",
+                "customEncryptLabel": "Custom Encryption Function:",
+                "customEncryptPlaceholder": "Enter custom encryption function: function encrypt(data, password, strength) { ... }",
+                "customEncryptInfo": "Function Parameters:\n    <ul>\n        <li><code>data</code>: ImageData object containing pixel data</li>\n        <li><code>password</code>: String, user-entered password</li>\n        <li><code>strength</code>: Number, encryption strength (1-10)</li>\n    </ul>\n    The function should directly modify the <code>data</code> object's pixel data, no return value needed.",
+                "customDecryptLabel": "Custom Decryption Function:",
+                "customDecryptPlaceholder": "Enter custom decryption function: function decrypt(data, password, strength) { ... }",
+                "customDecryptInfo": "Function Parameters:\n    <ul>\n        <li><code>data</code>: ImageData object containing pixel data</li>\n        <li><code>password</code>: String, user-entered password</li>\n        <li><code>strength</code>: Number, encryption strength (1-10)</li>\n    </ul>\n    The function should directly modify the <code>data</code> object's pixel data, no return value needed.",
+                "exampleLabel": "Algorithm Example:",
+                "algorithmExample": "// XOR Encryption Algorithm Example\nfunction encrypt(data, password, strength) {\n    const passwordLength = password.length;\n    const keyMultiplier = strength * 10;\n    \n    for (let i = 0; i < data.data.length; i += 4) {\n        const charIndex = (i / 4) % passwordLength;\n        const key = password.charCodeAt(charIndex) * keyMultiplier;\n        \n        data.data[i] = data.data[i] ^ key;     // R\n        data.data[i+1] = data.data[i+1] ^ key; // G\n        data.data[i+2] = data.data[i+2] ^ key; // B\n    }\n}\n\n// XOR Decryption Algorithm Example\nfunction decrypt(data, password, strength) {\n    // XOR encryption and decryption use the same algorithm\n    encrypt(data, password, strength);\n}",
+                
+                // Buttons
+                "encryptBtn": "🔒 Encrypt Image",
+                "decryptBtn": "🔓 Decrypt Image",
+                "saveBtn": "💾 Save Image",
+                "resetBtn": "🔄 Reset",
+                
+                // Advanced settings
+                "advancedTitle": "⚙️ Advanced Settings",
+                "compressionLabel": "Compression Level",
+                "noCompression": "No Compression",
+                "lightCompression": "Light Compression",
+                "mediumCompression": "Medium Compression",
+                "heavyCompression": "Heavy Compression",
+                "formatLabel": "Output Format",
+                "originalFormat": "Keep Original",
+                "pngFormat": "PNG",
+                "jpegFormat": "JPEG",
+                "webpFormat": "WebP",
+                "autoSaveLabel": "Auto Save",
+                "disabled": "Disabled",
+                "enabled": "Enabled",
+                "historySizeLabel": "History Size",
+                "fiveItems": "5 items",
+                "tenItems": "10 items",
+                "twentyItems": "20 items",
+                "watermarkLabel": "Add Watermark to Encrypted Images",
+                "metadataLabel": "Preserve Image Metadata",
+                "optimizeLabel": "Auto Optimize Image Size",
+                "loggingLabel": "Enable Detailed Logging",
+                
+                // History
+                "historyTitle": "📋 Processing History",
+                "noHistory": "No history available",
+                
+                // Footer
+                "footerText": "Image Encryption Tool &copy; 2023 | Secure | Efficient | Responsive Design",
+                
+                // Notifications
+                "uploadSuccess": "Image uploaded successfully!",
+                "uploadError": "Please select an image file",
+                "passwordError": "Please enter an encryption password",
+                "encryptSuccess": "Image encrypted successfully!",
+                "decryptSuccess": "Image decrypted successfully!",
+                "saveSuccess": "Image saved successfully!",
+                "resetSuccess": "Tool reset successfully",
+                "encrypting": "Encrypting image...",
+                "decrypting": "Decrypting image..."
+            }
+        };
+
         // Core functionality implementation
         document.addEventListener('DOMContentLoaded', function() {
             // DOM Elements
@@ -883,6 +1108,7 @@ function decrypt(data, password, strength) {
             const imageSize = document.getElementById('imageSize');
             const fileSize = document.getElementById('fileSize');
             const processStatus = document.getElementById('processStatus');
+            const langButtons = document.querySelectorAll('.lang-btn');
             
             // State variables
             let originalImage = null;
@@ -892,9 +1118,56 @@ function decrypt(data, password, strength) {
             let encryptionCanvas = document.createElement('canvas');
             let encryptionCtx = encryptionCanvas.getContext('2d');
             let isImageEncrypted = false;
+            let currentLanguage = 'zh'; // Default language
             
-            // Initialize history display
+            // Initialize
             updateHistoryPanel();
+            updateLanguage(currentLanguage);
+            
+            // Language switcher
+            langButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    currentLanguage = lang;
+                    updateLanguage(lang);
+                    
+                    // Update active button
+                    langButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Update language function
+            function updateLanguage(lang) {
+                // Update all elements with data-i18n attribute
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    if (resources[lang][key]) {
+                        element.innerHTML = resources[lang][key];
+                    }
+                });
+                
+                // Update placeholder texts
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-placeholder');
+                    if (resources[lang][key]) {
+                        element.setAttribute('placeholder', resources[lang][key]);
+                    }
+                });
+                
+                // Update select options
+                document.querySelectorAll('select option').forEach(option => {
+                    if (option.getAttribute('data-i18n')) {
+                        const key = option.getAttribute('data-i18n');
+                        if (resources[lang][key]) {
+                            option.textContent = resources[lang][key];
+                        }
+                    }
+                });
+                
+                // Update encryption status
+                updateEncryptionStatus(isImageEncrypted);
+            }
             
             // Upload area events
             uploadArea.addEventListener('click', () => fileInput.click());
@@ -960,7 +1233,7 @@ function decrypt(data, password, strength) {
             // Handle file selection
             function handleFileSelect(file) {
                 if (!file.type.match('image.*')) {
-                    showNotification('Please select an image file', 'error');
+                    showNotification(resources[currentLanguage]['uploadError'], 'error');
                     return;
                 }
                 
@@ -976,14 +1249,16 @@ function decrypt(data, password, strength) {
                         originalPreview.appendChild(originalImage);
                         
                         // Reset processed preview
-                        processedPreview.innerHTML = '<span>Processed image will appear here</span>';
+                        processedPreview.innerHTML = `<span>${resources[currentLanguage]['processedPlaceholder']}</span>`;
                         processedImage = null;
                         
-                        processStatus.textContent = 'Loaded';
+                        processStatus.textContent = resources[currentLanguage]['ready'];
                         updateEncryptionStatus(false);
                         
                         // Enable encrypt button
                         encryptBtn.disabled = false;
+                        
+                        showNotification(resources[currentLanguage]['uploadSuccess'], 'success');
                     };
                     originalImage.src = e.target.result;
                 };
@@ -1007,11 +1282,11 @@ function decrypt(data, password, strength) {
             function updateEncryptionStatus(encrypted) {
                 isImageEncrypted = encrypted;
                 if (encrypted) {
-                    encryptionStatus.textContent = 'Encrypted';
+                    encryptionStatus.textContent = resources[currentLanguage]['encrypted'];
                     encryptionStatus.className = 'encryption-status encrypted';
                     decryptBtn.disabled = false;
                 } else {
-                    encryptionStatus.textContent = 'Not Encrypted';
+                    encryptionStatus.textContent = resources[currentLanguage]['notEncrypted'];
                     encryptionStatus.className = 'encryption-status not-encrypted';
                     decryptBtn.disabled = true;
                 }
@@ -1020,13 +1295,13 @@ function decrypt(data, password, strength) {
             // Encrypt image
             function encryptImage() {
                 if (!originalImage) {
-                    showNotification('Please upload an image first', 'error');
+                    showNotification(resources[currentLanguage]['uploadError'], 'error');
                     return;
                 }
                 
                 const password = document.getElementById('password').value;
                 if (!password) {
-                    showNotification('Please enter an encryption password', 'error');
+                    showNotification(resources[currentLanguage]['passwordError'], 'error');
                     return;
                 }
                 
@@ -1035,8 +1310,8 @@ function decrypt(data, password, strength) {
                 progressFill.style.width = '0%';
                 
                 // Show encryption in progress
-                showNotification('Encrypting image...', 'success');
-                processStatus.textContent = 'Encrypting...';
+                showNotification(resources[currentLanguage]['encrypting'], 'success');
+                processStatus.textContent = resources[currentLanguage]['encrypting'];
                 
                 // Get encryption strength
                 const strength = parseInt(encryptionStrength.value);
@@ -1053,14 +1328,14 @@ function decrypt(data, password, strength) {
                         // Perform actual encryption
                         performEncryption(password, strength);
                         
-                        processStatus.textContent = 'Encrypted';
+                        processStatus.textContent = resources[currentLanguage]['encrypted'];
                         encryptionLevel.style.width = `${strength * 10}%`;
                         updateEncryptionStatus(true);
                         
                         // Add to history
                         addToHistory(currentFile.name, 'Encryption');
                         
-                        showNotification('Image encrypted successfully!', 'success');
+                        showNotification(resources[currentLanguage]['encryptSuccess'], 'success');
                         
                         // Hide progress bar
                         setTimeout(() => {
@@ -1243,7 +1518,7 @@ function decrypt(data, password, strength) {
                 
                 const password = document.getElementById('password').value;
                 if (!password) {
-                    showNotification('Please enter a decryption password', 'error');
+                    showNotification(resources[currentLanguage]['passwordError'], 'error');
                     return;
                 }
                 
@@ -1252,8 +1527,8 @@ function decrypt(data, password, strength) {
                 progressFill.style.width = '0%';
                 
                 // Show decryption in progress
-                showNotification('Decrypting image...', 'success');
-                processStatus.textContent = 'Decrypting...';
+                showNotification(resources[currentLanguage]['decrypting'], 'success');
+                processStatus.textContent = resources[currentLanguage]['decrypting'];
                 
                 // Simulate processing progress
                 let progress = 0;
@@ -1267,13 +1542,13 @@ function decrypt(data, password, strength) {
                         // Perform actual decryption
                         performDecryption(password);
                         
-                        processStatus.textContent = 'Decrypted';
+                        processStatus.textContent = resources[currentLanguage]['ready'];
                         updateEncryptionStatus(false);
                         
                         // Add to history
                         addToHistory(currentFile.name, 'Decryption');
                         
-                        showNotification('Image decrypted successfully!', 'success');
+                        showNotification(resources[currentLanguage]['decryptSuccess'], 'success');
                         
                         // Hide progress bar
                         setTimeout(() => {
@@ -1392,17 +1667,17 @@ function decrypt(data, password, strength) {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                     
-                    showNotification('Image saved successfully!', 'success');
+                    showNotification(resources[currentLanguage]['saveSuccess'], 'success');
                 });
             }
             
             // Reset tool
             function resetTool() {
                 fileInput.value = '';
-                originalPreview.innerHTML = '<span>Original image will appear here</span>';
-                processedPreview.innerHTML = '<span>Processed image will appear here</span>';
+                originalPreview.innerHTML = `<span>${resources[currentLanguage]['originalPlaceholder']}</span>`;
+                processedPreview.innerHTML = `<span>${resources[currentLanguage]['processedPlaceholder']}</span>`;
                 document.getElementById('password').value = '';
-                processStatus.textContent = 'Ready';
+                processStatus.textContent = resources[currentLanguage]['ready'];
                 fileName.textContent = '-';
                 imageSize.textContent = '-';
                 fileSize.textContent = '-';
@@ -1419,7 +1694,7 @@ function decrypt(data, password, strength) {
                 progressBar.style.display = 'none';
                 updateEncryptionStatus(false);
                 
-                showNotification('Tool reset successfully', 'success');
+                showNotification(resources[currentLanguage]['resetSuccess'], 'success');
             }
             
             // Add to history
@@ -1452,7 +1727,7 @@ function decrypt(data, password, strength) {
                 historyPanel.innerHTML = '';
                 
                 if (encryptionHistory.length === 0) {
-                    historyPanel.innerHTML = '<div class="history-item"><div class="history-name">No history available</div></div>';
+                    historyPanel.innerHTML = `<div class="history-item"><div class="history-name">${resources[currentLanguage]['noHistory']}</div></div>`;
                     return;
                 }
                 
