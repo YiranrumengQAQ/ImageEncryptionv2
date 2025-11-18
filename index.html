@@ -2,356 +2,37 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>图片加密解密二维码工具 Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现代视频播放器</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root {
-            --primary: #667eea;
-            --primary-light: #764ba2;
-            --secondary: #f093fb;
-            --accent: #4facfe;
-            --success: #43e97b;
-            --danger: #fa709a;
-            --dark: #1a202c;
-            --light: #f7fafc;
-            --shadow: rgba(102, 126, 234, 0.4);
-        }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem 1rem;
-            position: relative;
-            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        
+
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 3rem;
-            animation: fadeInDown 0.8s ease;
-        }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .pepc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            animation: fadeInUp 0.8s ease;
-        }
-        
-        .card {
+            width: 100%;
+            max-width: 1200px;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px var(--shadow);
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .card-title::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(180deg, var(--primary), var(--secondary));
-            border-radius: 2px;
-        }
-        
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .input-group label {
-            display: block;
-            color: var(--dark);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-        
-        input[type="file"] {
-            width: 100%;
-            padding: 1rem;
-            border: 2px dashed var(--primary);
-            border-radius: 12px;
-            background: var(--light);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-        
-        input[type="file"]:hover {
-            border-color: var(--primary-light);
-            background: #edf2f7;
-        }
-        
-        input[type="password"], input[type="text"] {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        
-        input[type="password"]:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-family: 'Consolas', 'Monaco', monospace;
-            resize: vertical;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            flex: 1;
-            min-width: 120px;
-            padding: 1rem 1.5rem;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.6s ease-out;
         }
-        
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        button:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(67, 233, 123, 0.6);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(250, 112, 154, 0.6);
-        }
-        
-        .btn-accent {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
-        }
-        
-        .btn-accent:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
-        }
-        
-        .preview-box {
-            margin-top: 1.5rem;
-            border-radius: 12px;
-            overflow: hidden;
-            background: var(--light);
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #e2e8f0;
-            position: relative;
-        }
-        
-        .preview-box img {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 8px;
-            display: block;
-        }
-        
-        .preview-box.empty::after {
-            content: '预览区域';
-            color: #a0aec0;
-            font-size: 1.1rem;
-        }
-        
-        #qrCode {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 220px;
-            background: var(--light);
-            border-radius: 12px;
-            margin-top: 1rem;
-            border: 2px solid #e2e8f0;
-        }
-        
-        #qrCode:empty::after {
-            content: '二维码将在这里生成';
-            color: #a0aec0;
-        }
-        
-        .loading {
-            pointer-events: none;
-            opacity: 0.6;
-            position: relative;
-        }
-        
-        .loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        .info-box {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-top: 2rem;
-            border-left: 4px solid var(--primary);
-            animation: fadeIn 1s ease;
-        }
-        
-        .info-box h3 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-        
-        .info-box p {
-            color: var(--dark);
-            line-height: 1.6;
-            margin-bottom: 0.5rem;
-        }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes fadeInUp {
+
+        @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(30px);
@@ -361,69 +42,358 @@
                 transform: translateY(0);
             }
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px 30px;
+            color: white;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
-        
+
+        .input-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .file-upload-label:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .video-container video,
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+
+        .placeholder svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .controls {
+            padding: 25px 30px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .progress-container {
+            flex: 1;
+            min-width: 200px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-slider {
+            width: 100px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .speed-control {
+            display: flex;
+            gap: 8px;
+        }
+
+        .speed-btn {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .speed-btn.active,
+        .speed-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
         @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
             .header h1 {
-                font-size: 1.8rem;
+                font-size: 22px;
             }
-            
-            .pepc-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
+
+            .input-section {
+                padding: 20px;
             }
-            
-            .card {
-                padding: 1.5rem;
-            }
-            
-            .btn-group {
+
+            .input-wrapper {
                 flex-direction: column;
             }
-            
-            button {
-                width: 100%;
+
+            input[type="text"] {
+                min-width: 100%;
+            }
+
+            .controls {
+                padding: 20px;
+            }
+
+            .control-row {
+                justify-content: center;
+            }
+
+            .volume-slider {
+                width: 80px;
             }
         }
-        
-        .toast {
+
+        @media (orientation: landscape) and (max-width: 900px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .header,
+            .input-section {
+                display: none;
+            }
+
+            .video-container {
+                padding-top: 100vh;
+            }
+
+            .controls {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+                padding: 15px;
+                z-index: 10;
+            }
+        }
+
+        .notification {
             position: fixed;
             top: 20px;
             right: 20px;
+            padding: 15px 25px;
             background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: none;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
         }
-        
-        .toast.show {
-            display: block;
-        }
-        
-        .toast.success {
-            border-left: 4px solid var(--success);
-        }
-        
-        .toast.error {
-            border-left: 4px solid var(--danger);
-        }
-        
-        @keyframes slideInRight {
+
+        @keyframes slideIn {
             from {
                 transform: translateX(400px);
                 opacity: 0;
@@ -433,349 +403,272 @@
                 opacity: 1;
             }
         }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .notification.error {
+            border-left: 4px solid #dc3545;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 图片加密解密工具</h1>
-            <p>安全 · 快速 · 美观 | PEPC响应式布局</p>
+            <h1>🎬 现代视频播放器</h1>
+            <p>支持本地视频和YouTube链接播放</p>
         </div>
-        
-        <div class="pepc-grid">
-            <!-- 加密卡片 -->
-            <div class="card">
-                <div class="card-title">📤 图片加密</div>
-                
-                <div class="input-group">
-                    <label>选择图片文件</label>
-                    <input type="file" id="imgInput" accept="image/*">
-                </div>
-                
-                <div class="input-group">
-                    <label>输入加密密钥</label>
-                    <input type="password" id="encKey" placeholder="请输入强密码">
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn-primary" onclick="encryptImage()">
-                        <span>🔒 加密图片</span>
-                    </button>
-                    <button class="btn-danger" onclick="clearAll()">
-                        <span>🗑️ 清空</span>
-                    </button>
-                </div>
-                
-                <div class="preview-box empty" id="imgPreviewBox">
-                    <img id="imgPreview" style="display:none">
+
+        <div class="input-section">
+            <div class="input-group">
+                <label>📹 上传本地视频</label>
+                <div class="input-wrapper">
+                    <input type="file" id="videoFile" accept="video/*">
+                    <label for="videoFile" class="file-upload-label">
+                        <span>📁</span>
+                        <span>选择视频文件</span>
+                    </label>
                 </div>
             </div>
-            
-            <!-- 加密结果与二维码 -->
-            <div class="card">
-                <div class="card-title">📱 加密结果 & 二维码</div>
-                
-                <div class="input-group">
-                    <label>加密文本（可复制分享）</label>
-                    <textarea id="encText" placeholder="加密结果将显示在这里..." readonly></textarea>
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn-success" onclick="genQR()">
-                        <span>📊 生成二维码</span>
+
+            <div class="input-group">
+                <label>🔗 YouTube链接</label>
+                <div class="input-wrapper">
+                    <input type="text" id="youtubeUrl" placeholder="粘贴YouTube视频链接 (例: https://www.youtube.com/watch?v=...)">
+                    <button class="btn btn-primary" onclick="loadYouTube()">
+                        <span>▶️</span>
+                        <span>加载</span>
                     </button>
-                    <button class="btn-accent" onclick="copyText()">
-                        <span>📋 复制文本</span>
+                    <button class="btn btn-secondary" onclick="clearVideo()">
+                        <span>🗑️</span>
+                        <span>清除</span>
                     </button>
-                </div>
-                
-                <div id="qrCode"></div>
-            </div>
-            
-            <!-- 解密卡片 -->
-            <div class="card">
-                <div class="card-title">🔓 图片解密</div>
-                
-                <div class="input-group">
-                    <label>粘贴加密文本</label>
-                    <textarea id="decText" placeholder="在此粘贴加密文本..."></textarea>
-                </div>
-                
-                <div class="input-group">
-                    <label>输入解密密钥</label>
-                    <input type="password" id="decKey" placeholder="请输入密码">
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn-primary" onclick="decryptImage()">
-                        <span>🔓 解密图片</span>
-                    </button>
-                </div>
-                
-                <div class="preview-box empty" id="decPreviewBox">
-                    <img id="decPreview" style="display:none">
                 </div>
             </div>
         </div>
-        
-        <div class="info-box">
-            <h3>🛡️ 安全说明</h3>
-            <p>✅ 采用AES-GCM-256加密算法，结合PBKDF2密钥派生（120000次迭代）</p>
-            <p>✅ 随机盐值防止彩虹表攻击，密钥需8位以上强密码</p>
-            <p>✅ 所有处理完全在本地浏览器完成，图片不会上传到任何服务器</p>
-            <p>✅ 二维码最大支持约2KB文本，大图片建议分割或压缩</p>
+
+        <div class="video-container" id="videoContainer">
+            <div class="placeholder" id="placeholder">
+                <svg fill="#ccc" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <p>请上传视频或输入YouTube链接</p>
+            </div>
+            <video id="videoPlayer" style="display:none;" controls></video>
+            <div id="youtubeContainer" style="display:none;"></div>
+        </div>
+
+        <div class="controls" id="controls" style="display:none;">
+            <div class="control-row">
+                <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">▶️</button>
+                <button class="control-btn" onclick="skipTime(-10)">⏪</button>
+                <button class="control-btn" onclick="skipTime(10)">⏩</button>
+                <div class="progress-container" id="progressContainer" onclick="seek(event)">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+            </div>
+
+            <div class="control-row">
+                <div class="volume-container">
+                    <button class="control-btn" onclick="toggleMute()">🔊</button>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" oninput="changeVolume(this.value)">
+                </div>
+
+                <div class="speed-control">
+                    <span style="color: #666; font-weight: 600; font-size: 14px;">速度:</span>
+                    <button class="speed-btn" onclick="changeSpeed(0.5)">0.5x</button>
+                    <button class="speed-btn active" onclick="changeSpeed(1)">1x</button>
+                    <button class="speed-btn" onclick="changeSpeed(1.5)">1.5x</button>
+                    <button class="speed-btn" onclick="changeSpeed(2)">2x</button>
+                </div>
+
+                <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+            </div>
         </div>
     </div>
-    
-    <div class="toast" id="toast"></div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <div class="notification" id="notification"></div>
+
     <script>
-        // Toast通知
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type} show`;
+        const videoPlayer = document.getElementById('videoPlayer');
+        const youtubeContainer = document.getElementById('youtubeContainer');
+        const placeholder = document.getElementById('placeholder');
+        const controls = document.getElementById('controls');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const videoFile = document.getElementById('videoFile');
+        let isYouTube = false;
+
+        // 文件上传处理
+        videoFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                loadLocalVideo(url);
+                showNotification('视频加载成功！', 'success');
+            }
+        });
+
+        // 加载本地视频
+        function loadLocalVideo(url) {
+            isYouTube = false;
+            youtubeContainer.style.display = 'none';
+            youtubeContainer.innerHTML = '';
+            placeholder.style.display = 'none';
+            videoPlayer.style.display = 'block';
+            videoPlayer.src = url;
+            controls.style.display = 'block';
+            videoPlayer.load();
+        }
+
+        // 加载YouTube视频
+        function loadYouTube() {
+            const url = document.getElementById('youtubeUrl').value.trim();
+            if (!url) {
+                showNotification('请输入YouTube链接', 'error');
+                return;
+            }
+
+            const videoId = extractYouTubeID(url);
+            if (!videoId) {
+                showNotification('无效的YouTube链接', 'error');
+                return;
+            }
+
+            isYouTube = true;
+            videoPlayer.style.display = 'none';
+            placeholder.style.display = 'none';
+            youtubeContainer.style.display = 'block';
+            youtubeContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0" allowfullscreen></iframe>`;
+            controls.style.display = 'none';
+            showNotification('YouTube视频加载成功！', 'success');
+        }
+
+        // 提取YouTube视频ID
+        function extractYouTubeID(url) {
+            const regExp = /^.*((youtu.be/)|(v/)|(/u/w/)|(embed/)|(watch?))??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
+        // 清除视频
+        function clearVideo() {
+            videoPlayer.pause();
+            videoPlayer.src = '';
+            youtubeContainer.innerHTML = '';
+            videoPlayer.style.display = 'none';
+            youtubeContainer.style.display = 'none';
+            placeholder.style.display = 'block';
+            controls.style.display = 'none';
+            document.getElementById('youtubeUrl').value = '';
+            videoFile.value = '';
+            showNotification('视频已清除', 'success');
+        }
+
+        // 播放/暂停
+        function togglePlayPause() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseBtn.textContent = '⏸️';
+            } else {
+                videoPlayer.pause();
+                playPauseBtn.textContent = '▶️';
+            }
+        }
+
+        // 快进/快退
+        function skipTime(seconds) {
+            videoPlayer.currentTime += seconds;
+        }
+
+        // 进度条点击
+        function seek(e) {
+            const percent = e.offsetX / progressContainer.offsetWidth;
+            videoPlayer.currentTime = percent * videoPlayer.duration;
+        }
+
+        // 更新进度
+        videoPlayer.addEventListener('timeupdate', function() {
+            const percent = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+            progressBar.style.width = percent + '%';
+            timeDisplay.textContent = formatTime(videoPlayer.currentTime) + ' / ' + formatTime(videoPlayer.duration);
+        });
+
+        // 格式化时间
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        // 音量控制
+        function changeVolume(value) {
+            videoPlayer.volume = value / 100;
+        }
+
+        // 静音切换
+        function toggleMute() {
+            videoPlayer.muted = !videoPlayer.muted;
+        }
+
+        // 改变播放速度
+        function changeSpeed(speed) {
+            videoPlayer.playbackRate = speed;
+            document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // 全屏切换
+        function toggleFullscreen() {
+            const container = document.querySelector('.container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    showNotification('全屏模式失败', 'error');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // 通知提示
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification ' + type + ' show';
             setTimeout(() => {
-                toast.classList.remove('show');
+                notification.classList.remove('show');
             }, 3000);
         }
-        
-        // PBKDF2密钥派生
-        async function deriveKey(password, salt) {
-            const encoder = new TextEncoder();
-            const keyMaterial = await window.crypto.subtle.importKey(
-                'raw',
-                encoder.encode(password),
-                'PBKDF2',
-                false,
-                ['deriveKey']
-            );
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (isYouTube || videoPlayer.style.display === 'none') return;
             
-            return window.crypto.subtle.deriveKey(
-                {
-                    name: 'PBKDF2',
-                    salt: salt,
-                    iterations: 120000,
-                    hash: 'SHA-256'
-                },
-                keyMaterial,
-                { name: 'AES-GCM', length: 256 },
-                false,
-                ['encrypt', 'decrypt']
-            );
-        }
-        
-        // AES-GCM加密
-        async function encryptData(data, password) {
-            const salt = window.crypto.getRandomValues(new Uint8Array(16));
-            const iv = window.crypto.getRandomValues(new Uint8Array(12));
-            const key = await deriveKey(password, salt);
-            
-            const encrypted = await window.crypto.subtle.encrypt(
-                { name: 'AES-GCM', iv: iv },
-                key,
-                data
-            );
-            
-            // 组合: [salt(16)][iv(12)][encrypted_data]
-            const result = new Uint8Array(16 + 12 + encrypted.byteLength);
-            result.set(salt, 0);
-            result.set(iv, 16);
-            result.set(new Uint8Array(encrypted), 28);
-            
-            return result;
-        }
-        
-        // AES-GCM解密
-        async function decryptData(encryptedData, password) {
-            const salt = encryptedData.slice(0, 16);
-            const iv = encryptedData.slice(16, 28);
-            const data = encryptedData.slice(28);
-            
-            const key = await deriveKey(password, salt);
-            
-            try {
-                const decrypted = await window.crypto.subtle.decrypt(
-                    { name: 'AES-GCM', iv: iv },
-                    key,
-                    data
-                );
-                return new Uint8Array(decrypted);
-            } catch (e) {
-                throw new Error('密钥错误或数据损坏');
-            }
-        }
-        
-        // Base64编码
-        function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return btoa(binary);
-        }
-        
-        // Base64解码
-        function base64ToArrayBuffer(base64) {
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return bytes;
-        }
-        
-        // 加密图片
-        async function encryptImage() {
-            const fileInput = document.getElementById('imgInput');
-            const password = document.getElementById('encKey').value;
-            
-            if (!fileInput.files[0]) {
-                showToast('请先选择图片文件！', 'error');
-                return;
-            }
-            
-            if (!password || password.length < 8) {
-                showToast('密钥长度至少8位！', 'error');
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            const button = event.target.closest('button');
-            button.classList.add('loading');
-            
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const encrypted = await encryptData(new Uint8Array(arrayBuffer), password);
-                const base64 = arrayBufferToBase64(encrypted);
-                
-                document.getElementById('encText').value = base64;
-                
-                // 显示预览
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('imgPreview');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    document.getElementById('imgPreviewBox').classList.remove('empty');
-                };
-                reader.readAsDataURL(file);
-                
-                showToast('✅ 图片加密成功！', 'success');
-            } catch (error) {
-                showToast('加密失败：' + error.message, 'error');
-            } finally {
-                button.classList.remove('loading');
-            }
-        }
-        
-        // 生成二维码
-        function genQR() {
-            const text = document.getElementById('encText').value.trim();
-            const qrContainer = document.getElementById('qrCode');
-            
-            if (!text) {
-                showToast('没有可生成二维码的内容！', 'error');
-                return;
-            }
-            
-            if (text.length > 2048) {
-                showToast('文本过长，二维码可能无法扫描！建议压缩图片', 'error');
-            }
-            
-            qrContainer.innerHTML = '';
-            
-            try {
-                new QRCode(qrContainer, {
-                    text: text,
-                    width: 220,
-                    height: 220,
-                    colorDark: '#667eea',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-                showToast('✅ 二维码生成成功！', 'success');
-            } catch (error) {
-                showToast('二维码生成失败：' + error.message, 'error');
-            }
-        }
-        
-        // 复制文本
-        function copyText() {
-            const text = document.getElementById('encText').value;
-            if (!text) {
-                showToast('没有可复制的内容！', 'error');
-                return;
-            }
-            
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ 已复制到剪贴板！', 'success');
-            }).catch(() => {
-                showToast('复制失败，请手动复制', 'error');
-            });
-        }
-        
-        // 解密图片
-        async function decryptImage() {
-            const encryptedText = document.getElementById('decText').value.trim();
-            const password = document.getElementById('decKey').value;
-            
-            if (!encryptedText) {
-                showToast('请粘贴加密文本！', 'error');
-                return;
-            }
-            
-            if (!password) {
-                showToast('请输入解密密钥！', 'error');
-                return;
-            }
-            
-            const button = event.target.closest('button');
-            button.classList.add('loading');
-            
-            try {
-                const encryptedData = base64ToArrayBuffer(encryptedText);
-                const decrypted = await decryptData(encryptedData, password);
-                
-                const blob = new Blob([decrypted]);
-                const url = URL.createObjectURL(blob);
-                
-                const img = document.getElementById('decPreview');
-                img.src = url;
-                img.style.display = 'block';
-                document.getElementById('decPreviewBox').classList.remove('empty');
-                
-                showToast('✅ 图片解密成功！', 'success');
-            } catch (error) {
-                showToast('解密失败：' + error.message, 'error');
-            } finally {
-                button.classList.remove('loading');
-            }
-        }
-        
-        // 清空所有
-        function clearAll() {
-            document.getElementById('imgInput').value = '';
-            document.getElementById('encKey').value = '';
-            document.getElementById('encText').value = '';
-            document.getElementById('decText').value = '';
-            document.getElementById('decKey').value = '';
-            
-            document.getElementById('imgPreview').style.display = 'none';
-            document.getElementById('imgPreviewBox').classList.add('empty');
-            document.getElementById('decPreview').style.display = 'none';
-            document.getElementById('decPreviewBox').classList.add('empty');
-            document.getElementById('qrCode').innerHTML = '';
-            
-            showToast('✅ 已清空所有内容！', 'success');
-        }
-        
-        // 文件选择预览
-        document.getElementById('imgInput').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                showToast('图片已选择：' + e.target.files[0].name, 'success');
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'ArrowLeft':
+                    skipTime(-5);
+                    break;
+                case 'ArrowRight':
+                    skipTime(5);
+                    break;
+                case 'f':
+                    toggleFullscreen();
+                    break;
+                case 'm':
+                    toggleMute();
+                    break;
             }
         });
     </script>
