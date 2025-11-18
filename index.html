@@ -207,6 +207,7 @@
             height: auto;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #f0f0f0;
         }
 
         .status {
@@ -338,16 +339,26 @@
             to { transform: rotate(360deg); }
         }
 
-        .algorithm-options {
+        .strength-indicator {
             display: flex;
+            align-items: center;
             gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
-        .algorithm-option {
+        .strength-bar {
             flex: 1;
-            min-width: 120px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            width: 50%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -398,8 +409,11 @@
                 <div class="input-group">
                     <label for="encryptionStrength">⚡ 加密强度</label>
                     <input type="range" id="encryptionStrength" min="1" max="10" value="5">
-                    <div class="level-indicator">
-                        <div class="level-fill" id="strengthIndicator" style="width: 50%;"></div>
+                    <div class="strength-indicator">
+                        <span id="strengthValue">5</span>
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -424,20 +438,22 @@
     </div>
 
     <script>
-        const MAGIC_HEADER = 'ENC_IMG_V1_';
-        
+        // 全局变量
         let currentImage = null;
         let processedImageData = null;
         let isEncrypted = false;
         let currentAlgorithm = 'xor';
         let encryptionStrength = 5;
+        let processedCanvasContext = null;
 
+        // DOM元素
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const passwordInput = document.getElementById('password');
         const algorithmSelect = document.getElementById('algorithm');
         const encryptionStrengthSlider = document.getElementById('encryptionStrength');
-        const strengthIndicator = document.getElementById('strengthIndicator');
+        const strengthValue = document.getElementById('strengthValue');
+        const strengthFill = document.getElementById('strengthFill');
         const encryptBtn = document.getElementById('encryptBtn');
         const decryptBtn = document.getElementById('decryptBtn');
         const downloadBtn = document.getElementById('downloadBtn');
@@ -448,45 +464,75 @@
         const logContent = document.getElementById('logContent');
         const clearLogBtn = document.getElementById('clearLogBtn');
 
-        // 初始化事件监听
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+        // 初始化
+        function init() {
+            // 初始化画布上下文
+            processedCanvasContext = processedCanvas.getContext('2d');
+            
+            // 设置初始加密强度显示
+            updateStrengthDisplay();
+            
+            // 添加事件监听器
+            setupEventListeners();
+        }
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
+        function setupEventListeners() {
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                loadImage(file);
-            }
-        });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
 
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) loadImage(file);
-        });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    loadImage(file);
+                }
+            });
 
-        algorithmSelect.addEventListener('change', (e) => {
-            currentAlgorithm = e.target.value;
-        });
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) loadImage(file);
+            });
 
-        encryptionStrengthSlider.addEventListener('input', (e) => {
-            encryptionStrength = parseInt(e.target.value);
-            strengthIndicator.style.width = `${encryptionStrength * 10}%`;
-        });
+            algorithmSelect.addEventListener('change', (e) => {
+                currentAlgorithm = e.target.value;
+                addLog(`切换算法: ${e.target.options[e.target.selectedIndex].text}`);
+            });
 
-        clearLogBtn.addEventListener('click', () => {
-            logContent.innerHTML = '';
-            logArea.style.display = 'none';
-        });
+            encryptionStrengthSlider.addEventListener('input', (e) => {
+                encryptionStrength = parseInt(e.target.value);
+                updateStrengthDisplay();
+            });
+
+            encryptBtn.addEventListener('click', encryptImage);
+            decryptBtn.addEventListener('click', decryptImage);
+            downloadBtn.addEventListener('click', downloadImage);
+            clearLogBtn.addEventListener('click', clearLog);
+
+            // 密码输入时启用按钮
+            passwordInput.addEventListener('input', () => {
+                if (passwordInput.value.length > 0 && currentImage) {
+                    encryptBtn.disabled = false;
+                    decryptBtn.disabled = false;
+                } else {
+                    encryptBtn.disabled = true;
+                    decryptBtn.disabled = true;
+                }
+            });
+        }
+
+        function updateStrengthDisplay() {
+            strengthValue.textContent = encryptionStrength;
+            strengthFill.style.width = `${encryptionStrength * 10}%`;
+        }
 
         function addLog(message) {
             const now = new Date();
@@ -499,6 +545,21 @@
             logArea.style.display = 'block';
         }
 
+        function clearLog() {
+            logContent.innerHTML = '';
+            logArea.style.display = 'none';
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
         function loadImage(file) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -506,8 +567,21 @@
                 img.onload = () => {
                     currentImage = img;
                     drawOriginal(img);
-                    checkIfEncrypted(e.target.result);
+                    
+                    // 重置处理后的画布
+                    processedCanvas.width = img.width;
+                    processedCanvas.height = img.height;
+                    processedCanvasContext.fillStyle = '#f0f0f0';
+                    processedCanvasContext.fillRect(0, 0, processedCanvas.width, processedCanvas.height);
+                    processedCanvasContext.fillStyle = '#888';
+                    processedCanvasContext.font = '16px Arial';
+                    processedCanvasContext.textAlign = 'center';
+                    processedCanvasContext.fillText('处理后图片将在此显示', processedCanvas.width/2, processedCanvas.height/2);
+                    
+                    // 启用按钮
                     encryptBtn.disabled = false;
+                    decryptBtn.disabled = false;
+                    
                     showStatus('图片加载成功！', 'success');
                     addLog(`图片加载成功: ${file.name} (${img.width}×${img.height})`);
                 };
@@ -523,21 +597,6 @@
             ctx.drawImage(img, 0, 0);
         }
 
-        function checkIfEncrypted(dataUrl) {
-            if (dataUrl.includes(MAGIC_HEADER)) {
-                isEncrypted = true;
-                decryptBtn.disabled = false;
-                encryptBtn.disabled = true;
-                showStatus('检测到加密图片！可以解密', 'info');
-                addLog('检测到加密图片，解密按钮已启用');
-            } else {
-                isEncrypted = false;
-                decryptBtn.disabled = true;
-                encryptBtn.disabled = false;
-                addLog('未加密图片，加密按钮已启用');
-            }
-        }
-
         function hashPassword(password) {
             let hash = 0;
             for (let i = 0; i < password.length; i++) {
@@ -548,12 +607,14 @@
             return Math.abs(hash);
         }
 
+        // 加密算法实现
         function xorEncrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             
             for (let i = 0; i < data.length; i += 4) {
                 const charIndex = (i / 4) % passwordLength;
-                const keyByte = passwordInput.value.charCodeAt(charIndex) * strength;
+                const keyByte = password.charCodeAt(charIndex) * strength;
                 
                 data[i] = data[i] ^ keyByte;
                 data[i+1] = data[i+1] ^ keyByte;
@@ -562,13 +623,14 @@
         }
 
         function simulateAESEncrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             const blockSize = 16;
             
             for (let i = 0; i < data.length; i += 4) {
                 const blockIndex = Math.floor((i / 4) / blockSize);
                 const charIndex = blockIndex % passwordLength;
-                const keyByte = passwordInput.value.charCodeAt(charIndex) * strength;
+                const keyByte = password.charCodeAt(charIndex) * strength;
                 
                 data[i] = (data[i] + keyByte) % 256;
                 data[i+1] = (data[i+1] - keyByte + 256) % 256;
@@ -583,10 +645,10 @@
         }
 
         function pixelScrambleEncrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
             
             // 根据密码生成伪随机序列
-            const seed = passwordInput.value.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const seed = password.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const rng = new PseudoRandom(seed);
             
             // 根据强度决定混淆程度
@@ -607,11 +669,12 @@
         }
 
         function shiftEncrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             
             for (let i = 0; i < data.length; i += 4) {
                 const charIndex = (i / 4) % passwordLength;
-                const shift = passwordInput.value.charCodeAt(charIndex) % 8;
+                const shift = password.charCodeAt(charIndex) % 8;
                 
                 data[i] = (data[i] << shift) | (data[i] >> (8 - shift));
                 data[i+1] = (data[i+1] << shift) | (data[i+1] >> (8 - shift));
@@ -620,6 +683,8 @@
         }
 
         function rc4Encrypt(data, key, strength) {
+            const password = passwordInput.value;
+            
             // RC4密钥调度算法
             const s = [];
             for (let i = 0; i < 256; i++) {
@@ -628,7 +693,7 @@
             
             let j = 0;
             for (let i = 0; i < 256; i++) {
-                j = (j + s[i] + passwordInput.value.charCodeAt(i % passwordInput.value.length)) % 256;
+                j = (j + s[i] + password.charCodeAt(i % password.length)) % 256;
                 [s[i], s[j]] = [s[j], s[i]];
             }
             
@@ -659,17 +724,18 @@
         }
 
         function poly1305Encrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             
             // 生成Poly1305密钥
             let polyKey = 0;
             for (let i = 0; i < passwordLength; i++) {
-                polyKey = (polyKey + passwordInput.value.charCodeAt(i)) % 256;
+                polyKey = (polyKey + password.charCodeAt(i)) % 256;
             }
             
             for (let i = 0; i < data.length; i += 4) {
                 const charIndex = (i / 4) % passwordLength;
-                const keyByte = (passwordInput.value.charCodeAt(charIndex) * strength + polyKey) % 256;
+                const keyByte = (password.charCodeAt(charIndex) * strength + polyKey) % 256;
                 
                 data[i] = (data[i] + keyByte) % 256;
                 data[i+1] = (data[i+1] + keyByte) % 256;
@@ -683,6 +749,7 @@
             }
         }
 
+        // 伪随机数生成器
         function PseudoRandom(seed) {
             this.seed = seed;
             this.next = function() {
@@ -691,7 +758,7 @@
             };
         }
 
-        encryptBtn.addEventListener('click', () => {
+        function encryptImage() {
             const password = passwordInput.value;
             if (!password) {
                 showStatus('请输入加密密码！', 'error');
@@ -770,28 +837,14 @@
 
                     ctx.putImageData(imageData, 0, 0);
 
-                    // 添加加密标记
-                    ctx.font = 'bold 30px Arial';
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.save();
-                    ctx.translate(canvas.width / 2, canvas.height / 2);
-                    ctx.rotate(-Math.PI / 6);
-                    ctx.fillText('🔒 ENCRYPTED', 0, 0);
-                    ctx.restore();
-
+                    // 显示加密后的图片
                     processedCanvas.width = canvas.width;
                     processedCanvas.height = canvas.height;
-                    const processedCtx = processedCanvas.getContext('2d');
-                    processedCtx.drawImage(canvas, 0, 0);
+                    processedCanvasContext.drawImage(canvas, 0, 0);
 
                     processedImageData = canvas.toDataURL('image/png');
-                    processedImageData = processedImageData.replace('data:image/png;base64,', `data:image/png;base64,${MAGIC_HEADER}`);
 
                     downloadBtn.disabled = false;
-                    decryptBtn.disabled = false;
-                    encryptBtn.disabled = true;
                     isEncrypted = true;
                     
                     addLog(`图片加密成功！使用算法: ${currentAlgorithm}`);
@@ -801,18 +854,19 @@
                     showStatus('加密失败：' + error.message, 'error');
                 } finally {
                     encryptBtn.innerHTML = '🔒 加密图片';
+                    encryptBtn.disabled = false;
                 }
             }, 100);
-        });
+        }
 
-        decryptBtn.addEventListener('click', () => {
+        function decryptImage() {
             const password = passwordInput.value;
             if (!password) {
                 showStatus('请输入解密密码！', 'error');
                 return;
             }
             if (!currentImage) {
-                showStatus('请先选择加密图片！', 'error');
+                showStatus('请先选择图片！', 'error');
                 return;
             }
 
@@ -890,16 +944,14 @@
 
                     ctx.putImageData(imageData, 0, 0);
 
+                    // 显示解密后的图片
                     processedCanvas.width = canvas.width;
                     processedCanvas.height = canvas.height;
-                    const processedCtx = processedCanvas.getContext('2d');
-                    processedCtx.drawImage(canvas, 0, 0);
+                    processedCanvasContext.drawImage(canvas, 0, 0);
 
                     processedImageData = canvas.toDataURL('image/png');
                     
                     downloadBtn.disabled = false;
-                    encryptBtn.disabled = false;
-                    decryptBtn.disabled = true;
                     isEncrypted = false;
                     
                     addLog('图片解密成功！');
@@ -909,18 +961,21 @@
                     showStatus('解密失败：' + error.message, 'error');
                 } finally {
                     decryptBtn.innerHTML = '🔓 解密图片';
+                    decryptBtn.disabled = false;
                 }
             }, 100);
-        });
+        }
 
+        // 解密算法实现
         function simulateAESDecrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             const blockSize = 16;
             
             for (let i = 0; i < data.length; i += 4) {
                 const blockIndex = Math.floor((i / 4) / blockSize);
                 const charIndex = blockIndex % passwordLength;
-                const keyByte = passwordInput.value.charCodeAt(charIndex) * strength;
+                const keyByte = password.charCodeAt(charIndex) * strength;
                 
                 if (i % 3 === 0) {
                     const temp = data[i];
@@ -935,11 +990,12 @@
         }
 
         function shiftDecrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             
             for (let i = 0; i < data.length; i += 4) {
                 const charIndex = (i / 4) % passwordLength;
-                const shift = passwordInput.value.charCodeAt(charIndex) % 8;
+                const shift = password.charCodeAt(charIndex) % 8;
                 
                 data[i] = (data[i] >> shift) | (data[i] << (8 - shift));
                 data[i+1] = (data[i+1] >> shift) | (data[i+1] << (8 - shift));
@@ -948,16 +1004,17 @@
         }
 
         function poly1305Decrypt(data, key, strength) {
-            const passwordLength = passwordInput.value.length;
+            const password = passwordInput.value;
+            const passwordLength = password.length;
             
             let polyKey = 0;
             for (let i = 0; i < passwordLength; i++) {
-                polyKey = (polyKey + passwordInput.value.charCodeAt(i)) % 256;
+                polyKey = (polyKey + password.charCodeAt(i)) % 256;
             }
             
             for (let i = 0; i < data.length; i += 4) {
                 const charIndex = (i / 4) % passwordLength;
-                const keyByte = (passwordInput.value.charCodeAt(charIndex) * strength + polyKey) % 256;
+                const keyByte = (password.charCodeAt(charIndex) * strength + polyKey) % 256;
                 
                 if (i % 5 === 0) {
                     const temp = data[i];
@@ -971,21 +1028,15 @@
             }
         }
 
-        downloadBtn.addEventListener('click', () => {
+        function downloadImage() {
             if (!processedImageData) {
                 showStatus('没有可下载的图片！', 'error');
                 return;
             }
 
             try {
-                // 移除魔法头部
-                let downloadData = processedImageData;
-                if (downloadData.includes(MAGIC_HEADER)) {
-                    downloadData = downloadData.replace(`data:image/png;base64,${MAGIC_HEADER}`, 'data:image/png;base64,');
-                }
-
                 const a = document.createElement('a');
-                a.href = downloadData;
+                a.href = processedImageData;
                 a.download = isEncrypted ? 'encrypted_image.png' : 'decrypted_image.png';
                 document.body.appendChild(a);
                 a.click();
@@ -997,17 +1048,10 @@
                 addLog(`下载失败: ${error.message}`);
                 showStatus('下载失败：' + error.message, 'error');
             }
-        });
-
-        function showStatus(message, type) {
-            status.textContent = message;
-            status.className = `status ${type}`;
-            status.style.display = 'block';
-            
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 5000);
         }
+
+        // 初始化应用
+        init();
     </script>
 </body>
 </html>
